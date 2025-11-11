@@ -5,7 +5,7 @@ local localPlayer = Players.LocalPlayer
 
 local AutoFavorite = {
     Enabled = false,
-    SelectedRarities = { "Epic" }, -- default aktif Epic
+    SelectedRarities = { "Epic" },
     AllRarities = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Secret" },
 }
 
@@ -23,22 +23,44 @@ local function findFavoriteRemote()
     return nil
 end
 
+-- 🔍 Cari lokasi inventory pemain
+local function findInventory()
+    local possibleLocations = {
+        localPlayer:FindFirstChild("Inventory"),
+        localPlayer:FindFirstChild("Backpack"),
+        ReplicatedStorage:FindFirstChild("Inventory"),
+        ReplicatedStorage:FindFirstChild("PlayerInventories") and ReplicatedStorage.PlayerInventories:FindFirstChild(localPlayer.Name),
+        localPlayer:FindFirstChild("PlayerGui") and localPlayer.PlayerGui:FindFirstChild("InventoryFrame"),
+    }
+
+    for _, inv in ipairs(possibleLocations) do
+        if inv and #inv:GetChildren() > 0 then
+            print("📦 [AutoFavorite] Inventory ditemukan di:", inv:GetFullName())
+            return inv
+        end
+    end
+
+    print("⚠️ [AutoFavorite] Tidak menemukan inventory, gunakan default localPlayer.Inventory jika muncul belakangan.")
+    return localPlayer:FindFirstChild("Inventory") or nil
+end
+
 local favoriteRemote = findFavoriteRemote()
+local inventory = findInventory()
 
 -- 💫 Favorite semua ikan dengan rarity tertentu
 local function favoriteFishByRarities()
+    inventory = inventory or findInventory()
+    if not inventory then
+        warn("❌ Inventory tidak ditemukan!")
+        return
+    end
+
     if not favoriteRemote then
         warn("❌ Favorite remote not found!")
         return
     end
 
-    local inv = localPlayer:FindFirstChild("Inventory")
-    if not inv then
-        warn("❌ Inventory tidak ditemukan!")
-        return
-    end
-
-    for _, item in ipairs(inv:GetChildren()) do
+    for _, item in ipairs(inventory:GetChildren()) do
         local rarityValue = item:FindFirstChild("Rarity")
         local rarity = rarityValue and rarityValue.Value or item:GetAttribute("Rarity")
         if rarity and table.find(AutoFavorite.SelectedRarities, rarity) then
