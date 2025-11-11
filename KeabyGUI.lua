@@ -859,18 +859,16 @@ makeToggle(pnl2,"Enable Instant 2x Speed",function(on) if on then instant2x.Star
 makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
 makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
 
-local pnlFav = makePanel(mainPage, "🌟 Auto Favorite", "")
-
-makeToggle(pnlFav, "Enable Auto Favorite", function(on)
-	if on then
-		AutoFavorite.Start()
-	else
-		AutoFavorite.Stop()
-	end
-end)
-
-makeDropdown(pnlFav, "Select Rarity", "🎣", {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Secret"}, function(selected)
-	AutoFavorite.SetRarity(selected)
+-- 🧭 RARITY FILTER (NEW)
+local rarityList = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Secret"}
+makeDropdown(pnl1, "Rarity Filter", "🎣", rarityList, function(selected)
+    print("[🎣 KeabyGUI] Selected rarity:", selected)
+    -- Hubungkan dengan AutoFavorite module (jika tersedia)
+    if AutoFavorite and AutoFavorite.SetRarity then
+        AutoFavorite.SetRarity(selected)
+    else
+        warn("AutoFavorite module tidak punya fungsi SetRarity, tambahkan fungsi itu di AutoFavorite.lua")
+    end
 end, "RarityDropdown")
 
 -- Teleport Page with Dropdowns
@@ -1316,3 +1314,4 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
