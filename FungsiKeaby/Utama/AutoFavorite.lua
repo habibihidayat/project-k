@@ -5,7 +5,8 @@ local localPlayer = Players.LocalPlayer
 
 local AutoFavorite = {
     Enabled = false,
-    SelectedRarity = "Epic",
+    SelectedRarities = { "Epic" }, -- default aktif Epic
+    AllRarities = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Secret" },
 }
 
 -- 🔍 Cari Remote Favorite otomatis
@@ -24,8 +25,8 @@ end
 
 local favoriteRemote = findFavoriteRemote()
 
--- 💫 Fungsi untuk favorite semua ikan dengan rarity tertentu
-local function favoriteFishByRarity(rarity)
+-- 💫 Favorite semua ikan dengan rarity tertentu
+local function favoriteFishByRarities()
     if not favoriteRemote then
         warn("❌ Favorite remote not found!")
         return
@@ -39,7 +40,8 @@ local function favoriteFishByRarity(rarity)
 
     for _, item in ipairs(inv:GetChildren()) do
         local rarityValue = item:FindFirstChild("Rarity")
-        if rarityValue and rarityValue.Value == rarity then
+        local rarity = rarityValue and rarityValue.Value or item:GetAttribute("Rarity")
+        if rarity and table.find(AutoFavorite.SelectedRarities, rarity) then
             print("⭐ Favoriting:", item.Name, "(" .. rarity .. ")")
             pcall(function()
                 if favoriteRemote:IsA("RemoteEvent") then
@@ -56,14 +58,14 @@ end
 function AutoFavorite.Start()
     if AutoFavorite.Enabled then return end
     AutoFavorite.Enabled = true
+    print("🟢 [AutoFavorite] Aktif untuk rarity:", table.concat(AutoFavorite.SelectedRarities, ", "))
 
     task.spawn(function()
         while AutoFavorite.Enabled do
-            favoriteFishByRarity(AutoFavorite.SelectedRarity)
+            favoriteFishByRarities()
             task.wait(5)
         end
     end)
-    print("🟢 [AutoFavorite] Aktif untuk rarity:", AutoFavorite.SelectedRarity)
 end
 
 function AutoFavorite.Stop()
@@ -71,9 +73,16 @@ function AutoFavorite.Stop()
     print("🔴 [AutoFavorite] Dinonaktifkan")
 end
 
-function AutoFavorite.SetRarity(rarity)
-    AutoFavorite.SelectedRarity = rarity
-    print("🎯 [AutoFavorite] Rarity diatur ke:", rarity)
+-- 🧭 Tambah / hapus rarity dari daftar aktif
+function AutoFavorite.ToggleRarity(rarity)
+    local idx = table.find(AutoFavorite.SelectedRarities, rarity)
+    if idx then
+        table.remove(AutoFavorite.SelectedRarities, idx)
+        print("❌ [AutoFavorite] Rarity dimatikan:", rarity)
+    else
+        table.insert(AutoFavorite.SelectedRarities, rarity)
+        print("✅ [AutoFavorite] Rarity diaktifkan:", rarity)
+    end
 end
 
 return AutoFavorite
