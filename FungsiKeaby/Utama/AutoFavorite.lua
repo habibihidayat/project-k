@@ -9,6 +9,23 @@ local AutoFavorite = {
 	AllRarities = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Secret" },
 }
 
+-- 🧩 Debug untuk menemukan lokasi inventory sebenarnya
+task.defer(function()
+	print("🔍 [AutoFavorite DEBUG] Memindai kemungkinan lokasi inventory player...")
+
+	for _, obj in ipairs(game:GetDescendants()) do
+		local name = string.lower(obj.Name)
+		if string.find(name, "fish") or string.find(name, "inventory") or string.find(name, "bag") then
+			if not obj:IsDescendantOf(localPlayer:WaitForChild("PlayerGui")) then
+				print("📁 Kandidat Inventory:", obj:GetFullName())
+			end
+		end
+	end
+
+	print("🔍 [AutoFavorite DEBUG] Selesai scanning.")
+end)
+
+
 -- 🔍 Cari Remote Favorite otomatis
 local function findFavoriteRemote()
 	for _, obj in ipairs(ReplicatedStorage:GetDescendants()) do
@@ -122,3 +139,4 @@ function AutoFavorite.ToggleRarity(rarity)
 end
 
 return AutoFavorite
+
