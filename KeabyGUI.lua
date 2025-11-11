@@ -19,6 +19,7 @@ end
 
 local instant = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant.lua"))()
 local instant2x = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant2Xspeed.lua"))()
+local AutoFavorite = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Inventory/AutoFavorite.lua"))()
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
 local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/TeleportToPlayer.lua"))()
 local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
@@ -857,6 +858,20 @@ local pnl2=makePanel(mainPage,"🚀 Instant 2x Speed","")
 makeToggle(pnl2,"Enable Instant 2x Speed",function(on) if on then instant2x.Start() else instant2x.Stop() end end)
 makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
 makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
+
+local pnlFav = makePanel(mainPage, "🌟 Auto Favorite", "")
+
+makeToggle(pnlFav, "Enable Auto Favorite", function(on)
+	if on then
+		AutoFavorite.Start()
+	else
+		AutoFavorite.Stop()
+	end
+end)
+
+makeDropdown(pnlFav, "Select Rarity", "🎣", {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Secret"}, function(selected)
+	AutoFavorite.SetRarity(selected)
+end, "RarityDropdown")
 
 -- Teleport Page with Dropdowns
 local locationItems = {}
