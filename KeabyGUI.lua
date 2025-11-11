@@ -858,12 +858,6 @@ makeToggle(pnl2,"Enable Instant 2x Speed",function(on) if on then instant2x.Star
 makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
 makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
 
--- Tambahkan pilihan rarity
-for _, rarity in ipairs(AutoFavorite.AllRarities) do
-    makeToggle(pnlAutoFav, rarity, function(on)
-        AutoFavorite.ToggleRarity(rarity)
-    end)
-end
 -- Teleport Page with Dropdowns
 local locationItems = {}
 for name, _ in pairs(TeleportModule.Locations) do
@@ -1307,9 +1301,3 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
-
-
-
-
-
-
