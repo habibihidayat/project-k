@@ -83,8 +83,8 @@ function fishing.Cast()
     local castSuccess = pcall(function()
         RF_ChargeFishingRod:InvokeServer({[1] = tick()})
         task.wait(0.07)
-        RF_RequestMinigame:InvokeServer(1, 0, tick())
-        fishing.WaitingHook = false
+        RF_RequestMinigame:InvokeServer(1, 1.95, tick())
+        fishing.WaitingHook = true
         log("🎯 Menunggu hook...")
 
         -- Timeout protection
@@ -225,6 +225,7 @@ end
 --     fishing.Stop()
 
 return fishing
+
 
 
 
