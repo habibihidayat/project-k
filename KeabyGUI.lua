@@ -854,6 +854,11 @@ makeToggle(pnl1,"Enable Instant Fishing",function(on) if on then instant.Start()
 makeSlider(pnl1,"Fishing Delay",0.01,5.0,1.30,function(v) instant.Settings.MaxWaitTime=v end)
 makeSlider(pnl1,"Cancel Delay",0.01,1.5,0.19,function(v) instant.Settings.CancelDelay=v end)
 
+local pnl2=makePanel(mainPage,"🚀 Instant 2x Speed","")
+makeToggle(pnl2,"Enable Instant 2x Speed",function(on) if on then instant2x.Start() else instant2x.Stop() end end)
+makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
+makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
+
 -- 🧭 RARITY FILTER (NEW)
 local rarityList = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Secret"}
 makeDropdown(pnl1, "Rarity Filter", "🎣", rarityList, function(selected)
@@ -865,13 +870,6 @@ makeDropdown(pnl1, "Rarity Filter", "🎣", rarityList, function(selected)
         warn("AutoFavorite module tidak punya fungsi SetRarity, tambahkan fungsi itu di AutoFavorite.lua")
     end
 end, "RarityDropdown")
-
-local pnl2=makePanel(mainPage,"🚀 Instant 2x Speed","")
-makeToggle(pnl2,"Enable Instant 2x Speed",function(on) if on then instant2x.Start() else instant2x.Stop() end end)
-makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
-makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
-
-
 
 -- Teleport Page with Dropdowns
 local locationItems = {}
@@ -1316,5 +1314,6 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
