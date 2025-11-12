@@ -1,14 +1,26 @@
--- ⚡ ULTRA SPEED AUTO FISHING v30 (Instant Hook Edition + Delay GUI)
--- Dibuat untuk memunculkan tanda seru SECEPAT MUNGKIN ⚡
+-- ⚡ ULTRA SPEED AUTO FISHING v29.2 (No Auto-Start / Controlled by GUI)
+-- Modifikasi: Meningkatkan MaxWaitTime menjadi 3 detik untuk menangani delay 2 detik munculnya tanda seru (!).
+--            Menghapus fallback dini (0.7x MaxWaitTime) yang menyebabkan tarik prematur sebelum bite terdeteksi.
+--            Ini memastikan script menunggu lebih lama untuk event bite tanpa interupsi dini.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
-local PlayerGui = localPlayer:WaitForChild("PlayerGui")
+local Character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
 
--- 🔌 Network path
-local netFolder = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("_Index")
-	:WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
+-- Hentikan script lama jika masih aktif
+if _G.FishingScript then
+    _G.FishingScript.Stop()
+    task.wait(0.1)
+end
+
+-- Inisialisasi koneksi network
+local netFolder = ReplicatedStorage
+    :WaitForChild("Packages")
+    :WaitForChild("_Index")
+    :WaitForChild("sleitnick_net@0.2.0")
+    :WaitForChild("net")
 
 local RF_ChargeFishingRod = netFolder:WaitForChild("RF/ChargeFishingRod")
 local RF_RequestMinigame = netFolder:WaitForChild("RF/RequestFishingMinigameStarted")
@@ -17,191 +29,174 @@ local RE_FishingCompleted = netFolder:WaitForChild("RE/FishingCompleted")
 local RE_MinigameChanged = netFolder:WaitForChild("RE/FishingMinigameChanged")
 local RE_FishCaught = netFolder:WaitForChild("RE/FishCaught")
 
--- 🎣 Main module
+-- Modul utama
 local fishing = {
-	Running = false,
-	WaitingHook = false,
-	CurrentCycle = 0,
-	TotalFish = 0,
-	Settings = {
-		FishingDelay = 0.25,
-		CancelDelay = 0.05,
-		PreRequestDelay = 0.02, -- waktu sebelum ChargeRod (agar tanda seru muncul cepat)
-		MaxWaitTime = 1.0,
-	}
+    Running = false,
+    WaitingHook = false,
+    CurrentCycle = 0,
+    TotalFish = 0,
+    Connections = {}, -- simpan koneksi agar bisa di-disconnect
+    Settings = {
+        FishingDelay = 0.01,
+        CancelDelay = 0.19,
+        HookDetectionDelay = 0.01, -- Dikurangi sedikit untuk respons lebih cepat
+        RetryDelay = 0.1,
+        MaxWaitTime = 3.0, -- Dinaikkan dari 1.3 ke 3.0 untuk handle delay 2 detik bite
+    }
 }
+
 _G.FishingScript = fishing
 
+-- Logging ringkas
 local function log(msg)
-	print("[Fishing] " .. msg)
+    print(("[Fishing] %s"):format(msg))
 end
 
--- 🪝 Event hook detection
-RE_MinigameChanged.OnClientEvent:Connect(function(state)
-	if fishing.WaitingHook and typeof(state) == "string" and string.find(string.lower(state), "hook") then
-		fishing.WaitingHook = false
-		task.wait(0.05)
-		RE_FishingCompleted:FireServer()
-		log("✅ Hook terdeteksi — ikan ditarik!")
-		task.wait(fishing.Settings.CancelDelay)
-		pcall(function() RF_CancelFishingInputs:InvokeServer() end)
-		task.wait(fishing.Settings.FishingDelay)
-		if fishing.Running then fishing.Cast() end
-	end
-end)
+-- Fungsi disable animasi
+local function disableFishingAnim()
+    pcall(function()
+        for _, track in pairs(Humanoid:GetPlayingAnimationTracks()) do
+            local name = track.Name:lower()
+            if name:find("fish") or name:find("rod") or name:find("cast") or name:find("reel") then
+                track:Stop(0)
+            end
+        end
+    end)
+    -- Posisi rod diperbaiki
+    task.spawn(function()
+        local rod = Character:FindFirstChild("Rod") or Character:FindFirstChildWhichIsA("Tool")
+        if rod and rod:FindFirstChild("Handle") then
+            local handle = rod.Handle
+            local weld = handle:FindFirstChildOfClass("Weld") or handle:FindFirstChildOfClass("Motor6D")
+            if weld then
+                weld.C0 = CFrame.new(0, -1, -1.2) * CFrame.Angles(math.rad(-10), 0, 0)
+            end
+        end
+    end)
+end
 
--- 🐟 Tangkap ikan event
-RE_FishCaught.OnClientEvent:Connect(function(name, data)
-	if fishing.Running then
-		fishing.WaitingHook = false
-		fishing.TotalFish += 1
-		log("🐟 Ikan tertangkap: " .. tostring(name))
-		task.wait(fishing.Settings.CancelDelay)
-		pcall(function() RF_CancelFishingInputs:InvokeServer() end)
-		task.wait(fishing.Settings.FishingDelay)
-		if fishing.Running then fishing.Cast() end
-	end
-end)
-
--- 🎯 Casting logic (instant hook version)
+-- Fungsi utama cast
 function fishing.Cast()
-	if not fishing.Running or fishing.WaitingHook then return end
-	fishing.CurrentCycle += 1
-
-	pcall(function()
-		-- Panggil RequestMinigame lebih dulu agar "!" langsung muncul saat kail menyentuh air
-		RF_RequestMinigame:InvokeServer(9, 0, tick())
-		task.wait(fishing.Settings.PreRequestDelay)
-		RF_ChargeFishingRod:InvokeServer({[22] = tick()})
-
-		log("⚡ Lempar pancing (Cycle " .. fishing.CurrentCycle .. ")")
-		fishing.WaitingHook = true
-
-		-- Timeout (fallback jika hook tidak muncul)
-		task.delay(fishing.Settings.MaxWaitTime, function()
-			if fishing.WaitingHook and fishing.Running then
-				fishing.WaitingHook = false
-				RE_FishingCompleted:FireServer()
-				log("⚠️ Timeout pendek — fallback tarik cepat.")
-				task.wait(fishing.Settings.CancelDelay)
-				pcall(function() RF_CancelFishingInputs:InvokeServer() end)
-				task.wait(fishing.Settings.FishingDelay)
-				if fishing.Running then fishing.Cast() end
-			end
-		end)
-	end)
+    if not fishing.Running or fishing.WaitingHook then return end
+    disableFishingAnim()
+    fishing.CurrentCycle += 1
+    log("⚡ Lempar pancing (Cycle: " .. fishing.CurrentCycle .. ")")
+    local castSuccess = pcall(function()
+        RF_ChargeFishingRod:InvokeServer({[1] = tick()})
+        task.wait(0.07)
+        RF_RequestMinigame:InvokeServer(1, 0, tick())
+        fishing.WaitingHook = true
+        log("🎯 Menunggu hook (max " .. fishing.Settings.MaxWaitTime .. " detik)...")
+        -- Timeout protection (tanpa fallback dini untuk menghindari tarik prematur)
+        task.delay(fishing.Settings.MaxWaitTime, function()
+            if fishing.WaitingHook and fishing.Running then
+                fishing.WaitingHook = false
+                log("⚠️ Timeout - Fallback tarik paksa setelah " .. fishing.Settings.MaxWaitTime .. " detik")
+                pcall(function()
+                    RE_FishingCompleted:FireServer()
+                end)
+                task.wait(fishing.Settings.RetryDelay)
+                pcall(function()
+                    RF_CancelFishingInputs:InvokeServer()
+                end)
+                task.wait(fishing.Settings.FishingDelay)
+                if fishing.Running then
+                    fishing.Cast()
+                end
+            end
+        end)
+    end)
+    if not castSuccess then
+        log("❌ Gagal cast, retrying...")
+        task.wait(fishing.Settings.RetryDelay)
+        if fishing.Running then
+            fishing.Cast()
+        end
+    end
 end
 
+-- Start / Stop Functions
 function fishing.Start()
-	if fishing.Running then return end
-	fishing.Running = true
-	fishing.CurrentCycle = 0
-	fishing.TotalFish = 0
-	log("🚀 AUTO FISHING STARTED!")
-	fishing.Cast()
+    if fishing.Running then return end
+    fishing.Running = true
+    fishing.CurrentCycle = 0
+    fishing.TotalFish = 0
+    log("🚀 AUTO FISHING STARTED!")
+    disableFishingAnim()
+    -- Hubungkan event hanya saat aktif
+    fishing.Connections.Minigame = RE_MinigameChanged.OnClientEvent:Connect(function(state)
+        if fishing.WaitingHook and typeof(state) == "string" then
+            local stateLower = string.lower(state)
+            if string.find(stateLower, "hook") or string.find(stateLower, "bite") or string.find(stateLower, "catch") then
+                fishing.WaitingHook = false
+                task.wait(fishing.Settings.HookDetectionDelay)
+                pcall(function()
+                    RE_FishingCompleted:FireServer()
+                    log("✅ Hook terdeteksi — ikan ditarik! (Delay bite: ~" .. fishing.Settings.MaxWaitTime .. "s max)")
+                end)
+                task.wait(fishing.Settings.CancelDelay)
+                pcall(function()
+                    RF_CancelFishingInputs:InvokeServer()
+                    log("🔄 Reset fishing inputs")
+                end)
+                task.wait(fishing.Settings.FishingDelay)
+                if fishing.Running then
+                    fishing.Cast()
+                end
+            end
+        end
+    end)
+    fishing.Connections.Caught = RE_FishCaught.OnClientEvent:Connect(function(name, data)
+        if fishing.Running then
+            fishing.WaitingHook = false
+            fishing.TotalFish += 1
+            local weight = data and data.Weight or 0
+            log("🐟 Ikan tertangkap: " .. tostring(name) .. " (" .. string.format("%.2f", weight) .. " kg)")
+            local success = pcall(function()
+                task.wait(fishing.Settings.CancelDelay)
+                RF_CancelFishingInputs:InvokeServer()
+                log("🔄 Reset setelah tangkapan")
+            end)
+            if not success then
+                log("⚠️ Gagal reset, melanjutkan...")
+            end
+            task.wait(fishing.Settings.FishingDelay)
+            if fishing.Running then
+                fishing.Cast()
+            end
+        end
+    end)
+    -- Disable animasi tiap 0.15s saat aktif
+    fishing.Connections.AnimDisabler = task.spawn(function()
+        while fishing.Running do
+            disableFishingAnim()
+            task.wait(0.15)
+        end
+    end)
+    task.wait(0.5)
+    fishing.Cast()
 end
 
 function fishing.Stop()
-	fishing.Running = false
-	fishing.WaitingHook = false
-	log("🛑 AUTO FISHING STOPPED")
+    if not fishing.Running then return end
+    fishing.Running = false
+    fishing.WaitingHook = false
+    -- Putuskan semua koneksi aktif
+    for _, conn in pairs(fishing.Connections) do
+        if typeof(conn) == "RBXScriptConnection" then
+            conn:Disconnect()
+        elseif typeof(conn) == "thread" then
+            task.cancel(conn)
+        end
+    end
+    fishing.Connections = {}
+    log("🛑 AUTO FISHING STOPPED")
 end
 
--- ===============================
--- 🎛️ GUI PENGATUR DELAY
--- ===============================
-local gui = Instance.new("ScreenGui")
-gui.Name = "FishingDelayControl"
-gui.ResetOnSpawn = false
-gui.Parent = PlayerGui
+-- ⚠️ Tidak ada auto-start di sini
+-- Script ini sekarang pasif, hanya aktif jika GUI memanggil:
+-- fishing.Start()
+-- dan berhenti jika GUI memanggil:
+-- fishing.Stop()
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 220, 0, 230)
-frame.Position = UDim2.new(0.03, 0, 0.4, 0)
-frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-frame.BackgroundTransparency = 0.1
-frame.Active = true
-frame.Draggable = true
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
-frame.Parent = gui
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 25)
-title.BackgroundTransparency = 1
-title.Text = "🎣 Ultra Speed Fishing GUI"
-title.TextColor3 = Color3.new(1,1,1)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 15
-title.Parent = frame
-
-local y = 30
-local function makeInput(label, key)
-	local lbl = Instance.new("TextLabel")
-	lbl.Size = UDim2.new(0.6, 0, 0, 20)
-	lbl.Position = UDim2.new(0, 5, 0, y)
-	lbl.BackgroundTransparency = 1
-	lbl.Font = Enum.Font.Gotham
-	lbl.TextSize = 13
-	lbl.TextColor3 = Color3.new(1,1,1)
-	lbl.TextXAlignment = Enum.TextXAlignment.Left
-	lbl.Text = label .. ":"
-	lbl.Parent = frame
-
-	local box = Instance.new("TextBox")
-	box.Size = UDim2.new(0.35, 0, 0, 20)
-	box.Position = UDim2.new(0.63, 0, 0, y)
-	box.BackgroundColor3 = Color3.fromRGB(40,40,40)
-	box.TextColor3 = Color3.new(1,1,1)
-	box.Font = Enum.Font.Gotham
-	box.TextSize = 13
-	box.Text = tostring(fishing.Settings[key])
-	box.ClearTextOnFocus = false
-	box.Parent = frame
-	Instance.new("UICorner", box).CornerRadius = UDim.new(0,5)
-
-	box.FocusLost:Connect(function()
-		local val = tonumber(box.Text)
-		if val then
-			fishing.Settings[key] = val
-			log(label .. " diubah ke " .. val)
-		end
-	end)
-
-	y += 25
-end
-
-makeInput("🎯 Fishing Delay", "FishingDelay")
-makeInput("⏳ Cancel Delay", "CancelDelay")
-makeInput("⚡ PreRequest Delay", "PreRequestDelay")
-makeInput("🕒 Max Wait Time", "MaxWaitTime")
-
-local startBtn = Instance.new("TextButton")
-startBtn.Size = UDim2.new(0.45, 0, 0, 25)
-startBtn.Position = UDim2.new(0.03, 0, 1, -30)
-startBtn.Text = "▶ START"
-startBtn.Font = Enum.Font.GothamBold
-startBtn.TextColor3 = Color3.new(1,1,1)
-startBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-Instance.new("UICorner", startBtn).CornerRadius = UDim.new(0,5)
-startBtn.Parent = frame
-
-local stopBtn = Instance.new("TextButton")
-stopBtn.Size = UDim2.new(0.45, 0, 0, 25)
-stopBtn.Position = UDim2.new(0.52, 0, 1, -30)
-stopBtn.Text = "⏹ STOP"
-stopBtn.Font = Enum.Font.GothamBold
-stopBtn.TextColor3 = Color3.new(1,1,1)
-stopBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
-Instance.new("UICorner", stopBtn).CornerRadius = UDim.new(0,5)
-stopBtn.Parent = frame
-
-startBtn.MouseButton1Click:Connect(function()
-	fishing.Start()
-end)
-
-stopBtn.MouseButton1Click:Connect(function()
-	fishing.Stop()
-end)
-
-log("✅ Fishing system ready (instant hook + GUI aktif)")
 return fishing
