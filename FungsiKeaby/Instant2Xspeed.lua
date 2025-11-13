@@ -1,4 +1,3 @@
--- Instant2Xspeed.lua (no toggle key) - ULTRA SPEED AUTO FISHING
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
@@ -21,6 +20,7 @@ local fishing = {
     Settings = {
         FishingDelay = 0.3,
         CancelDelay = 0.05,
+        FallbackDelay = 0.35, -- 🕒 Delay tambahan sebelum fallback tarik
     },
 }
 _G.FishingScript = fishing
@@ -29,6 +29,7 @@ local function log(msg)
     print("[Fishing] " .. msg)
 end
 
+-- Deteksi hook / bite
 RE_MinigameChanged.OnClientEvent:Connect(function(state)
     if fishing.WaitingHook and typeof(state) == "string" and string.find(string.lower(state), "hook") then
         fishing.WaitingHook = false
@@ -42,6 +43,7 @@ RE_MinigameChanged.OnClientEvent:Connect(function(state)
     end
 end)
 
+-- Ketika ikan tertangkap
 RE_FishCaught.OnClientEvent:Connect(function(name, data)
     if fishing.Running then
         fishing.WaitingHook = false
@@ -54,21 +56,28 @@ RE_FishCaught.OnClientEvent:Connect(function(name, data)
     end
 end)
 
+-- 🪝 Fungsi utama
 function fishing.Cast()
     if not fishing.Running or fishing.WaitingHook then return end
     fishing.CurrentCycle = fishing.CurrentCycle + 1
+
     pcall(function()
         RF_ChargeFishingRod:InvokeServer({[1] = tick()})
         log("⚡ Lempar pancing.")
         task.wait(1.8)
+
         RF_RequestMinigame:InvokeServer(1, 0, tick())
         log("🎯 Menunggu hook...")
         fishing.WaitingHook = true
+
+        -- 🕒 Fallback dengan delay tambahan agar tidak terlalu cepat
         task.delay(4.1, function()
             if fishing.WaitingHook and fishing.Running then
+                task.wait(fishing.Settings.FallbackDelay) -- << Tambahan penting
+                if not fishing.WaitingHook or not fishing.Running then return end
                 fishing.WaitingHook = false
                 RE_FishingCompleted:FireServer()
-                log("⚠️ Timeout pendek — fallback tarik cepat.")
+                log("⚠️ Timeout — fallback tarik (dengan delay aman).")
                 task.wait(fishing.Settings.CancelDelay)
                 pcall(function() RF_CancelFishingInputs:InvokeServer() end)
                 task.wait(fishing.Settings.FishingDelay)
@@ -78,6 +87,7 @@ function fishing.Cast()
     end)
 end
 
+-- 🎮 Start / Stop
 function fishing.Start()
     if fishing.Running then return end
     fishing.Running = true
@@ -94,16 +104,3 @@ function fishing.Stop()
 end
 
 return fishing
-
-
-
-
-
-
-
-
-
-
-
-
-
