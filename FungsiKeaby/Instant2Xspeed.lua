@@ -1,4 +1,3 @@
--- ⚡ ULTRA CONSISTENT AUTO FISHING v2 (Stable Cycle System)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
@@ -16,93 +15,92 @@ local RE_FishCaught = netFolder:WaitForChild("RE/FishCaught")
 local fishing = {
     Running = false,
     WaitingHook = false,
-    CycleLock = false,
     CurrentCycle = 0,
     TotalFish = 0,
+    LockCycle = false,
     Settings = {
-        FishingDelay = 0.25,
+        FishingDelay = 0.3,
         CancelDelay = 0.05,
         FallbackDelay = 0.35,
         RequestDelay = 0.15,
         PostRequestDelay = 0.05,
-        Timeout = 4.2,
+        MinigameDelay = 0.08, -- extra delay biar Request gak spam
     },
 }
 _G.FishingScript = fishing
 
 local function log(msg)
-    print(string.format("[Fishing] %s", msg))
+    print("[Fishing] " .. msg)
 end
 
--- 🪝 Core fishing cycle
+-- 🔄 Reset lock aman antar siklus
+local function resetCycle()
+    fishing.WaitingHook = false
+    fishing.LockCycle = false
+end
+
+-- 🪝 Fungsi utama lempar kail
 function fishing.Cast()
-    if not fishing.Running or fishing.CycleLock then return end
-    fishing.CycleLock = true
+    if not fishing.Running or fishing.WaitingHook or fishing.LockCycle then return end
+    fishing.LockCycle = true
     fishing.CurrentCycle += 1
 
     pcall(function()
-        -- 🔹 Double throw (dua kali untuk konsistensi visual)
         RF_ChargeFishingRod:InvokeServer({[1] = tick()})
         log("⚡ Lempar pancing.")
-        task.wait(0.08)
+        task.wait(fishing.Settings.RequestDelay)
         RF_ChargeFishingRod:InvokeServer({[1] = tick()})
         log("⚡ Lempar pancing.")
 
-        -- 🔹 Tunggu kail benar-benar dilempar
-        task.wait(1.65 + fishing.Settings.RequestDelay)
-
-        -- 🔹 Dua kali request untuk sinkronisasi hook
+        task.wait(1.6 + fishing.Settings.MinigameDelay)
         RF_RequestMinigame:InvokeServer(1, 0, tick())
-        log("🎯 Menunggu hook...")
-        task.wait(0.08)
-        RF_RequestMinigame:InvokeServer(1, 0, tick())
+        task.wait(fishing.Settings.PostRequestDelay)
         log("🎯 Menunggu hook...")
 
         fishing.WaitingHook = true
+    end)
 
-        -- 🔹 Timeout fallback
-        task.delay(fishing.Settings.Timeout, function()
-            if fishing.WaitingHook and fishing.Running then
-                task.wait(fishing.Settings.FallbackDelay)
-                if not fishing.WaitingHook or not fishing.Running then return end
-                fishing.WaitingHook = false
-                RE_FishingCompleted:FireServer()
-                log("⚠️ Timeout — fallback tarik.")
-                task.wait(fishing.Settings.CancelDelay)
-                pcall(function() RF_CancelFishingInputs:InvokeServer() end)
-                task.wait(fishing.Settings.FishingDelay)
-                fishing.CycleLock = false
-                if fishing.Running then fishing.Cast() end
-            end
-        end)
+    -- Timeout fallback
+    task.delay(4.0, function()
+        if fishing.WaitingHook and fishing.Running then
+            fishing.WaitingHook = false
+            log("⚠️ Timeout pendek — fallback tarik cepat.")
+            RE_FishingCompleted:FireServer()
+            task.wait(fishing.Settings.CancelDelay)
+            pcall(function() RF_CancelFishingInputs:InvokeServer() end)
+            task.wait(fishing.Settings.FishingDelay)
+            resetCycle()
+            if fishing.Running then fishing.Cast() end
+        end
     end)
 end
 
--- 🎣 Hook detected
+-- 🎯 Hook detection
 RE_MinigameChanged.OnClientEvent:Connect(function(state)
-    if fishing.WaitingHook and typeof(state) == "string" and string.find(string.lower(state), "hook") then
+    if not fishing.Running or not fishing.WaitingHook then return end
+    if typeof(state) == "string" and string.find(string.lower(state), "hook") then
         fishing.WaitingHook = false
-        task.wait(1.05)
+        task.wait(1.1)
         RE_FishingCompleted:FireServer()
-        log("🐟 Ikan tertangkap: Bandit Angelfish") -- log dummy biar konsisten urutan
+        log("✅ Hook terdeteksi — ikan ditarik.")
         task.wait(fishing.Settings.CancelDelay)
         pcall(function() RF_CancelFishingInputs:InvokeServer() end)
         task.wait(fishing.Settings.FishingDelay)
-        fishing.CycleLock = false
+        resetCycle()
         if fishing.Running then fishing.Cast() end
     end
 end)
 
--- 🐠 Real fish caught confirmation
-RE_FishCaught.OnClientEvent:Connect(function(name)
+-- 🐟 Ikan tertangkap
+RE_FishCaught.OnClientEvent:Connect(function(name, data)
     if not fishing.Running then return end
-    fishing.WaitingHook = false
     fishing.TotalFish += 1
+    fishing.WaitingHook = false
     log("🐟 Ikan tertangkap: " .. tostring(name))
     task.wait(fishing.Settings.CancelDelay)
     pcall(function() RF_CancelFishingInputs:InvokeServer() end)
     task.wait(fishing.Settings.FishingDelay)
-    fishing.CycleLock = false
+    resetCycle()
     if fishing.Running then fishing.Cast() end
 end)
 
@@ -112,14 +110,14 @@ function fishing.Start()
     fishing.Running = true
     fishing.CurrentCycle = 0
     fishing.TotalFish = 0
-    log("🚀 FISHING STARTED")
+    log("🚀 FISHING STARTED!")
     fishing.Cast()
 end
 
 function fishing.Stop()
     fishing.Running = false
     fishing.WaitingHook = false
-    fishing.CycleLock = false
+    fishing.LockCycle = false
     log("🛑 FISHING STOPPED")
 end
 
