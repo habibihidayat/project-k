@@ -861,6 +861,7 @@ makeSlider(pnl2,"Fallback Delay",0.01,5.0,0.19,function(v) instant2x.Settings.Fa
 makeSlider(pnl2,"Request Delay",0.01,5.0,0.19,function(v) instant2x.Settings.RequestDelay=v end)
 makeSlider(pnl2,"Post Request Delay",0.01,5.0,0.19,function(v) instant2x.Settings.PostRequestDelay=v end)
 makeSlider(pnl2,"Timeout",0.01,5.0,0.19,function(v) instant2x.Settings.Timeout=v end)
+makeSlider(pnl2,"safe cooldown",0.01,5.0,0.19,function(v) instant2x.Settings.SafeCooldown=v end)
 
 
 -- Teleport Page with Dropdowns
@@ -1306,6 +1307,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
