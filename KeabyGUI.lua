@@ -857,6 +857,8 @@ local pnl2=makePanel(mainPage,"🚀 Instant 2x Speed","")
 makeToggle(pnl2,"Enable Instant 2x Speed",function(on) if on then instant2x.Start() else instant2x.Stop() end end)
 makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
 makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
+makeSlider(pnl2,"Fallback Delay",0.01,5.0,0.19,function(v) instant2x.Settings.FallbackDelay=v end)
+
 
 -- Teleport Page with Dropdowns
 local locationItems = {}
@@ -1301,3 +1303,4 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
