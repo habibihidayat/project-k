@@ -1,14 +1,14 @@
--- ⚡ ULTRA SPEED AUTO FISHING v32.0 (Anti-Jeda & Anti-Double Cast)
+-- ⚡ ULTRA SPEED AUTO FISHING v33.0 (Rod Check + True Single Thread)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
 local Character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 
--- Hentikan script lama
+-- Stop old script
 if _G.FishingScript then
     _G.FishingScript.Stop()
-    task.wait(0.05)
+    task.wait(0.1)
 end
 
 -- Network connections
@@ -25,24 +25,24 @@ local RE_FishingCompleted = netFolder:WaitForChild("RE/FishingCompleted")
 local RE_MinigameChanged = netFolder:WaitForChild("RE/FishingMinigameChanged")
 local RE_FishCaught = netFolder:WaitForChild("RE/FishCaught")
 
--- Main module dengan MUTEX LOCK
+-- Main module with TRUE SINGLE THREAD
 local fishing = {
     Running = false,
-    Locked = false,  -- MUTEX LOCK untuk mencegah double cast
-    WaitingHook = false,
+    State = "idle",  -- idle, casting, waiting, pulling
     CurrentCycle = 0,
     TotalFish = 0,
     Connections = {},
-    CastQueue = 0,  -- Counter untuk track pending casts
+    MainLoop = nil,  -- SINGLE main loop thread
     
     Settings = {
-        FishingDelay = 0.003,
+        FishingDelay = 0.002,
         CancelDelay = 0.08,
         HookDetectionDelay = 0.01,
         MaxWaitTime = 1.0,
-        ChargeDelay = 0.02,
-        PostCastDelay = 0.04,
+        ChargeDelay = 0.025,
+        PostCastDelay = 0.035,
         AnimDisableInterval = 0.08,
+        RodCheckDelay = 0.01,
     }
 }
 
@@ -52,94 +52,124 @@ local function log(msg)
     print(("[Fishing] %s"):format(msg))
 end
 
+-- Check if rod is equipped and ready
+local function isRodReady()
+    local rod = Character:FindFirstChild("Rod") or Character:FindFirstChildWhichIsA("Tool")
+    if not rod then return false end
+    
+    -- Check if rod is actually equipped (has Handle in Character)
+    local handle = rod:FindFirstChild("Handle")
+    if not handle or not handle.Parent then return false end
+    
+    return true
+end
+
+-- Ensure rod is equipped
+local function ensureRodEquipped()
+    if isRodReady() then return true end
+    
+    -- Try to find rod in backpack and equip it
+    local backpack = localPlayer:FindFirstChild("Backpack")
+    if backpack then
+        local rod = backpack:FindFirstChild("Rod")
+        if rod then
+            pcall(function()
+                Humanoid:EquipTool(rod)
+            end)
+            task.wait(fishing.Settings.RodCheckDelay)
+            return isRodReady()
+        end
+    end
+    
+    return false
+end
+
 -- Disable animations
 local function disableFishingAnim()
-    task.spawn(function()
-        pcall(function()
-            for _, track in pairs(Humanoid:GetPlayingAnimationTracks()) do
-                local name = track.Name:lower()
-                if name:find("fish") or name:find("rod") or name:find("cast") or name:find("reel") or name:find("throw") then
-                    track:Stop(0)
-                    track.TimePosition = 0
-                end
+    pcall(function()
+        for _, track in pairs(Humanoid:GetPlayingAnimationTracks()) do
+            local name = track.Name:lower()
+            if name:find("fish") or name:find("rod") or name:find("cast") or name:find("reel") or name:find("throw") then
+                track:Stop(0)
+                track.TimePosition = 0
             end
-        end)
+        end
+    end)
 
-        pcall(function()
-            local rod = Character:FindFirstChild("Rod") or Character:FindFirstChildWhichIsA("Tool")
-            if rod and rod:FindFirstChild("Handle") then
-                local handle = rod.Handle
-                local weld = handle:FindFirstChildOfClass("Weld") or handle:FindFirstChildOfClass("Motor6D")
-                if weld then
-                    weld.C0 = CFrame.new(0, -1, -1.2) * CFrame.Angles(math.rad(-10), 0, 0)
-                end
+    pcall(function()
+        local rod = Character:FindFirstChild("Rod") or Character:FindFirstChildWhichIsA("Tool")
+        if rod and rod:FindFirstChild("Handle") then
+            local handle = rod.Handle
+            local weld = handle:FindFirstChildOfClass("Weld") or handle:FindFirstChildOfClass("Motor6D")
+            if weld then
+                weld.C0 = CFrame.new(0, -1, -1.2) * CFrame.Angles(math.rad(-10), 0, 0)
             end
-        end)
+        end
     end)
 end
 
--- MUTEX LOCK untuk Cast - Mencegah double execution
-function fishing.Cast()
-    -- Check lock PERTAMA sebelum apapun
-    if fishing.Locked or fishing.WaitingHook or not fishing.Running then
-        return
+-- MAIN CASTING FUNCTION - Called ONLY by main loop
+local function performCast()
+    if fishing.State ~= "idle" then
+        return false
     end
     
-    -- ACQUIRE LOCK
-    fishing.Locked = true
-    fishing.CurrentCycle += 1
+    -- Check rod first
+    if not ensureRodEquipped() then
+        log("⚠️ Rod not ready")
+        return false
+    end
     
-    disableFishingAnim()
+    fishing.State = "casting"
+    fishing.CurrentCycle += 1
     
     local cycleNum = fishing.CurrentCycle
     log("⚡ Cast #" .. cycleNum)
-
+    
+    disableFishingAnim()
+    
     local success = pcall(function()
         local timestamp = tick()
         
-        -- ATOMIC CAST SEQUENCE
-        -- Step 1: Charge
+        -- Charge rod
         local chargeOK = pcall(function()
             RF_ChargeFishingRod:InvokeServer({[1] = timestamp})
         end)
         
         if not chargeOK then
-            log("❌ Charge failed")
-            fishing.Locked = false
-            task.wait(0.05)
-            if fishing.Running then fishing.Cast() end
+            fishing.State = "idle"
             return
         end
         
-        -- Step 2: Wait minimal
         task.wait(fishing.Settings.ChargeDelay)
         
-        -- Step 3: Request Minigame
+        -- Request minigame - rod MUST be equipped
+        if not isRodReady() then
+            log("⚠️ Rod lost during cast")
+            fishing.State = "idle"
+            return
+        end
+        
         local minigameOK = pcall(function()
             RF_RequestMinigame:InvokeServer(1, 0, timestamp)
         end)
         
         if not minigameOK then
-            log("❌ Minigame request failed")
-            fishing.Locked = false
-            task.wait(0.05)
-            if fishing.Running then fishing.Cast() end
+            fishing.State = "idle"
             return
         end
         
-        -- Step 4: Post-cast delay
         task.wait(fishing.Settings.PostCastDelay)
         
-        -- RELEASE LOCK sebelum waiting hook
-        fishing.Locked = false
-        fishing.WaitingHook = true
-        log("🎯 Waiting hook #" .. cycleNum)
+        -- Transition to waiting
+        fishing.State = "waiting"
+        log("🎯 Hook #" .. cycleNum)
         
-        -- Single fallback timer
-        local fallbackTimer = task.delay(fishing.Settings.MaxWaitTime, function()
-            if fishing.WaitingHook and fishing.Running then
-                fishing.WaitingHook = false
+        -- Single timeout
+        task.delay(fishing.Settings.MaxWaitTime, function()
+            if fishing.State == "waiting" and fishing.Running then
                 log("⏰ Timeout #" .. cycleNum)
+                fishing.State = "pulling"
                 
                 pcall(function()
                     RE_FishingCompleted:FireServer()
@@ -152,40 +182,60 @@ function fishing.Cast()
                 end)
                 
                 task.wait(fishing.Settings.FishingDelay)
-                if fishing.Running and not fishing.Locked then
-                    fishing.Cast()
-                end
+                fishing.State = "idle"
             end
         end)
     end)
     
     if not success then
-        log("❌ Cast error")
-        fishing.Locked = false
-        fishing.WaitingHook = false
-        task.wait(0.05)
-        if fishing.Running then
-            fishing.Cast()
-        end
+        log("❌ Cast failed")
+        fishing.State = "idle"
+        return false
     end
+    
+    return true
 end
 
--- Start Function dengan SINGLE THREAD control
+-- MAIN LOOP - SINGLE THREAD controlling everything
+local function mainFishingLoop()
+    log("🔄 Main loop started")
+    
+    while fishing.Running do
+        if fishing.State == "idle" then
+            -- Try to cast
+            performCast()
+            task.wait(0.01)  -- Small yield to prevent tight loop
+        else
+            -- Wait for state to become idle
+            task.wait(0.05)
+        end
+    end
+    
+    log("🔄 Main loop ended")
+end
+
+-- Start Function
 function fishing.Start()
     if fishing.Running then return end
     fishing.Running = true
-    fishing.Locked = false
-    fishing.WaitingHook = false
+    fishing.State = "idle"
     fishing.CurrentCycle = 0
     fishing.TotalFish = 0
-    fishing.CastQueue = 0
 
-    log("🚀 SPAM FISHING - NO JEDA MODE!")
+    log("🚀 CONSISTENT FISHING START!")
+    
+    -- Ensure rod is equipped first
+    if not ensureRodEquipped() then
+        log("❌ No rod found!")
+        fishing.Running = false
+        return
+    end
+    
     disableFishingAnim()
 
-    -- Hook Detection - PRIORITY EVENT
+    -- Hook Detection
     fishing.Connections.Minigame = RE_MinigameChanged.OnClientEvent:Connect(function(state)
-        if not fishing.WaitingHook or not fishing.Running then return end
+        if fishing.State ~= "waiting" or not fishing.Running then return end
         
         if typeof(state) == "string" then
             local stateLower = string.lower(state)
@@ -196,7 +246,7 @@ function fishing.Start()
                string.find(stateLower, "reel") or
                string.find(stateLower, "!") then
                 
-                fishing.WaitingHook = false
+                fishing.State = "pulling"
                 log("🎣 HOOK!")
                 
                 -- Instant pull
@@ -205,21 +255,14 @@ function fishing.Start()
                 end)
                 
                 task.wait(fishing.Settings.HookDetectionDelay)
+                task.wait(fishing.Settings.CancelDelay)
                 
-                -- Reset & recast IMMEDIATELY
-                task.spawn(function()
-                    task.wait(fishing.Settings.CancelDelay)
-                    pcall(function()
-                        RF_CancelFishingInputs:InvokeServer()
-                    end)
-                    
-                    task.wait(fishing.Settings.FishingDelay)
-                    
-                    -- Pastikan tidak double cast
-                    if fishing.Running and not fishing.Locked and not fishing.WaitingHook then
-                        fishing.Cast()
-                    end
+                pcall(function()
+                    RF_CancelFishingInputs:InvokeServer()
                 end)
+                
+                task.wait(fishing.Settings.FishingDelay)
+                fishing.State = "idle"
             end
         end
     end)
@@ -228,24 +271,19 @@ function fishing.Start()
     fishing.Connections.Caught = RE_FishCaught.OnClientEvent:Connect(function(name, data)
         if not fishing.Running then return end
         
-        fishing.WaitingHook = false
-        fishing.TotalFish += 1
-        local weight = data and data.Weight or 0
-        log("🐟 #" .. fishing.TotalFish .. ": " .. tostring(name) .. " (" .. string.format("%.1f", weight) .. "kg)")
+        if fishing.State == "waiting" or fishing.State == "pulling" then
+            fishing.TotalFish += 1
+            local weight = data and data.Weight or 0
+            log("🐟 #" .. fishing.TotalFish .. ": " .. tostring(name) .. " (" .. string.format("%.1f", weight) .. "kg)")
 
-        task.spawn(function()
             task.wait(fishing.Settings.CancelDelay)
             pcall(function()
                 RF_CancelFishingInputs:InvokeServer()
             end)
             
             task.wait(fishing.Settings.FishingDelay)
-            
-            -- Pastikan tidak double cast
-            if fishing.Running and not fishing.Locked and not fishing.WaitingHook then
-                fishing.Cast()
-            end
-        end)
+            fishing.State = "idle"
+        end
     end)
 
     -- Animation Disabler
@@ -256,20 +294,24 @@ function fishing.Start()
         end
     end)
 
-    -- SINGLE initial cast
-    task.wait(0.05)
-    if fishing.Running and not fishing.Locked then
-        fishing.Cast()
-    end
+    -- START MAIN LOOP - SINGLE THREAD
+    task.wait(0.1)
+    fishing.MainLoop = task.spawn(mainFishingLoop)
 end
 
 -- Stop Function
 function fishing.Stop()
     if not fishing.Running then return end
     fishing.Running = false
-    fishing.Locked = false
-    fishing.WaitingHook = false
+    fishing.State = "idle"
 
+    -- Cancel main loop
+    if fishing.MainLoop then
+        task.cancel(fishing.MainLoop)
+        fishing.MainLoop = nil
+    end
+
+    -- Disconnect all connections
     for _, conn in pairs(fishing.Connections) do
         if typeof(conn) == "RBXScriptConnection" then
             conn:Disconnect()
