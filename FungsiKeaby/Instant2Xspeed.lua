@@ -27,15 +27,17 @@ local fishing = {
     State = STATE.IDLE,
     TotalFish = 0,
     CurrentCycle = 0,
-    LastActionTime = 0,
+    LastCastTime = 0,
     ActiveCoroutine = nil,
     Settings = {
-        CastDelay = 0.15,        -- Delay sebelum request minigame
-        HookTimeout = 4.5,       -- Timeout menunggu hook
-        PullDelay = 0.8,         -- Delay sebelum pull
-        CleanupDelay = 0.15,     -- Delay cleanup
-        CycleDelay = 0.3,        -- Delay antar cycle
-        MinActionGap = 0.1,      -- Min gap antar action
+        -- ULTRA FAST MODE
+        InstantRequest = true,      -- Request minigame bersamaan dengan cast
+        CastDelay = 0.05,           -- Minimal delay (nyaris instant)
+        HookTimeout = 3.5,          -- Timeout lebih cepat
+        PullDelay = 0.5,            -- Pull lebih cepat
+        CleanupDelay = 0.05,        -- Cleanup minimal
+        PostCatchDelay = 0.05,      -- Delay setelah ikan tertangkap (SUPER CEPAT)
+        MinCastInterval = 0.1,      -- Anti-spam protection minimal
     }
 }
 _G.FishingScript = fishing
@@ -55,6 +57,7 @@ local function canTransition(fromState)
 end
 
 local function waitSafe(duration)
+    if duration <= 0 then return true end
     local start = tick()
     while tick() - start < duration do
         if not fishing.Running then return false end
@@ -70,72 +73,79 @@ local function cancelActive()
     end
 end
 
--- Core fishing cycle
+local function instantPull()
+    -- Tarik ikan secepat mungkin
+    pcall(function()
+        RE_FishingCompleted:FireServer()
+    end)
+    task.wait(0.05)
+    pcall(function()
+        RF_CancelFishingInputs:InvokeServer()
+    end)
+end
+
+-- Core fishing cycle (OPTIMIZED FOR SPEED)
 local function executeFishingCycle()
-    -- 1. CASTING PHASE
+    -- Anti-spam check
+    local currentTime = tick()
+    if currentTime - fishing.LastCastTime < fishing.Settings.MinCastInterval then
+        task.wait(fishing.Settings.MinCastInterval)
+    end
+    
     if not canTransition(STATE.IDLE) then return end
     
     setState(STATE.CASTING)
     fishing.CurrentCycle += 1
-    fishing.LastActionTime = tick()
+    fishing.LastCastTime = tick()
     log("⚡ Lempar pancing.")
     
-    -- Charge rod
-    local chargeSuccess = pcall(function()
-        RF_ChargeFishingRod:InvokeServer({[1] = tick()})
+    -- PARALLEL EXECUTION - Cast dan Request bersamaan!
+    task.spawn(function()
+        pcall(function()
+            RF_ChargeFishingRod:InvokeServer({[1] = tick()})
+        end)
     end)
     
-    if not chargeSuccess or not waitSafe(fishing.Settings.CastDelay) then
+    -- Request minigame INSTANT (tanda seru muncul bersamaan)
+    if fishing.Settings.InstantRequest then
+        task.spawn(function()
+            task.wait(0.01) -- Tiny delay untuk sinkronisasi
+            pcall(function()
+                RF_RequestMinigame:InvokeServer(1, 0, tick())
+            end)
+        end)
+    end
+    
+    if not waitSafe(fishing.Settings.CastDelay) then
         setState(STATE.IDLE)
         return
     end
     
-    -- 2. REQUEST MINIGAME
+    -- Langsung ke WAITING_HOOK
     if not canTransition(STATE.CASTING) then return end
-    
-    local requestSuccess = pcall(function()
-        RF_RequestMinigame:InvokeServer(1, 0, tick())
-    end)
-    
-    if not requestSuccess then
-        setState(STATE.IDLE)
-        if fishing.Running then
-            task.wait(fishing.Settings.CycleDelay)
-            executeFishingCycle()
-        end
-        return
-    end
     
     setState(STATE.WAITING_HOOK)
     log("🎯 Menunggu hook...")
     
-    -- 3. WAIT FOR HOOK WITH TIMEOUT
-    local hookStartTime = tick()
-    local hookDetected = false
-    
+    -- Timeout dengan auto-pull
     fishing.ActiveCoroutine = task.delay(fishing.Settings.HookTimeout, function()
         if canTransition(STATE.WAITING_HOOK) then
-            log("⚠️ Timeout pendek — fallback tarik cepat.")
+            log("⚠️ Timeout — auto pull.")
             setState(STATE.PULLING)
             
-            pcall(function()
-                RE_FishingCompleted:FireServer()
-            end)
-            
-            waitSafe(fishing.Settings.CleanupDelay)
-            pcall(function() RF_CancelFishingInputs:InvokeServer() end)
+            instantPull()
             
             setState(STATE.IDLE)
             
             if fishing.Running then
-                waitSafe(fishing.Settings.CycleDelay)
+                waitSafe(fishing.Settings.PostCatchDelay)
                 executeFishingCycle()
             end
         end
     end)
 end
 
--- Hook detection handler
+-- Hook detection handler (INSTANT RESPONSE)
 local hookConnection
 hookConnection = RE_MinigameChanged.OnClientEvent:Connect(function(state)
     if not canTransition(STATE.WAITING_HOOK) then return end
@@ -143,25 +153,21 @@ hookConnection = RE_MinigameChanged.OnClientEvent:Connect(function(state)
     if typeof(state) == "string" and string.find(string.lower(state), "hook") then
         cancelActive()
         
-        log("✅ Hook terdeteksi — ikan ditarik.")
+        log("✅ Hook terdeteksi!")
         setState(STATE.PULLING)
         
+        -- INSTANT PULL - No delay!
         task.spawn(function()
             waitSafe(fishing.Settings.PullDelay)
             
             if fishing.State == STATE.PULLING then
-                pcall(function()
-                    RE_FishingCompleted:FireServer()
-                end)
-                
-                waitSafe(fishing.Settings.CleanupDelay)
-                pcall(function() RF_CancelFishingInputs:InvokeServer() end)
+                instantPull()
             end
         end)
     end
 end)
 
--- Fish caught handler
+-- Fish caught handler (INSTANT RECAST)
 local fishConnection
 fishConnection = RE_FishCaught.OnClientEvent:Connect(function(name)
     if not fishing.Running then return end
@@ -171,8 +177,9 @@ fishConnection = RE_FishCaught.OnClientEvent:Connect(function(name)
     
     fishing.TotalFish += 1
     setState(STATE.CAUGHT)
-    log("🐟 Ikan tertangkap: " .. tostring(name) .. " (Total: " .. fishing.TotalFish .. ")")
+    log("🐟 Ikan #" .. fishing.TotalFish .. ": " .. tostring(name))
     
+    -- INSTANT CLEANUP + RECAST
     task.spawn(function()
         waitSafe(fishing.Settings.CleanupDelay)
         pcall(function() RF_CancelFishingInputs:InvokeServer() end)
@@ -180,7 +187,8 @@ fishConnection = RE_FishCaught.OnClientEvent:Connect(function(name)
         setState(STATE.IDLE)
         
         if fishing.Running then
-            waitSafe(fishing.Settings.CycleDelay)
+            -- SUPER FAST RECAST - Minimal delay
+            waitSafe(fishing.Settings.PostCatchDelay)
             executeFishingCycle()
         end
     end)
@@ -196,12 +204,14 @@ function fishing.Start()
     fishing.Running = true
     fishing.TotalFish = 0
     fishing.CurrentCycle = 0
+    fishing.LastCastTime = 0
     setState(STATE.IDLE)
     cancelActive()
     
-    log("🚀 FISHING STARTED!")
+    log("🚀 TURBO FISHING MODE ACTIVATED!")
+    log("⚡ Instant cast + pull enabled")
     
-    task.wait(0.5)
+    task.wait(0.3)
     executeFishingCycle()
 end
 
@@ -215,16 +225,40 @@ function fishing.Stop()
     
     pcall(function() RF_CancelFishingInputs:InvokeServer() end)
     
-    log("🛑 FISHING STOPPED - Total ikan: " .. fishing.TotalFish)
+    log("🛑 STOPPED - Total: " .. fishing.TotalFish .. " ikan dalam " .. fishing.CurrentCycle .. " cycles")
 end
 
--- Status check
+-- Adjust speed on the fly
+function fishing.SetSpeed(mode)
+    if mode == "ULTRA" then
+        fishing.Settings.CastDelay = 0.05
+        fishing.Settings.HookTimeout = 3.0
+        fishing.Settings.PullDelay = 0.3
+        fishing.Settings.PostCatchDelay = 0.05
+        log("⚡ ULTRA SPEED MODE")
+    elseif mode == "FAST" then
+        fishing.Settings.CastDelay = 0.1
+        fishing.Settings.HookTimeout = 3.5
+        fishing.Settings.PullDelay = 0.5
+        fishing.Settings.PostCatchDelay = 0.1
+        log("🏃 FAST SPEED MODE")
+    elseif mode == "SAFE" then
+        fishing.Settings.CastDelay = 0.2
+        fishing.Settings.HookTimeout = 4.5
+        fishing.Settings.PullDelay = 0.8
+        fishing.Settings.PostCatchDelay = 0.3
+        log("🐢 SAFE SPEED MODE")
+    end
+end
+
+-- Status
 function fishing.GetStatus()
     return {
         Running = fishing.Running,
         State = fishing.State,
         TotalFish = fishing.TotalFish,
-        Cycle = fishing.CurrentCycle
+        Cycle = fishing.CurrentCycle,
+        FishPerMinute = fishing.TotalFish / ((tick() - fishing.LastCastTime) / 60)
     }
 end
 
