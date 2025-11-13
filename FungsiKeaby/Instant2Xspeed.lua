@@ -32,7 +32,7 @@ end
 RE_MinigameChanged.OnClientEvent:Connect(function(state)
     if fishing.WaitingHook and typeof(state) == "string" and string.find(string.lower(state), "hook") then
         fishing.WaitingHook = false
-        task.wait(0.30)
+        task.wait(0.50)
         RE_FishingCompleted:FireServer()
         log("✅ Hook terdeteksi — ikan ditarik.")
         task.wait(fishing.Settings.CancelDelay)
@@ -94,6 +94,7 @@ function fishing.Stop()
 end
 
 return fishing
+
 
 
 
