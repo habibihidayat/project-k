@@ -855,13 +855,12 @@ makeSlider(pnl1,"Cancel Delay",0.01,1.5,0.19,function(v) instant.Settings.Cancel
 
 local pnl2=makePanel(mainPage,"🚀 Instant 2x Speed","")
 makeToggle(pnl2,"Enable Instant 2x Speed",function(on) if on then instant2x.Start() else instant2x.Stop() end end)
-makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
-makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
-makeSlider(pnl2,"Fallback Delay",0.01,5.0,0.19,function(v) instant2x.Settings.FallbackDelay=v end)
-makeSlider(pnl2,"Request Delay",0.01,5.0,0.19,function(v) instant2x.Settings.RequestDelay=v end)
-makeSlider(pnl2,"Post Request Delay",0.01,5.0,0.19,function(v) instant2x.Settings.PostRequestDelay=v end)
-makeSlider(pnl2,"Timeout",0.01,5.0,0.19,function(v) instant2x.Settings.Timeout=v end)
-makeSlider(pnl2,"safe cooldown",0.01,5.0,0.19,function(v) instant2x.Settings.SafeCooldown=v end)
+makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.CastDelay=v end)
+makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.HookTimeout=v end)
+makeSlider(pnl2,"Fallback Delay",0.01,5.0,0.19,function(v) instant2x.Settings.PullDelay=v end)
+makeSlider(pnl2,"Request Delay",0.01,5.0,0.19,function(v) instant2x.Settings.CleanupDelay=v end)
+makeSlider(pnl2,"Post Request Delay",0.01,5.0,0.19,function(v) instant2x.Settings.CycleDelay=v end)
+makeSlider(pnl2,"Timeout",0.01,5.0,0.19,function(v) instant2x.Settings.MinActionGap=v end)
 
 
 -- Teleport Page with Dropdowns
@@ -1307,6 +1306,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
