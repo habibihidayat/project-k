@@ -859,7 +859,7 @@ makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.Fishing
 makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
 makeSlider(pnl2,"Hook detection Delay",0.01,5.0,0.19,function(v) instant2x.Settings.HookDetectionDelay=v end)
 makeSlider(pnl2,"Max wait time",0.01,5.0,0.19,function(v) instant2x.Settings.MaxWaitTime=v end)
-makeSlider(pnl2,"Anim Disable",0.01,5.0,0.19,function(v) instant2x.Settings.AnimDisableInterval=v end)
+makeSlider(pnl2,"Anim Disable",0.01,5.0,0.19,function(v) instant2x.Settings.RetryDelay=v end)
 
 
 
@@ -1306,6 +1306,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
