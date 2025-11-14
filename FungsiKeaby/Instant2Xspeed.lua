@@ -1,4 +1,4 @@
--- ⚡ ULTRA SPEED AUTO FISHING v38.0 (Server-Synced Perfect Timing)
+-- ⚡ ULTRA FAST AUTO FISHING v39.0 PREMIUM (Maximum Speed + Spam Cast)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -8,7 +8,7 @@ local Humanoid = Character:WaitForChild("Humanoid")
 
 if _G.FishingScript then
     _G.FishingScript.Stop()
-    task.wait(0.15)
+    task.wait(0.1)
 end
 
 local netFolder = ReplicatedStorage
@@ -31,33 +31,41 @@ local fishing = {
     CurrentCycle = 0,
     TotalFish = 0,
     Connections = {},
+    LastCastTime = 0,
     
-    -- Server sync tracking
-    LastServerResponseTime = 0,
-    AverageServerDelay = 0.08,
+    -- Advanced tracking
     ServerDelays = {},
+    AverageServerDelay = 0.05,
+    FastMode = true,
+    SpamCast = true,
     
     Settings = {
-        -- Core timing - DIATUR DARI GUI
-        CastDelay = 0.002,
-        ResetDelay = 0.08,
-        HookResponseDelay = 0.01,
-        TimeoutDuration = 1.5,
+        -- ULTRA FAST TIMING - Optimized untuk kecepatan maksimal
+        CastDelay = 0.001,              -- Hampir instant cast
+        ResetDelay = 0.03,              -- Minimal reset time
+        HookResponseDelay = 0.005,      -- Instant hook response
+        TimeoutDuration = 1.2,          -- Shorter timeout
         
-        -- Charge timing - CRITICAL untuk cast quality
-        ChargeHoldTime = 0.001,        -- Waktu hold sebelum release (instant)
-        PreMinigameDelay = 0.001,      -- Delay sebelum minigame request
-        PostMinigameWait = 0.05,       // Tunggu server ready
+        -- CHARGE TIMING - Zero delay untuk spam
+        ChargeHoldTime = 0,             -- NO HOLD = instant
+        PreMinigameDelay = 0,           -- NO DELAY
+        PostMinigameWait = 0.02,        -- Minimal wait
+        
+        -- SPAM SETTINGS
+        ParallelCasts = false,          -- Cast paralel (risky tapi cepat)
+        AggressiveMode = true,          -- Mode agresif
+        SkipAnimations = true,          -- Skip semua animasi
+        InstantPull = true,             -- Instant pull tanpa delay
         
         -- Animation
-        AnimCheckInterval = 0.1,
+        AnimCheckInterval = 0.05,
     }
 }
 
 _G.FishingScript = fishing
 
 local function log(msg)
-    print(("[Fish] " .. msg))
+    print(("[⚡Fish] " .. msg))
 end
 
 local function isRodReady()
@@ -72,7 +80,7 @@ local function ensureRod()
         local rod = bp:FindFirstChild("Rod")
         if rod then
             Humanoid:EquipTool(rod)
-            task.wait(0.02)
+            task.wait(0.01)
             return isRodReady()
         end
     end
@@ -80,22 +88,23 @@ local function ensureRod()
 end
 
 local function killAnims()
+    if not fishing.Settings.SkipAnimations then return end
     for _, track in pairs(Humanoid:GetPlayingAnimationTracks()) do
-        local n = track.Name:lower()
-        if n:find("fish") or n:find("rod") or n:find("cast") or n:find("reel") then
-            track:Stop(0)
-        end
+        track:Stop(0)
     end
 end
 
--- CORE CAST FUNCTION - Simplified & Synced
+-- ULTRA FAST CAST - Zero delay optimized
 function fishing.DoCast()
-    if fishing.Locked or fishing.WaitingForHook or not fishing.Running then 
+    if fishing.Locked or not fishing.Running then 
         return 
     end
     
+    if not fishing.Settings.ParallelCasts and fishing.WaitingForHook then
+        return
+    end
+    
     if not ensureRod() then
-        log("❌ No rod")
         return
     end
     
@@ -103,66 +112,62 @@ function fishing.DoCast()
     fishing.CurrentCycle += 1
     local cycle = fishing.CurrentCycle
     
-    killAnims()
-    log("⚡ Cast #" .. cycle)
-    
     task.spawn(function()
         local castStart = tick()
         local success, err = pcall(function()
-            -- PHASE 1: CHARGE (with server sync compensation)
-            local chargeTimestamp = tick()
             
-            -- Invoke charge - server starts tracking
-            local chargeResult = RF_ChargeFishingRod:InvokeServer({[1] = chargeTimestamp})
+            -- INSTANT CHARGE + MINIGAME REQUEST
+            local timestamp = tick()
             
-            -- Track server response time
-            local serverResponseTime = tick() - chargeTimestamp
-            table.insert(fishing.ServerDelays, serverResponseTime)
-            if #fishing.ServerDelays > 10 then
-                table.remove(fishing.ServerDelays, 1)
+            -- Parallel execution untuk speed
+            local chargeTask = task.spawn(function()
+                RF_ChargeFishingRod:InvokeServer({[1] = timestamp})
+            end)
+            
+            -- Tunggu minimal (atau skip jika aggressive)
+            if fishing.Settings.ChargeHoldTime > 0 then
+                task.wait(fishing.Settings.ChargeHoldTime)
             end
             
-            -- Calculate average server delay
-            local sum = 0
-            for _, d in ipairs(fishing.ServerDelays) do
-                sum = sum + d
+            -- INSTANT minigame request
+            if fishing.Settings.PreMinigameDelay > 0 then
+                task.wait(fishing.Settings.PreMinigameDelay)
             end
-            fishing.AverageServerDelay = #fishing.ServerDelays > 0 and (sum / #fishing.ServerDelays) or 0.08
             
-            -- TINY hold untuk cast quality
-            task.wait(fishing.Settings.ChargeHoldTime)
+            RF_RequestMinigame:InvokeServer(1, 0, timestamp)
             
-            -- PHASE 2: REQUEST MINIGAME
-            -- Compensate untuk server delay
-            task.wait(fishing.Settings.PreMinigameDelay)
+            -- Minimal wait
+            if fishing.Settings.PostMinigameWait > 0 then
+                task.wait(fishing.Settings.PostMinigameWait)
+            end
             
-            -- Request dengan SAME timestamp untuk perfect sync
-            local minigameResult = RF_RequestMinigame:InvokeServer(1, 0, chargeTimestamp)
-            
-            -- Wait untuk server process
-            task.wait(fishing.Settings.PostMinigameWait)
-            
-            -- PHASE 3: WAIT FOR HOOK
+            -- Unlock ASAP
             fishing.Locked = false
             fishing.WaitingForHook = true
             fishing.LastCastTime = castStart
             
-            log("🎯 Wait hook #" .. cycle .. " [Srv: " .. string.format("%.0f", fishing.AverageServerDelay * 1000) .. "ms]")
+            if cycle % 10 == 0 then
+                log("🎯 Cast #" .. cycle)
+            end
             
-            -- Timeout handler
+            -- AGGRESSIVE TIMEOUT
             task.delay(fishing.Settings.TimeoutDuration, function()
                 if fishing.WaitingForHook and fishing.Running then
                     fishing.WaitingForHook = false
-                    log("⏰ Timeout #" .. cycle)
                     
-                    pcall(function()
-                        RE_FishingCompleted:FireServer()
+                    -- Fast cleanup
+                    task.spawn(function()
+                        pcall(function()
+                            RE_FishingCompleted:FireServer()
+                        end)
                     end)
                     
                     task.wait(fishing.Settings.ResetDelay)
                     
-                    pcall(function()
-                        RF_CancelFishingInputs:InvokeServer()
+                    task.spawn(function()
+                        pcall(function()
+                            RF_CancelFishingInputs:InvokeServer()
+                        end)
                     end)
                     
                     task.wait(fishing.Settings.CastDelay)
@@ -175,10 +180,9 @@ function fishing.DoCast()
         end)
         
         if not success then
-            log("❌ Error: " .. tostring(err))
             fishing.Locked = false
             fishing.WaitingForHook = false
-            task.wait(0.1)
+            task.wait(0.05)
             if fishing.Running then
                 fishing.DoCast()
             end
@@ -186,13 +190,23 @@ function fishing.DoCast()
     end)
 end
 
+-- SPAM CAST LOOP - Untuk mode agresif
+function fishing.SpamCastLoop()
+    while fishing.Running and fishing.Settings.ParallelCasts do
+        if not fishing.Locked then
+            fishing.DoCast()
+        end
+        task.wait(0.1) -- Spam interval
+    end
+end
+
 function fishing.Start()
     if fishing.Running then return end
     
-    log("🚀 Starting...")
+    log("🚀 PREMIUM MODE STARTING...")
     
     if not ensureRod() then
-        log("❌ No fishing rod found!")
+        log("❌ No fishing rod!")
         return
     end
     
@@ -202,11 +216,10 @@ function fishing.Start()
     fishing.CurrentCycle = 0
     fishing.TotalFish = 0
     fishing.ServerDelays = {}
-    fishing.AverageServerDelay = 0.08
     
     killAnims()
     
-    -- HOOK DETECTION
+    -- ULTRA FAST HOOK DETECTION
     fishing.Connections.Hook = RE_MinigameChanged.OnClientEvent:Connect(function(state)
         if not fishing.WaitingForHook or not fishing.Running then return end
         
@@ -216,18 +229,26 @@ function fishing.Start()
                 fishing.WaitingForHook = false
                 
                 local hookTime = tick() - (fishing.LastCastTime or tick())
-                log("🎣 HOOK! (" .. string.format("%.2f", hookTime) .. "s)")
                 
-                -- INSTANT PULL
-                pcall(function()
-                    RE_FishingCompleted:FireServer()
+                -- INSTANT PULL - NO DELAY
+                task.spawn(function()
+                    pcall(function()
+                        RE_FishingCompleted:FireServer()
+                    end)
                 end)
                 
-                task.wait(fishing.Settings.HookResponseDelay)
-                task.wait(fishing.Settings.ResetDelay)
+                if fishing.Settings.InstantPull then
+                    -- Skip all delays untuk instant pull
+                    task.wait(0.01)
+                else
+                    task.wait(fishing.Settings.HookResponseDelay)
+                    task.wait(fishing.Settings.ResetDelay)
+                end
                 
-                pcall(function()
-                    RF_CancelFishingInputs:InvokeServer()
+                task.spawn(function()
+                    pcall(function()
+                        RF_CancelFishingInputs:InvokeServer()
+                    end)
                 end)
                 
                 task.wait(fishing.Settings.CastDelay)
@@ -239,20 +260,25 @@ function fishing.Start()
         end
     end)
     
-    -- FISH CAUGHT
+    -- FISH CAUGHT - Instant recast
     fishing.Connections.Catch = RE_FishCaught.OnClientEvent:Connect(function(name, data)
         if not fishing.Running then return end
         
         fishing.WaitingForHook = false
         fishing.TotalFish += 1
         
-        local weight = data and data.Weight or 0
-        log("🐟 #" .. fishing.TotalFish .. ": " .. tostring(name) .. " (" .. string.format("%.1f", weight) .. "kg)")
+        if fishing.TotalFish % 5 == 0 then
+            local weight = data and data.Weight or 0
+            log("🐟 #" .. fishing.TotalFish .. ": " .. tostring(name) .. " (" .. string.format("%.1f", weight) .. "kg)")
+        end
         
-        task.wait(fishing.Settings.ResetDelay)
+        -- MINIMAL DELAY untuk instant recast
+        task.wait(fishing.Settings.ResetDelay * 0.5)
         
-        pcall(function()
-            RF_CancelFishingInputs:InvokeServer()
+        task.spawn(function()
+            pcall(function()
+                RF_CancelFishingInputs:InvokeServer()
+            end)
         end)
         
         task.wait(fishing.Settings.CastDelay)
@@ -262,17 +288,28 @@ function fishing.Start()
         end
     end)
     
-    -- ANIM KILLER
-    fishing.Connections.Anim = RunService.Heartbeat:Connect(function()
-        if fishing.Running then
-            killAnims()
-        end
-    end)
+    -- AGGRESSIVE ANIM KILLER
+    if fishing.Settings.SkipAnimations then
+        fishing.Connections.Anim = RunService.Heartbeat:Connect(function()
+            if fishing.Running then
+                killAnims()
+            end
+        end)
+    end
     
-    log("✅ Started!")
+    log("✅ PREMIUM MODE ACTIVE!")
+    log("⚙️ Aggressive: " .. tostring(fishing.Settings.AggressiveMode))
+    log("⚙️ InstantPull: " .. tostring(fishing.Settings.InstantPull))
+    
+    -- Start spam loop if enabled
+    if fishing.Settings.ParallelCasts then
+        task.spawn(function()
+            fishing.SpamCastLoop()
+        end)
+    end
     
     -- First cast
-    task.wait(0.1)
+    task.wait(0.05)
     if fishing.Running then
         fishing.DoCast()
     end
@@ -292,7 +329,7 @@ function fishing.Stop()
     end
     fishing.Connections = {}
     
-    log("🛑 Stopped | Fish: " .. fishing.TotalFish .. " | Avg srv: " .. string.format("%.0f", fishing.AverageServerDelay * 1000) .. "ms")
+    log("🛑 STOPPED | Total Fish: " .. fishing.TotalFish)
 end
 
 function fishing.UpdateSettings(new)
@@ -304,8 +341,37 @@ function fishing.UpdateSettings(new)
     end
 end
 
-function fishing.GetSettings()
-    return fishing.Settings
+function fishing.SetPreset(preset)
+    if preset == "ULTRA_FAST" then
+        fishing.Settings.CastDelay = 0.001
+        fishing.Settings.ResetDelay = 0.02
+        fishing.Settings.ChargeHoldTime = 0
+        fishing.Settings.PreMinigameDelay = 0
+        fishing.Settings.PostMinigameWait = 0.01
+        fishing.Settings.InstantPull = true
+        fishing.Settings.AggressiveMode = true
+        log("🔥 ULTRA FAST preset activated!")
+        
+    elseif preset == "SPAM" then
+        fishing.Settings.CastDelay = 0
+        fishing.Settings.ResetDelay = 0.01
+        fishing.Settings.ChargeHoldTime = 0
+        fishing.Settings.PreMinigameDelay = 0
+        fishing.Settings.PostMinigameWait = 0
+        fishing.Settings.ParallelCasts = true
+        fishing.Settings.InstantPull = true
+        log("💥 SPAM preset activated!")
+        
+    elseif preset == "SAFE" then
+        fishing.Settings.CastDelay = 0.05
+        fishing.Settings.ResetDelay = 0.1
+        fishing.Settings.ChargeHoldTime = 0.001
+        fishing.Settings.PreMinigameDelay = 0.001
+        fishing.Settings.PostMinigameWait = 0.05
+        fishing.Settings.ParallelCasts = false
+        fishing.Settings.InstantPull = false
+        log("🛡️ SAFE preset activated!")
+    end
 end
 
 function fishing.GetStats()
@@ -313,9 +379,11 @@ function fishing.GetStats()
         Running = fishing.Running,
         TotalFish = fishing.TotalFish,
         CurrentCycle = fishing.CurrentCycle,
-        WaitingForHook = fishing.WaitingForHook,
-        AverageServerDelay = fishing.AverageServerDelay,
+        FishPerMinute = fishing.TotalFish > 0 and (fishing.TotalFish / ((tick() - (fishing.StartTime or tick())) / 60)) or 0,
     }
 end
+
+-- Set start time
+fishing.StartTime = tick()
 
 return fishing
