@@ -863,10 +863,10 @@ makeSlider(pnl2,"Charge time",0.01,5.0,0.19,function(v) instant2x.Settings.Charg
 makeSlider(pnl2,"Post cast delay",0.01,5.0,0.19,function(v) instant2x.Settings.PostCastDelay=v end)
 makeSlider(pnl2,"Anim Disable",0.01,5.0,0.19,function(v) instant2x.Settings.AnimDisableInterval=v end)
 
-makeSlider(pnl2,"Trothle trehold",0.01,5.0,0.19,function(v) instant2x.Settings.ThrottleThreshold=v end)
-makeSlider(pnl2,"T Delay",0.01,5.0,0.19,function(v) instant2x.Settings.ThrottleDelay=v end)
-makeSlider(pnl2,"t cooldown",0.01,5.0,0.19,function(v) instant2x.Settings.ThrottleCooldown=v end)
-makeSlider(pnl2,"FastCastWindow",0.01,5.0,0.19,function(v) instant2x.Settings.FastCastWindow=v end)
+makeSlider(pnl2,"Sync cast treshold",0.01,5.0,0.19,function(v) instant2x.Settings.SyncCastThreshold=v end)
+makeSlider(pnl2,"Micro Sync Delay",0.01,5.0,0.19,function(v) instant2x.Settings.MicroSyncDelay=v end)
+makeSlider(pnl2,"Slow Hook Threshold",0.01,5.0,0.19,function(v) instant2x.Settings.SlowHookThreshold=v end)
+makeSlider(pnl2,"Fast Hook Threshold",0.01,5.0,0.19,function(v) instant2x.Settings.FastHookThreshold=v end)
 
 
 
@@ -1313,6 +1313,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
