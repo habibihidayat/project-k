@@ -1,4 +1,4 @@
--- ⚡ ULTRA SPEED AUTO FISHING v34.0 (Adaptive Anti-Throttle)
+-- ⚡ ULTRA SPEED AUTO FISHING v35.0 (Perfect Sync - Anti Jeda)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
@@ -23,7 +23,6 @@ local RE_FishingCompleted = netFolder:WaitForChild("RE/FishingCompleted")
 local RE_MinigameChanged = netFolder:WaitForChild("RE/FishingMinigameChanged")
 local RE_FishCaught = netFolder:WaitForChild("RE/FishCaught")
 
--- Adaptive throttle detection
 local fishing = {
     Running = false,
     State = "idle",
@@ -32,26 +31,28 @@ local fishing = {
     Connections = {},
     MainLoop = nil,
     
-    -- Throttle detection
-    ConsecutiveFast = 0,  -- Counter ikan cepat berturut-turut
-    LastCastTime = 0,
-    LastHookTime = 0,
-    IsThrottled = false,  -- Apakah server sedang throttle
+    -- Advanced timing
+    ConsecutiveCasts = 0,      -- Jumlah cast berturut-turut
+    LastFishTime = 0,           -- Waktu ikan terakhir ditangkap
+    AverageHookTime = 1.0,      // Rolling average hook time
+    RecentHookTimes = {},       // Track 5 hook times terakhir
+    NeedSync = false,           // Apakah perlu sync pause
     
     Settings = {
         FishingDelay = 0.002,
         CancelDelay = 0.08,
         HookDetectionDelay = 0.01,
-        MaxWaitTime = 1.2,
-        ChargeDelay = 0.02,
-        PostCastDelay = 0.03,
+        MaxWaitTime = 1.3,
+        ChargeDelay = 0.025,
+        PostCastDelay = 0.04,
         AnimDisableInterval = 0.08,
         
-        -- Adaptive settings
-        ThrottleThreshold = 3,      -- Setelah X ikan cepat, expect throttle
-        ThrottleDelay = 0.15,       // Extra delay saat throttled
-        ThrottleCooldown = 2.0,     -- Waktu tunggu sebelum reset throttle
-        FastCastWindow = 1.5,       -- Window untuk "fast" fish (detik)
+        -- Anti-jeda settings
+        SyncCastThreshold = 3,      // Setiap 3 cast, cek sync
+        MicroSyncDelay = 0.12,      // Micro delay untuk sync
+        SlowHookThreshold = 1.8,    // Jika hook > 1.8s, mode slow
+        FastHookThreshold = 1.0,    // Jika hook < 1.0s, mode fast
+        AdaptiveBoost = true,       // Enable adaptive timing
     }
 }
 
@@ -78,7 +79,7 @@ local function ensureRodEquipped()
             pcall(function()
                 Humanoid:EquipTool(rod)
             end)
-            task.wait(0.01)
+            task.wait(0.015)
             return isRodReady()
         end
     end
@@ -108,42 +109,54 @@ local function disableFishingAnim()
     end)
 end
 
--- Detect if server is throttling
-local function updateThrottleStatus()
-    local currentTime = tick()
-    local timeSinceCast = currentTime - fishing.LastCastTime
+-- Calculate rolling average hook time
+local function updateAverageHookTime(hookTime)
+    table.insert(fishing.RecentHookTimes, hookTime)
     
-    -- Jika sudah lama sejak cast terakhir, reset counter
-    if timeSinceCast > fishing.Settings.ThrottleCooldown then
-        fishing.ConsecutiveFast = 0
-        fishing.IsThrottled = false
-        log("🔄 Throttle reset")
-        return
+    -- Keep only last 5
+    if #fishing.RecentHookTimes > 5 then
+        table.remove(fishing.RecentHookTimes, 1)
     end
     
-    -- Check apakah hook cepat atau lambat
-    if fishing.LastHookTime > 0 then
-        local hookDelay = fishing.LastHookTime - fishing.LastCastTime
-        
-        if hookDelay < fishing.Settings.FastCastWindow then
-            -- Hook cepat
-            fishing.ConsecutiveFast += 1
-            
-            -- Jika sudah X kali cepat, predict throttle
-            if fishing.ConsecutiveFast >= fishing.Settings.ThrottleThreshold then
-                fishing.IsThrottled = true
-                log("⚠️ Server throttle detected - adaptive mode")
-            end
-        else
-            -- Hook lambat, server mungkin throttling
-            if fishing.ConsecutiveFast > 0 then
-                fishing.IsThrottled = true
-            end
-        end
+    -- Calculate average
+    local sum = 0
+    for _, time in ipairs(fishing.RecentHookTimes) do
+        sum = sum + time
     end
+    fishing.AverageHookTime = sum / #fishing.RecentHookTimes
 end
 
--- Main casting function dengan adaptive delay
+-- Adaptive sync check - KEY FEATURE
+local function needsSyncPause()
+    -- Setiap X cast, beri micro pause untuk server sync
+    if fishing.ConsecutiveCasts > 0 and fishing.ConsecutiveCasts % fishing.Settings.SyncCastThreshold == 0 then
+        return true
+    end
+    
+    -- Jika average hook time naik drastis, server mulai slow
+    if fishing.AverageHookTime > fishing.Settings.SlowHookThreshold then
+        return true
+    end
+    
+    return false
+end
+
+-- Get adaptive delay based on recent performance
+local function getAdaptiveDelay()
+    if not fishing.Settings.AdaptiveBoost then
+        return 0
+    end
+    
+    -- Jika hook time rata-rata lambat, tambah delay
+    if fishing.AverageHookTime > fishing.Settings.SlowHookThreshold then
+        return fishing.Settings.MicroSyncDelay * 1.5
+    elseif fishing.AverageHookTime > fishing.Settings.FastHookThreshold then
+        return fishing.Settings.MicroSyncDelay
+    end
+    
+    return 0
+end
+
 local function performCast()
     if fishing.State ~= "idle" then return false end
     
@@ -152,28 +165,38 @@ local function performCast()
         return false
     end
     
-    -- ADAPTIVE DELAY - Jika server throttle, tunggu lebih lama
-    if fishing.IsThrottled then
-        log("⏳ Throttle delay...")
-        task.wait(fishing.Settings.ThrottleDelay)
+    -- ANTI-JEDA: Micro sync pause setiap beberapa cast
+    if needsSyncPause() then
+        local syncDelay = getAdaptiveDelay()
+        log("⏸️ Sync pause (" .. string.format("%.2f", syncDelay) .. "s)")
+        task.wait(syncDelay)
+        fishing.ConsecutiveCasts = 0  -- Reset counter
     end
     
     fishing.State = "casting"
     fishing.CurrentCycle += 1
-    fishing.LastCastTime = tick()
+    fishing.ConsecutiveCasts += 1
+    local castStartTime = tick()
     
     local cycleNum = fishing.CurrentCycle
-    local throttleIndicator = fishing.IsThrottled and " [THROTTLED]" or ""
-    log("⚡ Cast #" .. cycleNum .. throttleIndicator)
+    local avgInfo = string.format(" [Avg: %.2fs]", fishing.AverageHookTime)
+    log("⚡ Cast #" .. cycleNum .. avgInfo)
     
     disableFishingAnim()
     
     local success = pcall(function()
         local timestamp = tick()
         
-        local chargeOK = pcall(function()
-            RF_ChargeFishingRod:InvokeServer({[1] = timestamp})
-        end)
+        -- Charge with retry
+        local chargeAttempts = 0
+        local chargeOK = false
+        repeat
+            chargeAttempts += 1
+            chargeOK = pcall(function()
+                RF_ChargeFishingRod:InvokeServer({[1] = timestamp})
+            end)
+            if not chargeOK then task.wait(0.01) end
+        until chargeOK or chargeAttempts >= 2
         
         if not chargeOK then
             fishing.State = "idle"
@@ -182,14 +205,23 @@ local function performCast()
         
         task.wait(fishing.Settings.ChargeDelay)
         
+        -- Double check rod
         if not isRodReady() then
+            log("⚠️ Rod lost")
             fishing.State = "idle"
             return
         end
         
-        local minigameOK = pcall(function()
-            RF_RequestMinigame:InvokeServer(1, 0, timestamp)
-        end)
+        -- Request minigame with retry
+        local minigameAttempts = 0
+        local minigameOK = false
+        repeat
+            minigameAttempts += 1
+            minigameOK = pcall(function()
+                RF_RequestMinigame:InvokeServer(1, 0, timestamp)
+            end)
+            if not minigameOK then task.wait(0.01) end
+        until minigameOK or minigameAttempts >= 2
         
         if not minigameOK then
             fishing.State = "idle"
@@ -199,15 +231,16 @@ local function performCast()
         task.wait(fishing.Settings.PostCastDelay)
         
         fishing.State = "waiting"
+        fishing.LastCastTime = castStartTime
         log("🎯 Hook #" .. cycleNum)
         
-        -- Adaptive timeout - lebih lama jika throttled
-        local timeoutDuration = fishing.Settings.MaxWaitTime
-        if fishing.IsThrottled then
-            timeoutDuration = timeoutDuration * 1.5  -- 50% lebih lama
+        -- Adaptive timeout based on average
+        local adaptiveTimeout = fishing.Settings.MaxWaitTime
+        if fishing.AverageHookTime > fishing.Settings.SlowHookThreshold then
+            adaptiveTimeout = adaptiveTimeout * 1.4
         end
         
-        task.delay(timeoutDuration, function()
+        task.delay(adaptiveTimeout, function()
             if fishing.State == "waiting" and fishing.Running then
                 log("⏰ Timeout #" .. cycleNum)
                 fishing.State = "pulling"
@@ -223,9 +256,6 @@ local function performCast()
                 
                 task.wait(fishing.Settings.FishingDelay)
                 fishing.State = "idle"
-                
-                -- Update throttle status
-                updateThrottleStatus()
             end
         end)
     end)
@@ -240,7 +270,7 @@ local function performCast()
 end
 
 local function mainFishingLoop()
-    log("🔄 Adaptive loop started")
+    log("🔄 Perfect sync loop started")
     
     while fishing.Running do
         if fishing.State == "idle" then
@@ -260,12 +290,12 @@ function fishing.Start()
     fishing.State = "idle"
     fishing.CurrentCycle = 0
     fishing.TotalFish = 0
-    fishing.ConsecutiveFast = 0
-    fishing.IsThrottled = false
-    fishing.LastCastTime = 0
-    fishing.LastHookTime = 0
+    fishing.ConsecutiveCasts = 0
+    fishing.LastFishTime = 0
+    fishing.AverageHookTime = 1.0
+    fishing.RecentHookTimes = {}
 
-    log("🚀 ADAPTIVE FISHING START!")
+    log("🚀 PERFECT SYNC FISHING!")
     
     if not ensureRodEquipped() then
         log("❌ No rod!")
@@ -287,9 +317,11 @@ function fishing.Start()
                string.find(stateLower, "reel") or
                string.find(stateLower, "!") then
                 
+                local hookTime = tick() - fishing.LastCastTime
+                updateAverageHookTime(hookTime)
+                
                 fishing.State = "pulling"
-                fishing.LastHookTime = tick()
-                log("🎣 HOOK!")
+                log("🎣 HOOK! (" .. string.format("%.2fs", hookTime) .. ")")
                 
                 pcall(function()
                     RE_FishingCompleted:FireServer()
@@ -303,10 +335,6 @@ function fishing.Start()
                 end)
                 
                 task.wait(fishing.Settings.FishingDelay)
-                
-                -- Update throttle status
-                updateThrottleStatus()
-                
                 fishing.State = "idle"
             end
         end
@@ -317,9 +345,10 @@ function fishing.Start()
         
         if fishing.State == "waiting" or fishing.State == "pulling" then
             fishing.TotalFish += 1
+            fishing.LastFishTime = tick()
+            
             local weight = data and data.Weight or 0
-            local throttleInfo = fishing.IsThrottled and " [T]" or ""
-            log("🐟 #" .. fishing.TotalFish .. ": " .. tostring(name) .. " (" .. string.format("%.1f", weight) .. "kg)" .. throttleInfo)
+            log("🐟 #" .. fishing.TotalFish .. ": " .. tostring(name) .. " (" .. string.format("%.1f", weight) .. "kg)")
 
             task.wait(fishing.Settings.CancelDelay)
             pcall(function()
@@ -327,10 +356,6 @@ function fishing.Start()
             end)
             
             task.wait(fishing.Settings.FishingDelay)
-            
-            -- Update throttle status
-            updateThrottleStatus()
-            
             fishing.State = "idle"
         end
     end)
@@ -365,7 +390,7 @@ function fishing.Stop()
     end
     fishing.Connections = {}
 
-    log("🛑 STOPPED | Total: " .. fishing.TotalFish .. " fish | Fast: " .. fishing.ConsecutiveFast)
+    log("🛑 STOPPED | Fish: " .. fishing.TotalFish .. " | Avg Hook: " .. string.format("%.2fs", fishing.AverageHookTime))
 end
 
 function fishing.UpdateSettings(newSettings)
@@ -379,6 +404,17 @@ end
 
 function fishing.GetSettings()
     return fishing.Settings
+end
+
+-- Get stats untuk GUI
+function fishing.GetStats()
+    return {
+        TotalFish = fishing.TotalFish,
+        CurrentCycle = fishing.CurrentCycle,
+        AverageHookTime = fishing.AverageHookTime,
+        ConsecutiveCasts = fishing.ConsecutiveCasts,
+        State = fishing.State
+    }
 end
 
 return fishing
