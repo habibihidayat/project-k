@@ -1,4 +1,4 @@
--- ⚡ ULTRA SPEED AUTO FISHING v36.0 (Perfect Cast + Anti Jeda)
+-- ⚡ ULTRA SPEED AUTO FISHING v37.0 (Auto-Calibrating Perfect Cast)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
@@ -31,12 +31,17 @@ local fishing = {
     Connections = {},
     MainLoop = nil,
     
-    -- Perfect cast tracking
-    PerfectCasts = 0,
-    GoodCasts = 0,
-    OkCasts = 0,
+    -- Cast quality tracking
+    CastQualities = {},  -- Store recent cast qualities
+    LastCastQuality = "unknown",
     
-    -- Timing system
+    -- Auto-calibration
+    CalibrationMode = true,
+    TestTimings = {1.2, 1.1, 1.0, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7},  -- Test these timings
+    CurrentTestIndex = 1,
+    BestTiming = 1.0,
+    
+    -- Timing
     ConsecutiveCasts = 0,
     LastFishTime = 0,
     AverageHookTime = 1.0,
@@ -49,12 +54,10 @@ local fishing = {
         MaxWaitTime = 1.3,
         AnimDisableInterval = 0.08,
         
-        -- PERFECT CAST TIMING - Key settings
-        PerfectChargeTime = 0.95,      -- Waktu charge optimal untuk PERFECT (0.9-1.0s biasanya)
-        ChargeVariance = 0.05,         -- Variance untuk natural feeling
-        PerfectCastMode = true,        -- Enable perfect cast timing
-        
-        PostChargeDelay = 0.02,        -- Delay setelah charge sebelum request
+        -- Perfect cast settings - Will be auto-calibrated
+        ChargeTime = 1.0,              -- Start at 1.0s
+        UseAutoCalibration = true,     // Enable auto-find perfect timing
+        PostChargeDelay = 0.02,
         PostCastDelay = 0.04,
         
         -- Anti-jeda
@@ -119,18 +122,63 @@ local function disableFishingAnim()
     end)
 end
 
--- Calculate perfect charge time with slight variance
-local function getPerfectChargeTime()
-    if not fishing.Settings.PerfectCastMode then
-        return 0.025
+-- Auto-calibration system
+local function updateCalibration(quality)
+    if not fishing.Settings.UseAutoCalibration then return end
+    if not fishing.CalibrationMode then return end
+    
+    table.insert(fishing.CastQualities, {
+        timing = fishing.Settings.ChargeTime,
+        quality = quality
+    })
+    
+    log("📊 Calibration: " .. fishing.Settings.ChargeTime .. "s = " .. quality)
+    
+    -- If we got PERFECT, lock this timing!
+    if quality == "Perfect" or quality == "perfect" or quality == "PERFECT" then
+        fishing.BestTiming = fishing.Settings.ChargeTime
+        fishing.CalibrationMode = false
+        log("✅ PERFECT timing found: " .. fishing.BestTiming .. "s")
+        log("🔒 Calibration locked!")
+        return
     end
     
-    -- Add small random variance untuk natural feeling (-0.05 to +0.05)
-    local variance = (math.random() - 0.5) * 2 * fishing.Settings.ChargeVariance
-    local chargeTime = fishing.Settings.PerfectChargeTime + variance
-    
-    -- Clamp antara 0.85 - 1.05 detik (sweet spot untuk perfect)
-    return math.clamp(chargeTime, 0.85, 1.05)
+    -- Try next timing
+    if #fishing.CastQualities >= 2 then  -- Test each timing 2 times
+        fishing.CurrentTestIndex += 1
+        
+        if fishing.CurrentTestIndex > #fishing.TestTimings then
+            -- Finished testing all timings, find best
+            fishing.CalibrationMode = false
+            
+            -- Find timing with best quality
+            local bestScore = -1
+            for _, data in ipairs(fishing.CastQualities) do
+                local score = 0
+                if data.quality == "Perfect" or data.quality == "perfect" then
+                    score = 3
+                elseif data.quality == "Good" or data.quality == "good" then
+                    score = 2
+                elseif data.quality == "Ok" or data.quality == "ok" then
+                    score = 1
+                end
+                
+                if score > bestScore then
+                    bestScore = score
+                    fishing.BestTiming = data.timing
+                end
+            end
+            
+            fishing.Settings.ChargeTime = fishing.BestTiming
+            log("✅ Best timing found: " .. fishing.BestTiming .. "s")
+            log("🔒 Using optimized timing")
+        else
+            -- Set next test timing
+            fishing.Settings.ChargeTime = fishing.TestTimings[fishing.CurrentTestIndex]
+            fishing.CastQualities = {}  -- Reset for new timing test
+            log("🔄 Testing next timing: " .. fishing.Settings.ChargeTime .. "s")
+        end
+    end
 end
 
 local function updateAverageHookTime(hookTime)
@@ -156,9 +204,7 @@ local function needsSyncPause()
 end
 
 local function getAdaptiveDelay()
-    if not fishing.Settings.AdaptiveBoost then
-        return 0
-    end
+    if not fishing.Settings.AdaptiveBoost then return 0 end
     if fishing.AverageHookTime > fishing.Settings.SlowHookThreshold then
         return fishing.Settings.MicroSyncDelay * 1.5
     elseif fishing.AverageHookTime > fishing.Settings.FastHookThreshold then
@@ -167,8 +213,7 @@ local function getAdaptiveDelay()
     return 0
 end
 
--- PERFECT CAST SYSTEM
-local function performPerfectCast()
+local function performCast()
     if fishing.State ~= "idle" then return false end
     
     if not ensureRodEquipped() then
@@ -176,7 +221,6 @@ local function performPerfectCast()
         return false
     end
     
-    -- Anti-jeda sync pause
     if needsSyncPause() then
         local syncDelay = getAdaptiveDelay()
         log("⏸️ Sync (" .. string.format("%.2f", syncDelay) .. "s)")
@@ -190,55 +234,42 @@ local function performPerfectCast()
     local castStartTime = tick()
     
     local cycleNum = fishing.CurrentCycle
-    log("⚡ Cast #" .. cycleNum .. " [PERFECT MODE]")
+    local modeText = fishing.CalibrationMode and "[CALIBRATING]" or "[OPTIMIZED]"
+    log("⚡ Cast #" .. cycleNum .. " " .. modeText .. " @ " .. string.format("%.2f", fishing.Settings.ChargeTime) .. "s")
     
     disableFishingAnim()
     
     local success = pcall(function()
-        -- PERFECT CAST SEQUENCE
         local chargeStartTime = tick()
         
-        -- Calculate perfect charge time
-        local perfectCharge = getPerfectChargeTime()
-        log("⏱️ Charging for " .. string.format("%.3f", perfectCharge) .. "s")
-        
-        -- Start charging
+        -- Start charge
         local chargeOK = pcall(function()
             RF_ChargeFishingRod:InvokeServer({[1] = chargeStartTime})
         end)
         
         if not chargeOK then
-            log("❌ Charge failed")
             fishing.State = "idle"
             return
         end
         
-        -- WAIT PERFECT DURATION - Ini yang menentukan PERFECT cast!
-        task.wait(perfectCharge)
-        
-        -- Small delay untuk stabilitas
+        -- WAIT EXACT CHARGE TIME
+        task.wait(fishing.Settings.ChargeTime)
         task.wait(fishing.Settings.PostChargeDelay)
         
-        -- Double check rod masih ready
         if not isRodReady() then
-            log("⚠️ Rod lost during charge")
             fishing.State = "idle"
             return
         end
         
-        -- Request minigame dengan timestamp yang SAMA dari charge
-        -- Ini penting agar server tahu berapa lama kita charge
+        -- Request minigame
         local minigameOK = pcall(function()
             RF_RequestMinigame:InvokeServer(1, 0, chargeStartTime)
         end)
         
         if not minigameOK then
-            log("❌ Minigame request failed")
             fishing.State = "idle"
             return
         end
-        
-        log("✓ Perfect cast executed!")
         
         task.wait(fishing.Settings.PostCastDelay)
         
@@ -246,7 +277,6 @@ local function performPerfectCast()
         fishing.LastCastTime = castStartTime
         log("🎯 Waiting hook #" .. cycleNum)
         
-        -- Adaptive timeout
         local adaptiveTimeout = fishing.Settings.MaxWaitTime
         if fishing.AverageHookTime > fishing.Settings.SlowHookThreshold then
             adaptiveTimeout = adaptiveTimeout * 1.4
@@ -273,7 +303,6 @@ local function performPerfectCast()
     end)
     
     if not success then
-        log("❌ Cast execution failed")
         fishing.State = "idle"
         return false
     end
@@ -282,18 +311,16 @@ local function performPerfectCast()
 end
 
 local function mainFishingLoop()
-    log("🔄 Perfect cast loop started")
+    log("🔄 Auto-calibrating loop started")
     
     while fishing.Running do
         if fishing.State == "idle" then
-            performPerfectCast()
+            performCast()
             task.wait(0.01)
         else
             task.wait(0.05)
         end
     end
-    
-    log("🔄 Loop ended")
 end
 
 function fishing.Start()
@@ -303,15 +330,18 @@ function fishing.Start()
     fishing.CurrentCycle = 0
     fishing.TotalFish = 0
     fishing.ConsecutiveCasts = 0
-    fishing.PerfectCasts = 0
-    fishing.GoodCasts = 0
-    fishing.OkCasts = 0
     fishing.LastFishTime = 0
     fishing.AverageHookTime = 1.0
     fishing.RecentHookTimes = {}
+    fishing.CastQualities = {}
+    fishing.CurrentTestIndex = 1
+    fishing.CalibrationMode = fishing.Settings.UseAutoCalibration
+    fishing.Settings.ChargeTime = fishing.TestTimings[1]
 
-    log("🚀 PERFECT CAST FISHING START!")
-    log("🎯 Target charge: " .. fishing.Settings.PerfectChargeTime .. "s ±" .. fishing.Settings.ChargeVariance .. "s")
+    log("🚀 AUTO-CALIBRATING FISHING START!")
+    if fishing.CalibrationMode then
+        log("🔍 Testing timings: " .. table.concat(fishing.TestTimings, "s, ") .. "s")
+    end
     
     if not ensureRodEquipped() then
         log("❌ No rod!")
@@ -365,18 +395,21 @@ function fishing.Start()
             
             local weight = data and data.Weight or 0
             
-            -- Track cast quality (jika ada info dari data)
-            local quality = data and data.CastQuality or "unknown"
-            if quality == "perfect" or quality == "Perfect" then
-                fishing.PerfectCasts += 1
-            elseif quality == "good" or quality == "Good" then
-                fishing.GoodCasts += 1
-            elseif quality == "ok" or quality == "Ok" then
-                fishing.OkCasts += 1
+            -- Detect cast quality from data
+            local quality = "Unknown"
+            if data then
+                -- Try different possible field names
+                quality = data.CastQuality or data.castQuality or data.Quality or data.quality or 
+                         data.CastRating or data.castRating or data.Rating or data.rating or "Unknown"
             end
             
+            fishing.LastCastQuality = quality
+            
             log("🐟 #" .. fishing.TotalFish .. ": " .. tostring(name) .. " (" .. string.format("%.1f", weight) .. "kg)")
-            log("📊 Perfect: " .. fishing.PerfectCasts .. " | Good: " .. fishing.GoodCasts .. " | Ok: " .. fishing.OkCasts)
+            log("⭐ Cast quality: " .. tostring(quality))
+            
+            -- Update calibration with this result
+            updateCalibration(quality)
 
             task.wait(fishing.Settings.CancelDelay)
             pcall(function()
@@ -418,15 +451,12 @@ function fishing.Stop()
     end
     fishing.Connections = {}
 
-    local total = fishing.PerfectCasts + fishing.GoodCasts + fishing.OkCasts
-    local perfectRate = total > 0 and (fishing.PerfectCasts / total * 100) or 0
-    
     log("🛑 STOPPED")
-    log("📊 Cast Stats:")
-    log("   Perfect: " .. fishing.PerfectCasts .. " (" .. string.format("%.1f", perfectRate) .. "%)")
-    log("   Good: " .. fishing.GoodCasts)
-    log("   Ok: " .. fishing.OkCasts)
-    log("   Total Fish: " .. fishing.TotalFish)
+    log("📊 Calibration Results:")
+    for _, data in ipairs(fishing.CastQualities) do
+        log("   " .. data.timing .. "s = " .. data.quality)
+    end
+    log("✅ Best timing: " .. fishing.BestTiming .. "s")
 end
 
 function fishing.UpdateSettings(newSettings)
@@ -447,11 +477,10 @@ function fishing.GetStats()
         TotalFish = fishing.TotalFish,
         CurrentCycle = fishing.CurrentCycle,
         AverageHookTime = fishing.AverageHookTime,
-        ConsecutiveCasts = fishing.ConsecutiveCasts,
         State = fishing.State,
-        PerfectCasts = fishing.PerfectCasts,
-        GoodCasts = fishing.GoodCasts,
-        OkCasts = fishing.OkCasts,
+        LastCastQuality = fishing.LastCastQuality,
+        BestTiming = fishing.BestTiming,
+        CalibrationMode = fishing.CalibrationMode,
     }
 end
 
