@@ -1075,6 +1075,24 @@ makeButton(pnlTimer, "Stop Auto Sell", function()
 	end
 end)
 
+-- ============================
+-- 📂 TAB SHOP FEATURES
+-- ============================
+
+local tab = ShopFeaturesTab  -- panel tab kamu
+local panel = makePanel(tab, "Auto Buy Weather", "Memilih & membeli cuaca otomatis.")
+
+-- Dropdown Weather
+makeDropdown(panel, "Weather Type", AutoBuyWeather.GetWeatherList(), function(selected)
+    AutoBuyWeather.SetWeather(selected)
+end)
+
+-- Toggle ON/OFF
+makeToggle(panel, "Enable Auto Buy Weather", false, function(state)
+    AutoBuyWeather.SetEnabled(state)
+end)
+
+
 -- Settings Page
 local settingsPnl = makePanel(settingsPage,"⚙️ General Settings","")
 -- 🔒 Anti-AFK Panel
@@ -1311,6 +1329,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
