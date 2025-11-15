@@ -1078,46 +1078,34 @@ makeButton(pnlTimer, "Stop Auto Sell", function()
 	end
 end)
 
--- ===== Auto Buy Weather Module Fix =====
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local localPlayer = Players.LocalPlayer
+-- === AUTO BUY WEATHER PANEL ===
+local pnlWeather = makePanel(shopPage, "🌦️ Auto Buy Weather", "")
 
--- Module atau function untuk membeli cuaca
-local WeatherModule = require(ReplicatedStorage:WaitForChild("WeatherModule"))
+-- Dropdown multi-select untuk memilih cuaca
+local selectedWeathers = {}
+local weatherDropdown = makeDropdown(pnlWeather, "Select Weathers", "☁️", AutoBuyWeather.AllWeathers, function(weather)
+    -- Toggle selection
+    local idx = table.find(selectedWeathers, weather)
+    if idx then
+        table.remove(selectedWeathers, idx)
+    else
+        table.insert(selectedWeathers, weather)
+    end
+    -- Update AutoBuyWeather module
+    AutoBuyWeather.SetSelected(selectedWeathers)
+end, "WeatherDropdown")
 
--- ===== Variabel Kontrol =====
-local selectedWeather = "Sunny"          -- default
-local autoBuyWeatherEnabled = false
-
--- ===== GUI Setup =====
-local shopPage = MainGUI.ShopPage -- ganti sesuai GUI kamu
-
--- Dropdown untuk pilih cuaca
-makeDropdown(shopPage, "Select Weather", "🌦️", WeatherModule.AllWeathers, function(weather)
-    selectedWeather = weather
-    print("[AutoBuyWeather] Selected:", weather)
-end)
-
--- Toggle untuk Auto Buy
-makeToggle(shopPage, "Auto Buy Weather", "⛅", false, function(state)
-    autoBuyWeatherEnabled = state
-    print("[AutoBuyWeather] Enabled:", state)
-end)
-
--- ===== Worker Loop =====
-task.spawn(function()
-    while true do
-        task.wait(1) -- cek setiap 1 detik
-        if autoBuyWeatherEnabled and selectedWeather then
-            pcall(function()
-                -- Panggil function beli cuaca di module
-                WeatherModule:BuyWeather(selectedWeather)
-                print("[AutoBuyWeather] Buying:", selectedWeather)
-            end)
-        end
+-- Toggle untuk mulai/stop AutoWeather
+makeSwitch(pnlWeather, "Enable Auto Weather", false, function(on)
+    if on then
+        AutoBuyWeather.Start()
+        print("🟢 AutoWeather started")
+    else
+        AutoBuyWeather.Stop()
+        print("🔴 AutoWeather stopped")
     end
 end)
+
 
 -- Settings Page
 local settingsPnl = makePanel(settingsPage,"⚙️ General Settings","")
@@ -1355,6 +1343,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
