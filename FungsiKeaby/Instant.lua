@@ -38,48 +38,68 @@ local fishing = {
     LastCastTime = 0,
     Connections = {},
     Settings = {
-        FishingDelay = 0.01,
-        CancelDelay = 0.12,
-        HookDetectionDelay = 0.005,
-        RetryDelay = 0.35,
-        MaxWaitTime = 1.0,
-        FallbackTime = 0.5, -- Lebih cepat
-        -- ⭐ HOOK SPEED OPTIMIZATION
-        CastMode = "instant",
-        ChargeTime = 0.85, -- Lebih pendek untuk hook lebih cepat
-        ReleaseDelay = 0.0001, -- Minimal delay
+        FishingDelay = 0.005,
+        CancelDelay = 0.08,
+        HookDetectionDelay = 0.001,
+        RetryDelay = 0.25,
+        MaxWaitTime = 0.8,
+        FallbackTime = 0.25, -- SANGAT CEPAT
+        -- ⭐ EXTREME HOOK SPEED OPTIMIZATION
+        CastMode = "hyper",
+        ChargeTime = 0.5, -- MINIMAL untuk hook tercepat
+        ReleaseDelay = 0, -- ZERO DELAY
         PreHookCall = true, -- Panggil minigame sebelum charge selesai
         MultipleMinigameCalls = true, -- Panggil minigame berkali-kali
+        SpamMinigame = true, -- SPAM request minigame
+        InstantCast = true, -- Cast instant tanpa charge penuh
     }
 }
 
 _G.FishingScript = fishing
 
--- Preset timing dengan fokus kecepatan hook
+-- Preset timing dengan fokus kecepatan hook MAKSIMAL
 local CAST_PRESETS = {
+    hyper = {
+        chargeTime = 0.4, -- SANGAT PENDEK!
+        releaseDelay = 0,
+        power = 0.9,
+        earlyMinigame = true,
+        spamCount = 5 -- Spam 5x
+    },
+    extreme = {
+        chargeTime = 0.5,
+        releaseDelay = 0,
+        power = 0.92,
+        earlyMinigame = true,
+        spamCount = 4
+    },
     instant = {
-        chargeTime = 0.75, -- Sangat pendek
+        chargeTime = 0.6,
         releaseDelay = 0.0001,
         power = 0.95,
-        earlyMinigame = true
+        earlyMinigame = true,
+        spamCount = 3
     },
     ultrafast = {
-        chargeTime = 0.8,
+        chargeTime = 0.75,
         releaseDelay = 0.001,
         power = 0.96,
-        earlyMinigame = true
+        earlyMinigame = true,
+        spamCount = 2
     },
     fast = {
         chargeTime = 0.85,
         releaseDelay = 0.005,
         power = 0.97,
-        earlyMinigame = false
+        earlyMinigame = false,
+        spamCount = 1
     },
     perfect = {
         chargeTime = 1.0,
         releaseDelay = 0.001,
         power = 1,
-        earlyMinigame = false
+        earlyMinigame = false,
+        spamCount = 1
     }
 }
 
@@ -133,40 +153,45 @@ local function forceResetState()
     end)
 end
 
--- ⚡ AGGRESSIVE MINIGAME CALLER - Panggil berkali-kali untuk hook lebih cepat
-local function aggressiveMinigameCall(power, releaseTime)
-    if not fishing.Settings.MultipleMinigameCalls then
-        RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
-        return
+-- ⚡ EXTREME MINIGAME SPAM - Panggil berkali-kali untuk hook SUPER CEPAT
+local function aggressiveMinigameCall(power, releaseTime, spamCount)
+    spamCount = spamCount or 3
+    
+    -- Strategi 1: INSTANT SPAM - Panggil berkali-kali tanpa delay
+    for i = 1, spamCount do
+        task.spawn(function()
+            pcall(function()
+                RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
+            end)
+        end)
     end
     
-    -- Strategi 1: Panggil segera
-    task.spawn(function()
-        pcall(function()
-            RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
+    -- Strategi 2: Delayed spam dengan interval super cepat
+    for i = 1, spamCount do
+        task.delay(i * 0.02, function() -- Setiap 0.02s
+            if fishing.WaitingHook then
+                pcall(function()
+                    RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
+                end)
+            end
         end)
-    end)
+    end
     
-    -- Strategi 2: Panggil lagi setelah delay minimal
-    task.delay(0.05, function()
-        if fishing.WaitingHook then
-            pcall(function()
-                RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
-            end)
-        end
-    end)
-    
-    -- Strategi 3: Panggil sekali lagi untuk memastikan
-    task.delay(0.1, function()
-        if fishing.WaitingHook then
-            pcall(function()
-                RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
-            end)
-        end
-    end)
+    -- Strategi 3: Continuous spam selama 0.2 detik
+    if fishing.Settings.SpamMinigame then
+        local spamStart = tick()
+        task.spawn(function()
+            while fishing.WaitingHook and (tick() - spamStart) < 0.2 do
+                pcall(function()
+                    RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
+                end)
+                task.wait(0.01) -- Spam setiap 0.01s
+            end
+        end)
+    end
 end
 
--- Fungsi cast dengan ULTRA FAST HOOK optimization
+-- Fungsi cast dengan EXTREME SPEED optimization
 function fishing.Cast()
     if not fishing.Running or fishing.WaitingHook then return end
 
@@ -175,71 +200,87 @@ function fishing.Cast()
     fishing.CurrentCycle += 1
     fishing.LastCastTime = tick()
     
-    local preset = CAST_PRESETS[fishing.Settings.CastMode] or CAST_PRESETS.instant
+    local preset = CAST_PRESETS[fishing.Settings.CastMode] or CAST_PRESETS.hyper
     log("⚡ Cast #" .. fishing.CurrentCycle .. " [Mode: " .. fishing.Settings.CastMode:upper() .. "]")
 
     local castSuccess = pcall(function()
         local startTime = tick()
         
-        -- Strategy 1: Charge dengan timing minimal
+        -- Strategy 1: Charge dengan timing MINIMAL
         local chargeData = {[1] = startTime}
         RF_ChargeFishingRod:InvokeServer(chargeData)
         
-        -- ⚡ EARLY MINIGAME CALL - Panggil SEBELUM charge selesai jika enabled
+        -- ⚡ INSTANT MINIGAME SPAM - Panggil SEGERA tanpa nunggu charge!
+        if fishing.Settings.InstantCast then
+            task.spawn(function()
+                task.wait(0.05) -- Delay minimal
+                local instantTime = tick()
+                aggressiveMinigameCall(preset.power, instantTime, preset.spamCount)
+                log("⚡ INSTANT minigame spam!")
+            end)
+        end
+        
+        -- ⚡ EARLY MINIGAME CALL - Panggil saat 40% charge (lebih awal!)
         if preset.earlyMinigame and fishing.Settings.PreHookCall then
-            task.delay(preset.chargeTime * 0.6, function()
+            task.delay(preset.chargeTime * 0.4, function()
                 if fishing.Running and not fishing.WaitingHook then
                     local earlyTime = tick()
-                    pcall(function()
-                        RF_RequestMinigame:InvokeServer(preset.power, 0, earlyTime)
-                        log("🎯 Early minigame call!")
-                    end)
+                    aggressiveMinigameCall(preset.power, earlyTime, preset.spamCount)
+                    log("🎯 Early spam (40%)!")
                 end
             end)
         end
         
-        -- Strategy 2: Wait minimal dengan RenderStepped untuk timing tercepat
+        -- Strategy 2: ZERO wait time jika hyper mode
         local elapsed = 0
         local targetTime = preset.chargeTime
-        local connection
         
-        connection = RunService.RenderStepped:Connect(function()
-            elapsed = tick() - startTime
-            if elapsed >= targetTime or not fishing.Running then
-                connection:Disconnect()
-            end
-        end)
+        if fishing.Settings.CastMode == "hyper" or fishing.Settings.CastMode == "extreme" then
+            -- Hyper mode: minimal wait
+            task.wait(targetTime)
+        else
+            -- Normal mode: precise timing
+            local connection
+            connection = RunService.RenderStepped:Connect(function()
+                elapsed = tick() - startTime
+                if elapsed >= targetTime or not fishing.Running then
+                    connection:Disconnect()
+                end
+            end)
+            
+            repeat
+                task.wait()
+                elapsed = tick() - startTime
+            until elapsed >= targetTime or not fishing.Running
+            
+            if connection then connection:Disconnect() end
+        end
         
-        repeat
-            task.wait()
-            elapsed = tick() - startTime
-        until elapsed >= targetTime or not fishing.Running
+        -- Strategy 3: ZERO release delay
+        if preset.releaseDelay > 0 then
+            task.wait(preset.releaseDelay)
+        end
         
-        if connection then connection:Disconnect() end
-        
-        -- Strategy 3: Release dengan delay MINIMAL
-        task.wait(preset.releaseDelay)
-        
-        -- Strategy 4: AGGRESSIVE minigame request
+        -- Strategy 4: MASSIVE minigame spam
         local releaseTime = tick()
         local totalCharge = releaseTime - startTime
         
-        aggressiveMinigameCall(preset.power, releaseTime)
+        aggressiveMinigameCall(preset.power, releaseTime, preset.spamCount)
         
         fishing.WaitingHook = true
         log("🎯 Hooked! (Charge: " .. string.format("%.3f", totalCharge) .. "s)")
 
-        -- ⚡ ULTRA FAST FALLBACK - Lebih agresif
+        -- ⚡ HYPER FAST FALLBACK
         fishing.FallbackTask = task.delay(fishing.Settings.FallbackTime, function()
             if fishing.WaitingHook and fishing.Running then
-                log("⚡ Ultra fast reel...")
+                log("⚡ Hyper reel...")
                 pcall(function()
                     RE_FishingCompleted:FireServer()
                 end)
             end
         end)
 
-        -- Fallback 2: Force timeout
+        -- Fallback 2: Force timeout (lebih cepat)
         fishing.TimeoutTask = task.delay(fishing.Settings.MaxWaitTime, function()
             if fishing.WaitingHook and fishing.Running then
                 log("⚠️ Force timeout")
@@ -253,9 +294,9 @@ function fishing.Cast()
     end)
 
     if not castSuccess then
-        log("❌ Cast failed, quick retry...")
+        log("❌ Cast failed, instant retry...")
         forceResetState()
-        task.wait(fishing.Settings.RetryDelay * 0.5)
+        task.wait(fishing.Settings.RetryDelay)
         if fishing.Running then
             fishing.Cast()
         end
