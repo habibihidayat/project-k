@@ -1,4 +1,4 @@
--- ⚡ ULTRA SPEED AUTO FISHING v29.6 (Zero-Delay Timeout Recovery)
+-- ⚡ ULTRA SPEED AUTO FISHING v29.7 (Fixed Loop Consistency)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -30,19 +30,22 @@ local RE_FishCaught = netFolder:WaitForChild("RE/FishCaught")
 local fishing = {
     Running = false,
     WaitingHook = false,
-    IsCasting = false, -- Prevent duplicate casts
+    IsCasting = false,
+    IsResetting = false, -- NEW: Prevent concurrent resets
     CurrentCycle = 0,
     TotalFish = 0,
     LastCastTime = 0,
+    LastResetTime = 0, -- NEW: Track last reset
     TimeoutTask = nil,
     FallbackTask = nil,
     Connections = {},
     Settings = {
         FishingDelay = 0.01,
-        CancelDelay = 0.12, -- Lebih cepat
+        CancelDelay = 0.10,
         HookDetectionDelay = 0.01,
-        MaxWaitTime = 1.1, -- Timeout utama
-        FallbackTime = 0.75, // Fallback check
+        MaxWaitTime = 1.2, -- Slightly longer for stability
+        FallbackTime = 0.80, -- Fixed: was 0.75,// 
+        MinCastInterval = 0.05, -- NEW: Minimum time between casts
     }
 }
 
@@ -76,20 +79,32 @@ local function disableFishingAnim()
     end)
 end
 
--- Cleanup timeout tasks
+-- Cleanup timeout tasks (SAFE version)
 local function cleanupTimeouts()
+    -- Cancel tasks but don't interfere with their execution
     if fishing.TimeoutTask then
-        task.cancel(fishing.TimeoutTask)
+        pcall(function() task.cancel(fishing.TimeoutTask) end)
         fishing.TimeoutTask = nil
     end
     if fishing.FallbackTask then
-        task.cancel(fishing.FallbackTask)
+        pcall(function() task.cancel(fishing.FallbackTask) end)
         fishing.FallbackTask = nil
     end
 end
 
--- Force reset state (instant, no delay)
-local function forceResetState()
+-- Safe reset with debounce
+local function safeReset()
+    if fishing.IsResetting then return end
+    fishing.IsResetting = true
+    
+    local now = tick()
+    -- Prevent reset spam (minimum 50ms between resets)
+    if now - fishing.LastResetTime < 0.05 then
+        fishing.IsResetting = false
+        return
+    end
+    fishing.LastResetTime = now
+    
     cleanupTimeouts()
     fishing.WaitingHook = false
     fishing.IsCasting = false
@@ -97,13 +112,32 @@ local function forceResetState()
     pcall(function()
         RF_CancelFishingInputs:InvokeServer()
     end)
+    
+    fishing.IsResetting = false
 end
 
--- Fungsi cast dengan ZERO DELAY timeout recovery
+-- Scheduled cast (prevents immediate double-casting)
+local function scheduleCast(delay)
+    delay = delay or 0.01
+    task.delay(delay, function()
+        if fishing.Running and not fishing.WaitingHook and not fishing.IsCasting then
+            fishing.Cast()
+        end
+    end)
+end
+
+-- Fungsi cast dengan PROPER state management
 function fishing.Cast()
-    -- Prevent duplicate casts
-    if not fishing.Running or fishing.WaitingHook or fishing.IsCasting then 
-        return 
+    -- Multi-layer prevention
+    if not fishing.Running then return end
+    if fishing.WaitingHook then return end
+    if fishing.IsCasting then return end
+    if fishing.IsResetting then return end
+    
+    -- Debounce: minimum interval between casts
+    local now = tick()
+    if now - fishing.LastCastTime < fishing.Settings.MinCastInterval then
+        return
     end
 
     fishing.IsCasting = true
@@ -125,60 +159,50 @@ function fishing.Cast()
         fishing.IsCasting = false
         log("🎯 Hooked!")
 
-        -- ⚡ ZERO-DELAY TIMEOUT SYSTEM
-        -- Fallback 1: Quick check (gentle)
+        -- Fallback 1: Gentle quick reel
         fishing.FallbackTask = task.delay(fishing.Settings.FallbackTime, function()
-            if fishing.WaitingHook and fishing.Running then
-                log("⚡ Quick reel")
-                pcall(function()
-                    RE_FishingCompleted:FireServer()
-                end)
-            end
+            if not fishing.WaitingHook or not fishing.Running then return end
+            
+            log("⚡ Quick reel")
+            pcall(function()
+                RE_FishingCompleted:FireServer()
+            end)
         end)
 
-        -- Fallback 2: Hard timeout with INSTANT retry
+        -- Fallback 2: Hard timeout with SAFE recovery
         fishing.TimeoutTask = task.delay(fishing.Settings.MaxWaitTime, function()
-            if fishing.WaitingHook and fishing.Running then
-                log("⏰ Timeout - instant retry")
-                
-                -- Instant reset (NO DELAYS)
-                cleanupTimeouts()
-                fishing.WaitingHook = false
-                fishing.IsCasting = false
-                
-                -- Fire completion tanpa menunggu response
-                pcall(function()
-                    RE_FishingCompleted:FireServer()
-                end)
-                
-                -- Cancel inputs tanpa menunggu
-                pcall(function()
-                    RF_CancelFishingInputs:InvokeServer()
-                end)
-                
-                -- INSTANT re-cast (NO task.wait)
-                if fishing.Running then
-                    fishing.Cast()
-                end
-            end
+            if not fishing.WaitingHook or not fishing.Running then return end
+            
+            log("⏰ Timeout recovery")
+            
+            -- Fire completion
+            pcall(function()
+                RE_FishingCompleted:FireServer()
+            end)
+            
+            -- Small delay to let server respond
+            task.wait(0.05)
+            
+            -- Safe reset
+            safeReset()
+            
+            -- Schedule next cast (prevents immediate collision)
+            scheduleCast(0.02)
         end)
     end)
 
     if not castSuccess then
-        log("❌ Cast failed - instant retry")
+        log("❌ Cast failed")
         fishing.IsCasting = false
-        forceResetState()
-        
-        -- NO DELAY - instant retry
-        if fishing.Running then
-            fishing.Cast()
-        end
+        safeReset()
+        scheduleCast(0.1) -- Slightly longer delay on error
     end
 end
 
--- Handle catch yang lebih responsif
+-- Handle catch yang lebih safe
 local function handleCatch()
-    if not fishing.Running or not fishing.WaitingHook then return end
+    if not fishing.Running then return end
+    if not fishing.WaitingHook then return end
     
     cleanupTimeouts()
     fishing.WaitingHook = false
@@ -196,9 +220,7 @@ local function handleCatch()
     end)
     
     task.wait(fishing.Settings.FishingDelay)
-    if fishing.Running then
-        fishing.Cast()
-    end
+    scheduleCast() -- Use scheduled cast
 end
 
 -- Start / Stop Functions
@@ -208,78 +230,75 @@ function fishing.Start()
     fishing.CurrentCycle = 0
     fishing.TotalFish = 0
     fishing.LastCastTime = 0
+    fishing.LastResetTime = 0
     fishing.IsCasting = false
+    fishing.IsResetting = false
 
     log("🚀 AUTO FISHING STARTED!")
-    log("⚡ Zero-delay timeout recovery active")
+    log("⚡ Fixed loop consistency system active")
     disableFishingAnim()
 
     -- Minigame state detector
     fishing.Connections.Minigame = RE_MinigameChanged.OnClientEvent:Connect(function(state)
-        if fishing.WaitingHook and typeof(state) == "string" then
-            local stateLower = string.lower(state)
-            if string.find(stateLower, "hook") or 
-               string.find(stateLower, "bite") or 
-               string.find(stateLower, "catch") or
-               string.find(stateLower, "reel") then
-                handleCatch()
-            end
+        if not fishing.WaitingHook then return end
+        if typeof(state) ~= "string" then return end
+        
+        local stateLower = string.lower(state)
+        if string.find(stateLower, "hook") or 
+           string.find(stateLower, "bite") or 
+           string.find(stateLower, "catch") or
+           string.find(stateLower, "reel") then
+            handleCatch()
         end
     end)
 
     -- Fish caught detector
     fishing.Connections.Caught = RE_FishCaught.OnClientEvent:Connect(function(name, data)
-        if fishing.Running then
-            cleanupTimeouts()
-            fishing.WaitingHook = false
-            fishing.IsCasting = false
-            fishing.TotalFish += 1
-            
-            local weight = data and data.Weight or 0
-            local cycleTime = tick() - fishing.LastCastTime
-            log("🐟 " .. tostring(name) .. " (" .. string.format("%.2f", weight) .. "kg) | #" .. fishing.TotalFish .. " | " .. string.format("%.2f", cycleTime) .. "s")
+        if not fishing.Running then return end
+        
+        cleanupTimeouts()
+        fishing.WaitingHook = false
+        fishing.IsCasting = false
+        fishing.TotalFish += 1
+        
+        local weight = data and data.Weight or 0
+        local cycleTime = tick() - fishing.LastCastTime
+        log("🐟 " .. tostring(name) .. " (" .. string.format("%.2f", weight) .. "kg) | #" .. fishing.TotalFish .. " | " .. string.format("%.2f", cycleTime) .. "s")
 
-            task.wait(fishing.Settings.CancelDelay)
-            
-            pcall(function()
-                RF_CancelFishingInputs:InvokeServer()
-            end)
+        task.wait(fishing.Settings.CancelDelay)
+        
+        pcall(function()
+            RF_CancelFishingInputs:InvokeServer()
+        end)
 
-            task.wait(fishing.Settings.FishingDelay)
-            if fishing.Running then
-                fishing.Cast()
-            end
-        end
+        task.wait(fishing.Settings.FishingDelay)
+        scheduleCast() -- Use scheduled cast
     end)
 
     -- Animation disabler
     fishing.Connections.AnimDisabler = task.spawn(function()
         while fishing.Running do
             disableFishingAnim()
-            task.wait(0.1)
+            task.wait(0.15)
         end
     end)
 
-    -- Watchdog: deteksi stuck (lebih ketat)
+    -- Watchdog: ONLY for extreme stuck cases (2.5s+)
     fishing.Connections.Watchdog = task.spawn(function()
         while fishing.Running do
-            task.wait(1.5)
+            task.wait(2.5) -- Much longer interval
             
-            if fishing.Running and fishing.WaitingHook then
-                local stuckTime = tick() - fishing.LastCastTime
-                if stuckTime > 1.5 then
-                    log("🔧 Stuck " .. string.format("%.1f", stuckTime) .. "s - force recovery")
-                    forceResetState()
-                    -- INSTANT retry
-                    if fishing.Running then
-                        fishing.Cast()
-                    end
-                end
+            if not fishing.Running then break end
+            if not fishing.WaitingHook then continue end
+            
+            local stuckTime = tick() - fishing.LastCastTime
+            if stuckTime > 2.5 then -- Higher threshold
+                log("🔧 Critical stuck " .. string.format("%.1f", stuckTime) .. "s")
+                safeReset()
+                scheduleCast(0.1)
             end
         end
     end)
-
-    -- REMOVED: Auto cast loop (tidak perlu, menyebabkan duplikasi)
 
     task.wait(0.3)
     fishing.Cast()
@@ -292,6 +311,7 @@ function fishing.Stop()
     cleanupTimeouts()
     fishing.WaitingHook = false
     fishing.IsCasting = false
+    fishing.IsResetting = false
 
     for _, conn in pairs(fishing.Connections) do
         if typeof(conn) == "RBXScriptConnection" then
@@ -308,9 +328,12 @@ end
 -- 🎯 COMMANDS FOR GUI:
 -- _G.FishingScript.Start()
 -- _G.FishingScript.Stop()
+-- _G.FishingScript.TotalFish
+-- _G.FishingScript.Running
 --
--- FINE TUNING (if needed):
--- _G.FishingScript.Settings.FallbackTime = 0.70
--- _G.FishingScript.Settings.MaxWaitTime = 1.1
+-- FINE TUNING:
+-- _G.FishingScript.Settings.FallbackTime = 0.80
+-- _G.FishingScript.Settings.MaxWaitTime = 1.2
+-- _G.FishingScript.Settings.MinCastInterval = 0.05
 
 return fishing
