@@ -36,7 +36,7 @@ local fishing = {
         FishingDelay = 0.01,
         CancelDelay = 0.19,
         HookDetectionDelay = 0.01,
-        RetryDelay = 0.01,
+        RetryDelay = 0.30,
         MaxWaitTime = 1.3,
     }
 }
@@ -225,6 +225,7 @@ end
 --     fishing.Stop()
 
 return fishing
+
 
 
 
