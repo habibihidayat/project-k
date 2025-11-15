@@ -851,8 +851,9 @@ end
 local pnl1=makePanel(mainPage,"⚡ Instant Fishing","")
 makeToggle(pnl1,"Enable Instant Fishing",function(on) if on then instant.Start() else instant.Stop() end end)
 makeSlider(pnl1,"Fishing Delay",0.01,5.0,1.30,function(v) instant.Settings.MaxWaitTime=v end)
+makeSlider(pnl1,"Cast Delay",0.01,5.0,1.0,function(v) instant.Settings.ChargeTime=v end)
+makeSlider(pnl1,"Cast Delay",0.01,5.0,0.001,function(v) instant.Settings.ReleaseDelay=v end)
 makeSlider(pnl1,"Cancel Delay",0.01,1.5,0.19,function(v) instant.Settings.CancelDelay=v end)
-makeSlider(pnl1,"Charge Time",0.01,5.0,1.30,function(v) instant.Settings.ChargeTime=v end)
 
 local pnl2=makePanel(mainPage,"🚀 Instant 2x Speed","")
 makeToggle(pnl2,"Enable Instant 2x Speed",function(on) if on then instant2x.Start() else instant2x.Stop() end end)
@@ -860,7 +861,7 @@ makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.Fishing
 makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
 makeSlider(pnl2,"Hook detection Delay",0.01,5.0,0.19,function(v) instant2x.Settings.HookDetectionDelay=v end)
 makeSlider(pnl2,"Max wait time",0.01,5.0,0.19,function(v) instant2x.Settings.MaxWaitTime=v end)
-makeSlider(pnl2,"Retry Delay",0.01,5.0,0.19,function(v) instant2x.Settings.RetryDelay=v end)
+makeSlider(pnl2,"Anim Disable",0.01,5.0,0.19,function(v) instant2x.Settings.RetryDelay=v end)
 
 
 
@@ -1307,10 +1308,6 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
-
-
-
-
 
 
 
