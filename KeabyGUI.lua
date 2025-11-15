@@ -851,22 +851,12 @@ end
 local pnl1=makePanel(mainPage,"⚡ Instant Fishing","")
 makeToggle(pnl1,"Enable Instant Fishing",function(on) if on then instant.Start() else instant.Stop() end end)
 makeSlider(pnl1,"Fishing Delay",0.01,5.0,1.30,function(v) instant.Settings.MaxWaitTime=v end)
-makeSlider(pnl1,"Cast Delay",0.01,5.0,1.0,function(v) instant.Settings.HookDetectionDelay=v end)
-makeSlider(pnl1,"Cast Delay",0.01,5.0,0.001,function(v) instant.Settings.RetryDelay=v end)
 makeSlider(pnl1,"Cancel Delay",0.01,1.5,0.19,function(v) instant.Settings.CancelDelay=v end)
-makeSlider(pnl1,"Fallback Time",0.01,1.5,0.75,function(v) instant.Settings.FallbackTime=v end)
 
 local pnl2=makePanel(mainPage,"🚀 Instant 2x Speed","")
--- makeToggle(pnl2,"Enable Instant 2x Speed",function(on) if on then instant2x.Start() else instant2x.Stop() end end)
--- makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
--- makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
--- makeSlider(pnl2,"Hook detection Delay",0.01,5.0,0.19,function(v) instant2x.Settings.HookDetectionDelay=v end)
--- makeSlider(pnl2,"Retry delay",0.01,5.0,0.05,function(v) instant2x.Settings.RetryDelay=v end)
--- makeSlider(pnl2,"Min Cycle Delay",0.01,5.0,0.8,function(v) instant2x.Settings.MinCycleDelay=v end)
--- makeSlider(pnl2,"Force Reset Time",0.01,5.0,0.7,function(v) instant2x.Settings.ForceResetTime=v end)
-
-
-
+makeToggle(pnl2,"Enable Instant 2x Speed",function(on) if on then instant2x.Start() else instant2x.Stop() end end)
+makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
+makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
 
 -- Teleport Page with Dropdowns
 local locationItems = {}
@@ -1311,28 +1301,3 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
