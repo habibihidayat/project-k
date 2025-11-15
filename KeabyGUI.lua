@@ -1087,11 +1087,12 @@ local weatherPanel = makePanel(shopPage, "Auto Buy Weather", "⛈️")
 -- === Auto Buy Weather (Dropdown + Toggle) ===
 
 local weatherItems = {
-    "Rain",
+    "Cloudy",
     "Storm",
-    "Foggy",
-    "Heat",
-    "Blizzard"
+    "Wind",
+    "Snow",
+    "Radiant",
+    "Shark Hunt"
 }
 
 local selectedWeather = weatherItems[1]
@@ -1360,6 +1361,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
