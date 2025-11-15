@@ -1078,14 +1078,12 @@ makeButton(pnlTimer, "Stop Auto Sell", function()
 	end
 end)
 
--------------------------------------------------------------
--- 🌦️ AUTO BUY WEATHER (DROP-DOWN + TOGGLE)
--------------------------------------------------------------
+--------------------------------------------------------------------
+-- 🌦️ AUTO BUY WEATHER — GUI KEABY STYLE (Dropdown + Toggle)
+--------------------------------------------------------------------
 
--- BUAT PANEL
 local weatherPanel = makePanel(shopPage, "Auto Buy Weather", "⛈️")
 
--- DAFTAR CUACA YANG TERSEDIA
 local weatherList = {
     "Cloudy",
     "Storm",
@@ -1095,33 +1093,37 @@ local weatherList = {
     "Shark Hunt"
 }
 
--- VARIABLE PENYIMPANAN
 local selectedWeather = nil
 
--- DROPDOWN UNTUK MEMILIH CUACA
-makeDropdown(weatherPanel, "Select Weather", weatherList, function(value)
-    selectedWeather = value
-    AutoBuyWeather.SetSelected({value}) -- modul mengharapkan list, bukan string
-end)
+-- Dropdown untuk memilih cuaca
+makeDropdown(
+    weatherPanel,                 -- parent
+    "Select Weather",             -- title text
+    "🌫️",                         -- icon
+    weatherList,                  -- list items
+    function(value)               -- callback
+        selectedWeather = value
+        AutoBuyWeather.SetSelected({ value })  
+    end,
+    "WeatherDropdown"             -- unique Id
+)
 
--- TOGGLE UNTUK MENGAKTIFKAN AUTO BUY
-makeToggle(weatherPanel, "Auto Buy Weather", function(state)
+-- Toggle untuk ON / OFF Auto Buy Weather
+makeToggle(weatherPanel, "Enable Auto Buy", function(state)
     if state then
         if not selectedWeather then
-            print("⚠️ Pilih cuaca dulu!")
+            print("⚠️ Pilih cuaca dulu sebelum ON!")
             return false
         end
         AutoBuyWeather.Start()
-        print("🟢 Auto Buy Weather ON (" .. selectedWeather .. ")")
+        print("🟢 AutoBuyWeather ON:", selectedWeather)
     else
         AutoBuyWeather.Stop()
-        print("🔴 Auto Buy Weather OFF")
+        print("🔴 AutoBuyWeather OFF")
     end
 end)
 
--------------------------------------------------------------
--- END AUTO BUY WEATHER UI
--------------------------------------------------------------
+--------------------------------------------------------------------
 
 
 -- Settings Page
@@ -1360,6 +1362,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
