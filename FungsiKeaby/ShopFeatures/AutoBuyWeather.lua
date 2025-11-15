@@ -1,60 +1,59 @@
--- ============================================================================
--- 📦 AutoBuyWeather.lua
--- Lokasi: FungsiKeaby/ShopFeatures/AutoBuyWeather.lua
--- Sistem Auto Beli Weather sesuai pilihan user
--- ============================================================================
+-- AutoBuyWeather.lua (MODULE VERSION)
 
 local AutoBuyWeather = {}
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+local NetPackage = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"]
+local RFPurchaseWeatherEvent = NetPackage.net["RF/PurchaseWeatherEvent"]
 
-local enabled = false
-local chosenWeather = nil
-local connection
+-- STATE
+local isRunning = false
+local selected = {}
 
--- Remote path (sesuaikan bila berbeda)
-local WeatherEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("BuyWeather")
-
--- 🌤️ Daftar cuaca yang tersedia (sesuaikan dengan server kamu)
-local WeatherList = {
-    "Stormy",
-    "Rainy",
-    "Sunny",
-    "Foggy",
-    "Windy"
+AutoBuyWeather.AllWeathers = {
+    "Cloudy",
+    "Storm",
+    "Wind",
+    "Snow",
+    "Radiant",
+    "Shark Hunt"
 }
 
-function AutoBuyWeather.GetWeatherList()
-    return WeatherList
+-- Set cuaca terpilih
+function AutoBuyWeather.SetSelected(list)
+    selected = list
 end
 
--- 🔘 Dipanggil dari GUI ketika toggle ON/OFF berubah
-function AutoBuyWeather.SetEnabled(state)
-    enabled = state
+-- Start auto maintain
+function AutoBuyWeather.Start()
+    if isRunning then return end
+    isRunning = true
 
-    -- Jika mati → hentikan listener
-    if not enabled then
-        if connection then connection:Disconnect() end
-        connection = nil
-        return
-    end
-
-    -- Jika hidup → jalankan auto-buy loop
-    if not connection then
-        connection = game:GetService("RunService").Heartbeat:Connect(function()
-            if not enabled or not chosenWeather then return end
-            
-            -- Kirim remote request beli cuaca
-            WeatherEvent:FireServer(chosenWeather)
-        end)
-    end
+    task.spawn(function()
+        while isRunning do
+            for _, weather in ipairs(selected) do
+                if not isRunning then break end
+                pcall(function()
+                    RFPurchaseWeatherEvent:InvokeServer(weather)
+                end)
+                task.wait(2)
+            end
+            task.wait(15)
+        end
+    end)
 end
 
--- 🧭 Dipanggil GUI saat dropdown berubah
-function AutoBuyWeather.SetWeather(name)
-    chosenWeather = name
+-- Stop auto maintain
+function AutoBuyWeather.Stop()
+    isRunning = false
+end
+
+-- Getter untuk GUI status
+function AutoBuyWeather.GetStatus()
+    return {
+        Running = isRunning,
+        Selected = selected
+    }
 end
 
 return AutoBuyWeather
