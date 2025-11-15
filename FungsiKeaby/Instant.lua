@@ -1,4 +1,4 @@
--- ⚡ ULTIMATE INSTANT HOOK AUTO FISHING v31.0 (MAXIMUM SPEED - ALL LIMITERS REMOVED)
+-- ⚡💀 INSTANT HOOK GODMODE v32.0 (ZERO LIMITS - MAXIMUM CHAOS MODE)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -38,88 +38,80 @@ local fishing = {
     LastCastTime = 0,
     Connections = {},
     Settings = {
-        FishingDelay = 0.001,
-        CancelDelay = 0.05,
+        FishingDelay = 0,
+        CancelDelay = 0.03,
         HookDetectionDelay = 0,
-        RetryDelay = 0.15,
-        MaxWaitTime = 0.6,
-        FallbackTime = 0.15, -- INSTANT
-        -- ⭐ ULTIMATE MAXIMUM SPEED
-        CastMode = "godmode",
-        ChargeTime = 0.2, -- SUPER MINIMAL!
-        ReleaseDelay = 0, -- ZERO
+        RetryDelay = 0.05,
+        MaxWaitTime = 0.4,
+        FallbackTime = 0.08,
+        -- ⭐💀 ABSOLUTE ZERO LIMITS
+        CastMode = "chaos",
+        ChargeTime = 0.05, -- ALMOST INSTANT!
+        ReleaseDelay = 0,
         PreHookCall = true,
         MultipleMinigameCalls = true,
         SpamMinigame = true,
         InstantCast = true,
-        -- 🔥 NEW: INSANE OPTIMIZATIONS
-        ParallelSpam = true, -- Spam parallel tanpa waiting
-        PreChargeSpam = true, -- Spam SEBELUM charge dimulai
-        ContinuousSpam = true, -- Spam terus menerus
-        SpamInterval = 0.005, -- Spam tiap 0.005s (super cepat!)
-        SpamDuration = 0.3, -- Spam selama 0.3s
+        -- 🔥💀 CHAOS MODE SETTINGS
+        ParallelSpam = true,
+        PreChargeSpam = true,
+        ContinuousSpam = true,
+        SpamInterval = 0.001, -- SPAM TIAP 0.001s = 1000 req/s!
+        SpamDuration = 0.5,
+        -- 💀 NEW: NUCLEAR OPTIONS
+        ZeroDelayMode = true, -- ZERO delay di semua tempat
+        InstantMinigame = true, -- Panggil minigame SEBELUM charge
+        NuclearSpam = true, -- Spam dengan SEMUA method sekaligus
+        SpamThreads = 20, -- 20 thread spam parallel!
+        RequestsPerCycle = 100, -- 100+ requests per cast!
     }
 }
 
 _G.FishingScript = fishing
 
--- Preset timing dengan MAXIMUM SPEED - NO LIMITS!
+-- Preset timing - ABSOLUTE MAXIMUM CHAOS
 local CAST_PRESETS = {
+    chaos = {
+        chargeTime = 0.05, -- ALMOST ZERO!
+        releaseDelay = 0,
+        power = 0.8,
+        earlyMinigame = true,
+        spamCount = 20 -- 20x SPAM!
+    },
+    nuclear = {
+        chargeTime = 0.08,
+        releaseDelay = 0,
+        power = 0.82,
+        earlyMinigame = true,
+        spamCount = 15
+    },
     godmode = {
-        chargeTime = 0.15, -- INSANELY FAST!
+        chargeTime = 0.1,
         releaseDelay = 0,
         power = 0.85,
         earlyMinigame = true,
-        spamCount = 10 -- SPAM 10x!
+        spamCount = 12
     },
     insane = {
-        chargeTime = 0.2,
+        chargeTime = 0.15,
         releaseDelay = 0,
         power = 0.88,
         earlyMinigame = true,
-        spamCount = 8
+        spamCount = 10
     },
     hyper = {
-        chargeTime = 0.3,
+        chargeTime = 0.2,
         releaseDelay = 0,
         power = 0.9,
         earlyMinigame = true,
-        spamCount = 6
+        spamCount = 8
     },
     extreme = {
-        chargeTime = 0.4,
+        chargeTime = 0.3,
         releaseDelay = 0,
         power = 0.92,
         earlyMinigame = true,
-        spamCount = 5
-    },
-    instant = {
-        chargeTime = 0.6,
-        releaseDelay = 0,
-        power = 0.95,
-        earlyMinigame = true,
-        spamCount = 3
-    },
-    ultrafast = {
-        chargeTime = 0.75,
-        releaseDelay = 0.001,
-        power = 0.96,
-        earlyMinigame = true,
-        spamCount = 2
-    },
-    fast = {
-        chargeTime = 0.85,
-        releaseDelay = 0.005,
-        power = 0.97,
-        earlyMinigame = false,
-        spamCount = 1
-    },
-    perfect = {
-        chargeTime = 1.0,
-        releaseDelay = 0.001,
-        power = 1,
-        earlyMinigame = false,
-        spamCount = 1
+        spamCount = 6
     }
 }
 
@@ -173,85 +165,123 @@ local function forceResetState()
     end)
 end
 
--- ⚡ ULTIMATE MINIGAME SPAM - MAXIMUM SPEED NO LIMITS
+-- ⚡💀 NUCLEAR SPAM - ABSOLUTE MAXIMUM CHAOS
 local function aggressiveMinigameCall(power, releaseTime, spamCount)
-    spamCount = spamCount or 5
+    spamCount = spamCount or 10
     
-    -- 🔥 STRATEGY 0: PRE-SPAM - Spam SEBELUM function dipanggil
-    if fishing.Settings.PreChargeSpam then
+    -- 💀 NUCLEAR OPTION: Spam dengan jumlah thread maksimal
+    local totalThreads = fishing.Settings.SpamThreads or 20
+    
+    for thread = 1, totalThreads do
+        task.spawn(function()
+            -- 🔥 Method 1: INSTANT FLOOD
+            for i = 1, math.floor(fishing.Settings.RequestsPerCycle / totalThreads) do
+                pcall(function()
+                    RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
+                end)
+            end
+        end)
+    end
+    
+    -- 🔥 Method 2: ZERO DELAY LOOP
+    if fishing.Settings.ZeroDelayMode then
+        for thread = 1, 5 do
+            task.spawn(function()
+                local spamStart = tick()
+                while fishing.WaitingHook and (tick() - spamStart) < fishing.Settings.SpamDuration do
+                    pcall(function()
+                        RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
+                    end)
+                    -- ZERO WAIT!
+                end
+            end)
+        end
+    end
+    
+    -- 🔥 Method 3: RENDERSTEP SPAM (EVERY FRAME)
+    if fishing.Settings.NuclearSpam then
+        local spamStart = tick()
         for i = 1, 3 do
             task.spawn(function()
-                pcall(function()
-                    RF_RequestMinigame:InvokeServer(power, 0, releaseTime - 0.1)
+                local conn
+                conn = RunService.RenderStepped:Connect(function()
+                    if fishing.WaitingHook and (tick() - spamStart) < fishing.Settings.SpamDuration then
+                        pcall(function()
+                            RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
+                        end)
+                    else
+                        conn:Disconnect()
+                    end
                 end)
             end)
         end
     end
     
-    -- 🔥 STRATEGY 1: INSTANT PARALLEL SPAM - Semua sekaligus tanpa delay
-    if fishing.Settings.ParallelSpam then
-        for i = 1, spamCount * 2 do -- Double spam count!
-            task.spawn(function()
-                pcall(function()
-                    RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
-                end)
-            end)
-        end
-    end
-    
-    -- 🔥 STRATEGY 2: RAPID FIRE - Spam dengan interval super cepat
-    for i = 1, spamCount * 2 do
-        task.delay(i * fishing.Settings.SpamInterval, function()
-            if fishing.WaitingHook then
-                pcall(function()
-                    RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
-                end)
-            end
-        end)
-    end
-    
-    -- 🔥 STRATEGY 3: CONTINUOUS SPAM LOOP - Loop terus menerus
-    if fishing.Settings.ContinuousSpam then
-        local spamStart = tick()
+    -- 🔥 Method 4: HEARTBEAT SPAM
+    for i = 1, 3 do
         task.spawn(function()
-            while fishing.WaitingHook and (tick() - spamStart) < fishing.Settings.SpamDuration do
-                pcall(function()
-                    RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
-                end)
-                -- ZERO delay untuk max speed
-                RunService.Heartbeat:Wait()
-            end
-        end)
-    end
-    
-    -- 🔥 STRATEGY 4: RENDER STEP SPAM - Spam tiap frame!
-    if fishing.Settings.SpamMinigame then
-        local spamStart = tick()
-        local conn
-        conn = RunService.RenderStepped:Connect(function()
-            if fishing.WaitingHook and (tick() - spamStart) < fishing.Settings.SpamDuration then
-                pcall(function()
-                    RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
-                end)
-            else
-                conn:Disconnect()
-            end
-        end)
-    end
-    
-    -- 🔥 STRATEGY 5: HEARTBEAT SPAM - Backup spam method
-    task.spawn(function()
-        local spamStart = tick()
-        while fishing.WaitingHook and (tick() - spamStart) < fishing.Settings.SpamDuration do
-            pcall(function()
-                RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
+            local spamStart = tick()
+            local conn
+            conn = RunService.Heartbeat:Connect(function()
+                if fishing.WaitingHook and (tick() - spamStart) < fishing.Settings.SpamDuration then
+                    pcall(function()
+                        RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
+                    end)
+                else
+                    conn:Disconnect()
+                end
             end)
-            RunService.Heartbeat:Wait()
-        end
-    end)
+        end)
+    end
+    
+    -- 🔥 Method 5: STEPPED SPAM
+    for i = 1, 3 do
+        task.spawn(function()
+            local spamStart = tick()
+            local conn
+            conn = RunService.Stepped:Connect(function()
+                if fishing.WaitingHook and (tick() - spamStart) < fishing.Settings.SpamDuration then
+                    pcall(function()
+                        RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
+                    end)
+                else
+                    conn:Disconnect()
+                end
+            end)
+        end)
+    end
+    
+    -- 🔥 Method 6: RAPID FIRE WITH MINIMAL DELAY
+    for i = 1, spamCount * 3 do
+        task.spawn(function()
+            local iterations = 0
+            while fishing.WaitingHook and iterations < 50 do
+                pcall(function()
+                    RF_RequestMinigame:InvokeServer(power, 0, releaseTime)
+                end)
+                task.wait(fishing.Settings.SpamInterval)
+                iterations += 1
+            end
+        end)
+    end
+    
+    -- 🔥 Method 7: PRE-EMPTIVE SPAM (Spam di berbagai waktu)
+    for i = 0, 10 do
+        task.delay(i * 0.01, function()
+            if fishing.WaitingHook then
+                for j = 1, 3 do
+                    task.spawn(function()
+                        pcall(function()
+                            RF_RequestMinigame:InvokeServer(power, 0, releaseTime + (i * 0.01))
+                        end)
+                    end)
+                end
+            end
+        end)
+    end
 end
 
--- Fungsi cast dengan GODMODE SPEED - ALL LIMITERS OFF
+-- Fungsi cast dengan ABSOLUTE CHAOS MODE
 function fishing.Cast()
     if not fishing.Running or fishing.WaitingHook then return end
 
@@ -260,80 +290,86 @@ function fishing.Cast()
     fishing.CurrentCycle += 1
     fishing.LastCastTime = tick()
     
-    local preset = CAST_PRESETS[fishing.Settings.CastMode] or CAST_PRESETS.godmode
-    log("⚡ Cast #" .. fishing.CurrentCycle .. " [" .. fishing.Settings.CastMode:upper() .. "]")
+    local preset = CAST_PRESETS[fishing.Settings.CastMode] or CAST_PRESETS.chaos
+    log("💀 CAST #" .. fishing.CurrentCycle .. " [" .. fishing.Settings.CastMode:upper() .. "]")
 
     local castSuccess = pcall(function()
         local startTime = tick()
         
-        -- 🔥 STRATEGY 0: PRE-CHARGE SPAM - Spam SEBELUM charge dimulai!
-        if fishing.Settings.PreChargeSpam then
-            aggressiveMinigameCall(preset.power, startTime, 3)
-            log("💥 PRE-CHARGE SPAM!")
+        -- 💀 INSTANT MINIGAME - Panggil SEBELUM charge!
+        if fishing.Settings.InstantMinigame then
+            aggressiveMinigameCall(preset.power, startTime, preset.spamCount)
+            log("💀 INSTANT MINIGAME!")
         end
         
-        -- Strategy 1: Charge dengan timing SUPER MINIMAL
+        -- Charge dengan timing MINIMAL
         local chargeData = {[1] = startTime}
         RF_ChargeFishingRod:InvokeServer(chargeData)
         
-        -- 🔥 STRATEGY 1: INSTANT SPAM - Panggil SEGERA (0.01s)
-        if fishing.Settings.InstantCast then
-            task.spawn(function()
-                task.wait(0.01) -- SUPER minimal
-                local instantTime = tick()
-                aggressiveMinigameCall(preset.power, instantTime, preset.spamCount)
-                log("⚡ INSTANT SPAM (0.01s)!")
-            end)
-        end
+        -- 💀 ZERO DELAY SPAM - Panggil segera tanpa delay
+        task.spawn(function()
+            aggressiveMinigameCall(preset.power, startTime, preset.spamCount)
+            log("💥 ZERO DELAY SPAM!")
+        end)
         
-        -- 🔥 STRATEGY 2: ULTRA EARLY CALL - Panggil saat 20% charge!
-        if preset.earlyMinigame and fishing.Settings.PreHookCall then
-            task.delay(preset.chargeTime * 0.2, function()
-                if fishing.Running then
-                    local earlyTime = tick()
-                    aggressiveMinigameCall(preset.power, earlyTime, preset.spamCount)
-                    log("💥 ULTRA EARLY (20%)!")
-                end
-            end)
-        end
-        
-        -- 🔥 STRATEGY 3: MID SPAM - Panggil di tengah charge
-        task.delay(preset.chargeTime * 0.5, function()
+        -- 💀 IMMEDIATE SPAM (0.001s)
+        task.delay(0.001, function()
             if fishing.Running then
-                local midTime = tick()
-                aggressiveMinigameCall(preset.power, midTime, preset.spamCount)
-                log("💥 MID SPAM (50%)!")
+                aggressiveMinigameCall(preset.power, tick(), preset.spamCount)
+                log("⚡ 0.001s SPAM!")
             end
         end)
         
-        -- Strategy 4: ZERO wait - Langsung ke release
-        task.wait(preset.chargeTime)
+        -- 💀 CONTINUOUS SPAM - Spam setiap milidetik
+        if fishing.Settings.ZeroDelayMode then
+            for i = 1, 10 do
+                task.delay(i * 0.005, function()
+                    if fishing.Running then
+                        aggressiveMinigameCall(preset.power, tick(), preset.spamCount)
+                    end
+                end)
+            end
+        end
         
-        -- Strategy 5: MASSIVE FINAL SPAM
+        -- ZERO wait untuk charge
+        if fishing.Settings.ZeroDelayMode then
+            -- Langsung skip ke release
+        else
+            task.wait(preset.chargeTime)
+        end
+        
+        -- 💀 NUCLEAR FINAL SPAM
         local releaseTime = tick()
         local totalCharge = releaseTime - startTime
         
-        aggressiveMinigameCall(preset.power, releaseTime, preset.spamCount * 2) -- DOUBLE SPAM!
+        aggressiveMinigameCall(preset.power, releaseTime, preset.spamCount * 3) -- TRIPLE SPAM!
         
         fishing.WaitingHook = true
-        log("🎯 HOOKED! (" .. string.format("%.2f", totalCharge) .. "s)")
+        log("💀 HOOKED! (" .. string.format("%.3f", totalCharge) .. "s)")
 
-        -- ⚡ INSTANT FALLBACK
+        -- 💀 INSTANT FALLBACK
         fishing.FallbackTask = task.delay(fishing.Settings.FallbackTime, function()
             if fishing.WaitingHook and fishing.Running then
-                log("⚡ INSTANT REEL!")
+                log("💥 INSTANT REEL!")
                 pcall(function()
                     RE_FishingCompleted:FireServer()
                 end)
+                -- SPAM reel multiple times
+                for i = 1, 5 do
+                    task.spawn(function()
+                        pcall(function()
+                            RE_FishingCompleted:FireServer()
+                        end)
+                    end)
+                end
             end
         end)
 
         -- Timeout super cepat
         fishing.TimeoutTask = task.delay(fishing.Settings.MaxWaitTime, function()
             if fishing.WaitingHook and fishing.Running then
-                log("⚠️ FORCE RESET")
+                log("💀 FORCE RESET")
                 forceResetState()
-                task.wait(fishing.Settings.FishingDelay)
                 if fishing.Running then
                     fishing.Cast()
                 end
@@ -342,7 +378,7 @@ function fishing.Cast()
     end)
 
     if not castSuccess then
-        log("❌ ERROR - INSTANT RETRY")
+        log("💀 ERROR - INSTANT RETRY")
         forceResetState()
         task.wait(fishing.Settings.RetryDelay)
         if fishing.Running then
@@ -385,12 +421,13 @@ function fishing.Start()
     fishing.PerfectCasts = 0
     fishing.LastCastTime = 0
 
-    log("🚀 GODMODE SPEED ACTIVATED!")
-    log("💥 Cast Mode: " .. fishing.Settings.CastMode:upper() .. " (" .. CAST_PRESETS[fishing.Settings.CastMode].chargeTime .. "s)")
-    log("⚡ Pre-charge spam: " .. (fishing.Settings.PreChargeSpam and "ON" or "OFF"))
-    log("⚡ Parallel spam: " .. (fishing.Settings.ParallelSpam and "ON" or "OFF"))
-    log("⚡ Continuous spam: " .. (fishing.Settings.ContinuousSpam and "ON" or "OFF"))
-    log("💥 ALL LIMITERS: REMOVED")
+    log("💀🔥 CHAOS MODE ACTIVATED!")
+    log("💥 Mode: " .. fishing.Settings.CastMode:upper() .. " (" .. CAST_PRESETS[fishing.Settings.CastMode].chargeTime .. "s)")
+    log("💀 Spam threads: " .. fishing.Settings.SpamThreads)
+    log("💀 Requests/cycle: " .. fishing.Settings.RequestsPerCycle .. "+")
+    log("💀 Zero delay: " .. (fishing.Settings.ZeroDelayMode and "ON" or "OFF"))
+    log("💀 Nuclear spam: " .. (fishing.Settings.NuclearSpam and "ON" or "OFF"))
+    log("💀 WARNING: EXTREME SPAM - BAN RISK HIGH!")
     disableFishingAnim()
 
     -- Minigame state detector - LEBIH SENSITIF
@@ -447,10 +484,9 @@ function fishing.Start()
             
             if fishing.Running and fishing.WaitingHook then
                 local stuckTime = tick() - fishing.LastCastTime
-                if stuckTime > 1.0 then
-                    log("🔧 STUCK (" .. string.format("%.1f", stuckTime) .. "s) - FORCE RECOVERY")
+                if stuckTime > 0.7 then
+                    log("💀 STUCK - NUCLEAR RESET")
                     forceResetState()
-                    task.wait(fishing.Settings.FishingDelay)
                     if fishing.Running then
                         fishing.Cast()
                     end
@@ -486,34 +522,58 @@ end
 -- _G.FishingScript.Start()
 -- _G.FishingScript.Stop()
 -- 
--- 🔥💥 GODMODE SPEED LEVELS (ABSOLUTE MAXIMUM SPEED):
--- _G.FishingScript.Settings.CastMode = "godmode"    -- 💀💥 GODMODE! 0.15s + 10x SPAM + ALL STRATEGIES
--- _G.FishingScript.Settings.CastMode = "insane"     -- ⚡⚡⚡ INSANE! 0.2s + 8x SPAM
--- _G.FishingScript.Settings.CastMode = "hyper"      -- ⚡⚡ HYPER! 0.3s + 6x SPAM
--- _G.FishingScript.Settings.CastMode = "extreme"    -- ⚡ EXTREME! 0.4s + 5x SPAM
--- _G.FishingScript.Settings.CastMode = "instant"    -- Instant (0.6s)
--- _G.FishingScript.Settings.CastMode = "ultrafast"  -- Sangat cepat (0.75s)
+-- 💀🔥 CHAOS MODE SPEED LEVELS (ABSOLUTE MAXIMUM - NO BAN PROTECTION):
+-- _G.FishingScript.Settings.CastMode = "chaos"      -- 💀💀💀 CHAOS! 0.05s + 20x SPAM + 100+ REQUESTS!
+-- _G.FishingScript.Settings.CastMode = "nuclear"    -- 💀💀 NUCLEAR! 0.08s + 15x SPAM
+-- _G.FishingScript.Settings.CastMode = "godmode"    -- 💀 GODMODE! 0.1s + 12x SPAM
+-- _G.FishingScript.Settings.CastMode = "insane"     -- ⚡⚡⚡ INSANE! 0.15s + 10x SPAM
+-- _G.FishingScript.Settings.CastMode = "hyper"      -- ⚡⚡ HYPER! 0.2s + 8x SPAM
+-- _G.FishingScript.Settings.CastMode = "extreme"    -- ⚡ EXTREME! 0.3s + 6x SPAM
 --
--- ⚡💥 GODMODE OPTIMIZATION TOGGLES (ALL ENABLED BY DEFAULT):
--- _G.FishingScript.Settings.PreChargeSpam = true      -- Spam SEBELUM charge!
--- _G.FishingScript.Settings.ParallelSpam = true       -- Multi-thread spam parallel
--- _G.FishingScript.Settings.ContinuousSpam = true     -- Loop spam terus menerus
--- _G.FishingScript.Settings.InstantCast = true        -- Instant cast (0.01s)
--- _G.FishingScript.Settings.SpamMinigame = true       -- RenderStepped spam
+-- 💀 CHAOS MODE FEATURES (ENABLED BY DEFAULT):
+-- • 20+ parallel spam threads
+-- • 100+ requests per cast cycle
+-- • 7 different spam methods simultaneously
+-- • Spam interval: 0.001s (1000 requests/second)
+-- • Zero delay mode: Instant everything
+-- • Nuclear spam: Every RunService event
+-- • Pre-charge minigame calls
+-- • Continuous spam loops
 --
--- 🎮 GODMODE MANUAL TUNING (FOR ABSOLUTE MAXIMUM):
--- _G.FishingScript.Settings.ChargeTime = 0.1         -- MINIMUM! (0.1-0.15s)
--- _G.FishingScript.Settings.FallbackTime = 0.1       -- INSTANT fallback
--- _G.FishingScript.Settings.SpamInterval = 0.001     -- Spam tiap 0.001s (INSANE!)
--- _G.FishingScript.Settings.SpamDuration = 0.5       -- Spam selama 0.5s
--- _G.FishingScript.Settings.FishingDelay = 0         -- ZERO delay antar cycle
+-- ⚡💀 NUCLEAR TOGGLES:
+-- _G.FishingScript.Settings.ZeroDelayMode = true      -- Remove ALL delays
+-- _G.FishingScript.Settings.InstantMinigame = true    -- Call BEFORE charge
+-- _G.FishingScript.Settings.NuclearSpam = true        -- ALL spam methods
+-- _G.FishingScript.Settings.SpamThreads = 50          -- 50 parallel threads! (default 20)
+-- _G.FishingScript.Settings.RequestsPerCycle = 200    -- 200 requests/cast! (default 100)
 --
--- ⚠️ WARNING: 
--- Mode "godmode" dan "insane" SANGAT EKSTREM dan mungkin crash/banned!
--- Jika tidak stabil, gunakan "hyper" atau "extreme"
--- Mode ini akan SPAM server dengan ratusan request per detik!
+-- 🎮 ABSOLUTE MAXIMUM TUNING:
+-- _G.FishingScript.Settings.ChargeTime = 0.01        -- 0.01s = ALMOST INSTANT!
+-- _G.FishingScript.Settings.SpamInterval = 0.0001    -- 0.0001s = 10,000 req/s!
+-- _G.FishingScript.Settings.SpamDuration = 1.0       -- Spam for 1 full second
+-- _G.FishingScript.Settings.FallbackTime = 0.05      -- Instant fallback
+-- _G.FishingScript.Settings.FishingDelay = 0         -- ZERO delay between casts
+-- _G.FishingScript.Settings.SpamThreads = 100        -- 100 THREADS!
 --
--- 💡 RECOMMENDED SAFE MODE:
--- _G.FishingScript.Settings.CastMode = "hyper"  -- Sangat cepat tapi stabil
+-- ⚠️💀 EXTREME WARNING: 
+-- MODE "CHAOS" WILL:
+-- • Send 1000+ requests per second to server
+-- • Use 20-100 parallel threads
+-- • Spam EVERY RunService event (RenderStepped, Heartbeat, Stepped)
+-- • Hook appears in 0.05-0.1 seconds (ALMOST INSTANT)
+-- • VERY HIGH ban risk - use at your own risk!
+-- • May cause client/server lag or crash
+-- • Absolutely NO anti-detection measures
+--
+-- 💡 IF YOU GET BANNED:
+-- You were warned! This is the absolute maximum possible speed.
+-- Nothing faster exists without directly modifying game files.
+--
+-- 🔥 YOLO MODE (EVEN MORE EXTREME):
+_G.FishingScript.Settings.ChargeTime = 0.01
+_G.FishingScript.Settings.SpamThreads = 100
+_G.FishingScript.Settings.RequestsPerCycle = 500
+_G.FishingScript.Settings.SpamInterval = 0.0001
+_G.FishingScript.Start()
 
 return fishing
