@@ -30,6 +30,7 @@ local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.co
 
 
 
+
 -- Ultra Modern Cyberpunk Palette
 local colors = {
     primary = Color3.fromRGB(0, 255, 255),
@@ -1077,22 +1078,50 @@ makeButton(pnlTimer, "Stop Auto Sell", function()
 	end
 end)
 
--- ============================
--- 📂 TAB SHOP FEATURES
--- ============================
+-------------------------------------------------------------
+-- 🌦️ AUTO BUY WEATHER (DROP-DOWN + TOGGLE)
+-------------------------------------------------------------
 
-local tab = ShopFeaturesTab  -- panel tab kamu
-local panel = makePanel(tab, "Auto Buy Weather", "Memilih & membeli cuaca otomatis.")
+-- BUAT PANEL
+local weatherPanel = makePanel(shopPage, "Auto Buy Weather", "⛈️")
 
--- Dropdown Weather
-makeDropdown(panel, "Weather Type", AutoBuyWeather.GetWeatherList(), function(selected)
-    AutoBuyWeather.SetWeather(selected)
+-- DAFTAR CUACA YANG TERSEDIA
+local weatherList = {
+    "Cloudy",
+    "Storm",
+    "Wind",
+    "Snow",
+    "Radiant",
+    "Shark Hunt"
+}
+
+-- VARIABLE PENYIMPANAN
+local selectedWeather = nil
+
+-- DROPDOWN UNTUK MEMILIH CUACA
+makeDropdown(weatherPanel, "Select Weather", weatherList, function(value)
+    selectedWeather = value
+    AutoBuyWeather.SetSelected({value}) -- modul mengharapkan list, bukan string
 end)
 
--- Toggle ON/OFF
-makeToggle(panel, "Enable Auto Buy Weather", false, function(state)
-    AutoBuyWeather.SetEnabled(state)
+-- TOGGLE UNTUK MENGAKTIFKAN AUTO BUY
+makeToggle(weatherPanel, "Auto Buy Weather", function(state)
+    if state then
+        if not selectedWeather then
+            print("⚠️ Pilih cuaca dulu!")
+            return false
+        end
+        AutoBuyWeather.Start()
+        print("🟢 Auto Buy Weather ON (" .. selectedWeather .. ")")
+    else
+        AutoBuyWeather.Stop()
+        print("🔴 Auto Buy Weather OFF")
+    end
 end)
+
+-------------------------------------------------------------
+-- END AUTO BUY WEATHER UI
+-------------------------------------------------------------
 
 
 -- Settings Page
@@ -1331,6 +1360,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
