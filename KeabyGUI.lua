@@ -1098,17 +1098,20 @@ local weatherItems = {
 local selectedWeather = weatherItems[1]
 local autoBuyWeatherEnabled = false
 
--- Dropdown pilih cuaca
-makeDropdown(shopPage, "Select Weather", "🌦️", weatherItems, function(weather)
-    selectedWeather = weather
+makeDropdown(shopPage, "Select Weather", "🌦️", AutoBuyWeather.AllWeathers, function(weather)
+    AutoBuyWeather.SetSelected({ weather })   -- FIX: bungkus menjadi table
     print("[AutoBuyWeather] Selected:", weather)
 end)
 
--- Toggle untuk ON/OFF fitur
+
 makeToggle(shopPage, "Auto Buy Weather", "⛅", false, function(state)
-    autoBuyWeatherEnabled = state
-    print("[AutoBuyWeather] Active:", state)
+    if state then
+        AutoBuyWeather.Start()
+    else
+        AutoBuyWeather.Stop()
+    end
 end)
+
 
 -- Worker utama auto buy
 task.spawn(function()
@@ -1361,6 +1364,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
