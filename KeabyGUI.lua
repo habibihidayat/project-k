@@ -1078,55 +1078,46 @@ makeButton(pnlTimer, "Stop Auto Sell", function()
 	end
 end)
 
---------------------------------------------------------------------
--- 🌦️ AUTO BUY WEATHER — GUI KEABY STYLE (Dropdown + Toggle)
---------------------------------------------------------------------
+-- ===== Auto Buy Weather Module Fix =====
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
 
-local weatherPanel = makePanel(shopPage, "Auto Buy Weather", "⛈️")
+-- Module atau function untuk membeli cuaca
+local WeatherModule = require(ReplicatedStorage:WaitForChild("WeatherModule"))
 
--- === Auto Buy Weather (Dropdown + Toggle) ===
-
-local weatherItems = {
-    "Cloudy",
-    "Storm",
-    "Wind",
-    "Snow",
-    "Radiant",
-    "Shark Hunt"
-}
-
-local selectedWeather = weatherItems[1]
+-- ===== Variabel Kontrol =====
+local selectedWeather = "Sunny"          -- default
 local autoBuyWeatherEnabled = false
 
-makeDropdown(shopPage, "Select Weather", "🌦️", AutoBuyWeather.AllWeathers, function(weather)
-    AutoBuyWeather.SetSelected({ weather })   -- FIX: bungkus menjadi table
+-- ===== GUI Setup =====
+local shopPage = MainGUI.ShopPage -- ganti sesuai GUI kamu
+
+-- Dropdown untuk pilih cuaca
+makeDropdown(shopPage, "Select Weather", "🌦️", WeatherModule.AllWeathers, function(weather)
+    selectedWeather = weather
     print("[AutoBuyWeather] Selected:", weather)
 end)
 
-
+-- Toggle untuk Auto Buy
 makeToggle(shopPage, "Auto Buy Weather", "⛅", false, function(state)
-    if state then
-        AutoBuyWeather.Start()
-    else
-        AutoBuyWeather.Stop()
-    end
+    autoBuyWeatherEnabled = state
+    print("[AutoBuyWeather] Enabled:", state)
 end)
 
-
--- Worker utama auto buy
+-- ===== Worker Loop =====
 task.spawn(function()
     while true do
-        task.wait(1)
-
+        task.wait(1) -- cek setiap 1 detik
         if autoBuyWeatherEnabled and selectedWeather then
-            -- Pastikan function BuyWeather tersedia
             pcall(function()
+                -- Panggil function beli cuaca di module
                 WeatherModule:BuyWeather(selectedWeather)
+                print("[AutoBuyWeather] Buying:", selectedWeather)
             end)
         end
     end
 end)
-
 
 -- Settings Page
 local settingsPnl = makePanel(settingsPage,"⚙️ General Settings","")
@@ -1364,6 +1355,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
