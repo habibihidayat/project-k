@@ -1084,46 +1084,44 @@ end)
 
 local weatherPanel = makePanel(shopPage, "Auto Buy Weather", "⛈️")
 
-local weatherList = {
-    "Cloudy",
+-- === Auto Buy Weather (Dropdown + Toggle) ===
+
+local weatherItems = {
+    "Rain",
     "Storm",
-    "Wind",
-    "Snow",
-    "Radiant",
-    "Shark Hunt"
+    "Foggy",
+    "Heat",
+    "Blizzard"
 }
 
-local selectedWeather = nil
+local selectedWeather = weatherItems[1]
+local autoBuyWeatherEnabled = false
 
--- Dropdown untuk memilih cuaca
-makeDropdown(
-    weatherPanel,                 -- parent
-    "Select Weather",             -- title text
-    "🌫️",                         -- icon
-    weatherList,                  -- list items
-    function(value)               -- callback
-        selectedWeather = value
-        AutoBuyWeather.SetSelected({ value })  
-    end,
-    "WeatherDropdown"             -- unique Id
-)
-
--- Toggle untuk ON / OFF Auto Buy Weather
-makeToggle(weatherPanel, "Enable Auto Buy", function(state)
-    if state then
-        if not selectedWeather then
-            print("⚠️ Pilih cuaca dulu sebelum ON!")
-            return false
-        end
-        AutoBuyWeather.Start()
-        print("🟢 AutoBuyWeather ON:", selectedWeather)
-    else
-        AutoBuyWeather.Stop()
-        print("🔴 AutoBuyWeather OFF")
-    end
+-- Dropdown pilih cuaca
+makeDropdown(shopPage, "Select Weather", "🌦️", weatherItems, function(weather)
+    selectedWeather = weather
+    print("[AutoBuyWeather] Selected:", weather)
 end)
 
---------------------------------------------------------------------
+-- Toggle untuk ON/OFF fitur
+makeToggle(shopPage, "Auto Buy Weather", "⛅", false, function(state)
+    autoBuyWeatherEnabled = state
+    print("[AutoBuyWeather] Active:", state)
+end)
+
+-- Worker utama auto buy
+task.spawn(function()
+    while true do
+        task.wait(1)
+
+        if autoBuyWeatherEnabled and selectedWeather then
+            -- Pastikan function BuyWeather tersedia
+            pcall(function()
+                WeatherModule:BuyWeather(selectedWeather)
+            end)
+        end
+    end
+end)
 
 
 -- Settings Page
@@ -1362,6 +1360,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
