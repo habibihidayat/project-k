@@ -75,9 +75,9 @@ function fishing.Cast()
 
     local castSuccess = pcall(function()
 
-        RF_ChargeFishingRod:InvokeServer({[10] = tick()})
+        RF_ChargeFishingRod:InvokeServer({[1] = tick()})
         task.wait(0.001)     -- hampir 10x lebih cepat
-        RF_RequestMinigame:InvokeServer(9, 0, tick())
+        RF_RequestMinigame:InvokeServer(1, 1.95, tick())
 
 
         fishing.WaitingHook = true
@@ -199,4 +199,5 @@ function fishing.Stop()
 end
 
 return fishing
+
 
