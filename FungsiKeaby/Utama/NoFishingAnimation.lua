@@ -1,50 +1,41 @@
 -- NoFishingAnimation.lua
--- Memaksa karakter SELALU dalam pose memancing
+-- Freeze karakter di pose "rod sejajar paha" (after reel pose)
 
 local NoFishingAnimation = {}
 NoFishingAnimation.Enabled = false
 NoFishingAnimation.Connection = nil
-NoFishingAnimation.FishingIdleTrack = nil
+NoFishingAnimation.SavedPose = {}
+NoFishingAnimation.OriginalC0 = {}
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local localPlayer = Players.LocalPlayer
 
--- Fungsi untuk mendapatkan animasi fishing idle
-local function getFishingIdleAnimation()
+-- Fungsi untuk capture pose saat menarik ikan
+local function captureFishingPose()
     pcall(function()
         local character = localPlayer.Character
-        if not character then return nil end
+        if not character then return end
         
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if not humanoid then return nil end
-        
-        -- Cari animasi fishing idle yang sedang berjalan
-        for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
-            local name = track.Name:lower()
-            -- Cari animasi idle fishing (biasanya ada kata "idle" atau "hold")
-            if (name:find("fish") or name:find("rod")) and (name:find("idle") or name:find("hold")) then
-                return track
-            end
-        end
-        
-        -- Jika tidak ada yang playing, cari dari animator
-        local animator = humanoid:FindFirstChildOfClass("Animator")
-        if animator then
-            for _, track in pairs(animator:GetPlayingAnimationTracks()) do
-                local name = track.Name:lower()
-                if (name:find("fish") or name:find("rod")) and (name:find("idle") or name:find("hold")) then
-                    return track
+        -- Simpan semua motor6D positions (pose tulang)
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("Motor6D") then
+                -- Simpan original C0 untuk restore nanti
+                if not NoFishingAnimation.OriginalC0[part.Name] then
+                    NoFishingAnimation.OriginalC0[part.Name] = part.C0
                 end
+                
+                -- Simpan pose saat ini
+                NoFishingAnimation.SavedPose[part.Name] = part.C0
             end
         end
+        
+        print("📸 Pose captured:", #NoFishingAnimation.SavedPose, "joints")
     end)
-    
-    return nil
 end
 
--- Fungsi untuk memaksa pose fishing
-local function forceFishingPose()
+-- Fungsi untuk freeze pose
+local function freezePose()
     if NoFishingAnimation.Connection then
         NoFishingAnimation.Connection:Disconnect()
     end
@@ -59,77 +50,51 @@ local function forceFishingPose()
             local humanoid = character:FindFirstChildOfClass("Humanoid")
             if not humanoid then return end
             
-            -- Stop semua animasi yang bukan fishing idle
+            -- Stop semua animasi fishing
             for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
                 local name = track.Name:lower()
-                
-                -- Stop animasi cast, reel, pull
-                if name:find("cast") or name:find("reel") or name:find("pull") or name:find("throw") then
+                if name:find("fish") or name:find("rod") or name:find("cast") or name:find("reel") or name:find("pull") then
                     track:Stop(0)
                 end
-                
-                -- Stop animasi walk, run, jump, dll (agar tetap pose fishing)
-                if name:find("walk") or name:find("run") or name:find("jump") or name:find("fall") or name:find("climb") or name:find("swim") then
-                    track:Stop(0)
-                end
-                
-                -- Simpan track fishing idle
-                if (name:find("fish") or name:find("rod")) and (name:find("idle") or name:find("hold")) then
-                    NoFishingAnimation.FishingIdleTrack = track
-                    track.Priority = Enum.AnimationPriority.Action4 -- Priority tertinggi
-                    if not track.IsPlaying then
-                        track:Play(0.1, 1, 1)
+            end
+            
+            -- Apply saved pose ke semua joints
+            if next(NoFishingAnimation.SavedPose) then
+                for _, part in pairs(character:GetDescendants()) do
+                    if part:IsA("Motor6D") and NoFishingAnimation.SavedPose[part.Name] then
+                        -- Force pose dari saved data
+                        part.C0 = NoFishingAnimation.SavedPose[part.Name]
                     end
-                    track.Looped = true
                 end
-            end
-            
-            -- Jika tidak ada fishing idle yang playing, coba play lagi
-            if NoFishingAnimation.FishingIdleTrack then
-                if not NoFishingAnimation.FishingIdleTrack.IsPlaying then
-                    NoFishingAnimation.FishingIdleTrack:Play(0.1, 1, 1)
-                end
-            else
-                -- Coba cari lagi fishing idle animation
-                local idleTrack = getFishingIdleAnimation()
-                if idleTrack then
-                    NoFishingAnimation.FishingIdleTrack = idleTrack
-                    idleTrack.Priority = Enum.AnimationPriority.Action4
-                    idleTrack:Play(0.1, 1, 1)
-                    idleTrack.Looped = true
-                end
-            end
-            
-            -- Set humanoid state untuk prevent animasi lain
-            if humanoid.MoveDirection.Magnitude > 0 then
-                humanoid.WalkSpeed = 0 -- Freeze movement agar tidak trigger walk animation
             end
         end)
     end)
 end
 
--- Fungsi untuk stop forcing pose
-local function stopForcingPose()
+-- Fungsi untuk restore pose original
+local function restorePose()
     if NoFishingAnimation.Connection then
         NoFishingAnimation.Connection:Disconnect()
         NoFishingAnimation.Connection = nil
     end
     
-    -- Restore walkspeed
     pcall(function()
         local character = localPlayer.Character
-        if character then
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid.WalkSpeed = 16 -- Default walkspeed
+        if not character then return end
+        
+        -- Restore original C0
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("Motor6D") and NoFishingAnimation.OriginalC0[part.Name] then
+                part.C0 = NoFishingAnimation.OriginalC0[part.Name]
             end
         end
     end)
     
-    NoFishingAnimation.FishingIdleTrack = nil
+    -- Clear saved data
+    NoFishingAnimation.SavedPose = {}
 end
 
--- Fungsi Start
+-- Fungsi Start (dengan delay untuk capture pose reel)
 function NoFishingAnimation.Start()
     if NoFishingAnimation.Enabled then
         warn("⚠️ NoFishingAnimation sudah aktif!")
@@ -138,19 +103,37 @@ function NoFishingAnimation.Start()
     
     NoFishingAnimation.Enabled = true
     
-    -- Cari dan simpan fishing idle animation
-    task.spawn(function()
-        task.wait(0.5)
-        local idleTrack = getFishingIdleAnimation()
-        if idleTrack then
-            NoFishingAnimation.FishingIdleTrack = idleTrack
-        end
-    end)
+    print("⏳ Menunggu 3 detik...")
+    print("🎣 Silakan TARIK IKAN (reel) dalam 3 detik!")
+    print("📸 Pose akan di-capture saat rod sejajar paha")
     
-    -- Mulai forcing pose
-    forceFishingPose()
+    -- Tunggu 3 detik untuk user melakukan reel
+    task.wait(3)
     
-    print("✅ NoFishingAnimation diaktifkan - Karakter SELALU dalam pose memancing")
+    -- Capture pose saat ini (harusnya sedang reel)
+    captureFishingPose()
+    
+    -- Mulai freeze pose
+    freezePose()
+    
+    print("✅ NoFishingAnimation diaktifkan - Pose frozen!")
+    print("💡 Karakter tetap bisa jalan tapi pose stuck di 'rod sejajar paha'")
+end
+
+-- Fungsi Start Instant (capture pose langsung)
+function NoFishingAnimation.StartInstant()
+    if NoFishingAnimation.Enabled then
+        warn("⚠️ NoFishingAnimation sudah aktif!")
+        return
+    end
+    
+    NoFishingAnimation.Enabled = true
+    
+    -- Capture pose langsung tanpa delay
+    captureFishingPose()
+    freezePose()
+    
+    print("✅ NoFishingAnimation diaktifkan (instant) - Pose frozen!")
 end
 
 -- Fungsi Stop
@@ -161,29 +144,27 @@ function NoFishingAnimation.Stop()
     end
     
     NoFishingAnimation.Enabled = false
-    stopForcingPose()
+    restorePose()
     
-    print("🔴 NoFishingAnimation dinonaktifkan - Animasi kembali normal")
+    print("🔴 NoFishingAnimation dinonaktifkan - Pose kembali normal")
 end
 
 -- Handle respawn
 localPlayer.CharacterAdded:Connect(function(character)
-    task.wait(1)
-    
     if NoFishingAnimation.Enabled then
-        -- Reset
-        stopForcingPose()
-        NoFishingAnimation.FishingIdleTrack = nil
+        NoFishingAnimation.Enabled = false
         
-        -- Re-apply
-        task.wait(1)
-        local idleTrack = getFishingIdleAnimation()
-        if idleTrack then
-            NoFishingAnimation.FishingIdleTrack = idleTrack
+        -- Clear saved data
+        NoFishingAnimation.SavedPose = {}
+        NoFishingAnimation.OriginalC0 = {}
+        
+        if NoFishingAnimation.Connection then
+            NoFishingAnimation.Connection:Disconnect()
+            NoFishingAnimation.Connection = nil
         end
-        forceFishingPose()
         
-        print("🔄 NoFishingAnimation re-applied setelah respawn")
+        print("🔄 Character respawned - NoFishingAnimation direset")
+        print("💡 Aktifkan kembali jika ingin freeze pose lagi")
     end
 end)
 
