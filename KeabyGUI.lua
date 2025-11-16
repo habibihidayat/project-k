@@ -870,14 +870,13 @@ makeSlider(pnl2,"Min Cycle Delay",0.01,5.0,0.8,function(v) instant2x.Settings.Mi
 makeSlider(pnl2,"Force Reset Time",0.01,5.0,0.7,function(v) instant2x.Settings.ForceResetTime=v end)
 
 local pnl3=makePanel(mainPage,"🎣 No Fishing Animation","")
-makeToggle(pnl3,"Disable Fishing Animation",function(on) 
+makeToggle(pnl3,"Freeze Reel Pose (3s delay)",function(on) 
     if on then 
-        NoFishingAnimation.Start() 
+        NoFishingAnimation.Start() -- Delay 3 detik
     else 
         NoFishingAnimation.Stop() 
     end 
 end)
-
 
 
 
@@ -1353,6 +1352,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
