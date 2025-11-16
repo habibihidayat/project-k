@@ -77,7 +77,7 @@ function fishing.Cast()
 
         RF_ChargeFishingRod:InvokeServer({[1] = tick()})
         task.wait(0.001)     -- hampir 10x lebih cepat
-        RF_RequestMinigame:InvokeServer(1, 1.95, tick())
+        RF_RequestMinigame:InvokeServer(1, 0, tick())
 
 
         fishing.WaitingHook = true
@@ -199,5 +199,6 @@ function fishing.Stop()
 end
 
 return fishing
+
 
 
