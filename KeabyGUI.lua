@@ -870,11 +870,9 @@ makeSlider(pnl2,"Retry delay",0.01,5.0,0.05,function(v) instant2x.Settings.Retry
 makeSlider(pnl2,"Min Cycle Delay",0.01,5.0,0.8,function(v) instant2x.Settings.MinCycleDelay=v end)
 makeSlider(pnl2,"Force Reset Time",0.01,5.0,0.7,function(v) instant2x.Settings.ForceResetTime=v end)
 
--- === BLATANT AUTO FISHING PANEL ===
 local pnlBlatant = makePanel(mainPage,"🔥 Blatant Auto Fishing","")
 
--- Toggle utama
-makeToggle(pnlBlatant,"Enable Blatant Mode (FAST!)",function(on) 
+makeToggle(pnlBlatant,"Enable Blatant Mode",function(on) 
     if on then 
         BlatantAutoFishing.Start()
     else 
@@ -882,34 +880,24 @@ makeToggle(pnlBlatant,"Enable Blatant Mode (FAST!)",function(on)
     end 
 end)
 
--- Slider Charge Time (power cast)
-makeSlider(pnlBlatant,"Charge Time (Power)",0.1,8.0,1.0,function(v) 
+-- Charge Power
+makeSlider(pnlBlatant,"Charge Power",0.1,8.0,1.0,function(v) 
     BlatantAutoFishing.Settings.ChargeTime = v
 end)
 
--- Slider Cast Delay
-makeSlider(pnlBlatant,"Cast Delay",0.001,8.0,0.001,function(v) 
+-- Cast Delay (antar cast)
+makeSlider(pnlBlatant,"Cast Delay",0.1,8.0,0.5,function(v) 
     BlatantAutoFishing.Settings.CastDelay = v
 end)
 
--- Slider Reel Delay
-makeSlider(pnlBlatant,"Reel Delay",0.001,8.0,0.001,function(v) 
-    BlatantAutoFishing.Settings.ReelDelay = v
-end)
-
--- Slider Retry Delay
-makeSlider(pnlBlatant,"Retry Delay",0.001,8.0,0.001,function(v) 
+-- Retry Delay (setelah fishing selesai)
+makeSlider(pnlBlatant,"Retry Delay",0.1,8.0,0.5,function(v) 
     BlatantAutoFishing.Settings.RetryDelay = v
 end)
 
--- Toggle Auto Shake
+-- Auto Shake Toggle
 makeToggle(pnlBlatant,"Auto Shake Minigame",function(on) 
     BlatantAutoFishing.Settings.AutoShake = on
-end)
-
--- Toggle Auto Reel
-makeToggle(pnlBlatant,"Auto Reel (Instant)",function(on) 
-    BlatantAutoFishing.Settings.AutoReel = on
 end)
 
 local pnl3=makePanel(mainPage,"🎣 No Fishing Animation","")
@@ -1395,6 +1383,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
