@@ -870,11 +870,11 @@ makeSlider(pnl2,"Retry delay",0.01,5.0,0.05,function(v) instant2x.Settings.Retry
 makeSlider(pnl2,"Min Cycle Delay",0.01,5.0,0.8,function(v) instant2x.Settings.MinCycleDelay=v end)
 makeSlider(pnl2,"Force Reset Time",0.01,5.0,0.7,function(v) instant2x.Settings.ForceResetTime=v end)
 
--- === BLATANT AUTO FISHING PANEL ===
-local pnlBlatant = makePanel(mainPage,"🔥 Blatant Auto Fishing","")
+-- === TRUE BLATANT MODE PANEL ===
+local pnlBlatant = makePanel(mainPage,"🔥 TRUE BLATANT MODE","")
 
 -- Toggle utama
-makeToggle(pnlBlatant,"Enable Blatant Mode (ULTRA FAST)",function(on) 
+makeToggle(pnlBlatant,"🔥 ENABLE EXTREME BLATANT 🔥",function(on) 
     if on then 
         BlatantAutoFishing.Start()
     else 
@@ -882,29 +882,19 @@ makeToggle(pnlBlatant,"Enable Blatant Mode (ULTRA FAST)",function(on)
     end 
 end)
 
--- Slider Fishing Delay
-makeSlider(pnlBlatant,"Fishing Delay",0.001,9.0,0.01,function(v) 
-    BlatantAutoFishing.Settings.FishingDelay = v
+-- Instant Catch
+makeToggle(pnlBlatant,"Instant Catch (No Wait)",function(on) 
+    BlatantAutoFishing.Settings.InstantCatch = on
 end)
 
--- Slider Cancel Delay
-makeSlider(pnlBlatant,"Cancel Delay",0.001,9.0,0.01,function(v) 
-    BlatantAutoFishing.Settings.CancelDelay = v
+-- Auto Complete
+makeToggle(pnlBlatant,"Auto Complete Everything",function(on) 
+    BlatantAutoFishing.Settings.AutoComplete = on
 end)
 
--- Slider Hook Detection Delay
-makeSlider(pnlBlatant,"Hook Detection Delay",0.001,9.0,0.01,function(v) 
-    BlatantAutoFishing.Settings.HookDetectionDelay = v
-end)
-
--- Slider Request Minigame Delay
-makeSlider(pnlBlatant,"Request Minigame Delay",0.001,9.0,0.01,function(v) 
-    BlatantAutoFishing.Settings.RequestMinigameDelay = v
-end)
-
--- Slider Timeout Delay
-makeSlider(pnlBlatant,"Timeout Delay",0.1,9.0,0.5,function(v) 
-    BlatantAutoFishing.Settings.TimeoutDelay = v
+-- Spam Rate Slider
+makeSlider(pnlBlatant,"Spam Rate (ms)",0.001,0.1,0.001,function(v) 
+    BlatantAutoFishing.Settings.SpamRate = v
 end)
 
 local pnl3=makePanel(mainPage,"🎣 No Fishing Animation","")
@@ -1390,6 +1380,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
