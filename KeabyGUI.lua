@@ -869,6 +869,43 @@ makeSlider(pnl2,"Retry delay",0.01,5.0,0.05,function(v) instant2x.Settings.Retry
 makeSlider(pnl2,"Min Cycle Delay",0.01,5.0,0.8,function(v) instant2x.Settings.MinCycleDelay=v end)
 makeSlider(pnl2,"Force Reset Time",0.01,5.0,0.7,function(v) instant2x.Settings.ForceResetTime=v end)
 
+-- === BLATANT AUTO FISHING PANEL ===
+local pnlBlatant = makePanel(mainPage,"🔥 Blatant Auto Fishing","")
+
+-- Toggle utama
+makeToggle(pnlBlatant,"Enable Blatant Mode (FAST!)",function(on) 
+    if on then 
+        BlatantAutoFishing.Start()
+    else 
+        BlatantAutoFishing.Stop() 
+    end 
+end)
+
+-- Slider Cast Delay
+makeSlider(pnlBlatant,"Cast Delay",0.001,9.0,0.001,function(v) 
+    BlatantAutoFishing.Settings.CastDelay = v
+end)
+
+-- Slider Reel Delay
+makeSlider(pnlBlatant,"Reel Delay",0.001,9.0,0.001,function(v) 
+    BlatantAutoFishing.Settings.ReelDelay = v
+end)
+
+-- Slider Retry Delay
+makeSlider(pnlBlatant,"Retry Delay",0.001,9.0,0.001,function(v) 
+    BlatantAutoFishing.Settings.RetryDelay = v
+end)
+
+-- Toggle Auto Shake
+makeToggle(pnlBlatant,"Auto Shake Minigame",function(on) 
+    BlatantAutoFishing.Settings.AutoShake = on
+end)
+
+-- Toggle Auto Reel
+makeToggle(pnlBlatant,"Auto Reel (Instant)",function(on) 
+    BlatantAutoFishing.Settings.AutoReel = on
+end)
+
 local pnl3=makePanel(mainPage,"🎣 No Fishing Animation","")
 
 -- Method 2: Manual (backup jika auto gagal)
@@ -1352,6 +1389,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
