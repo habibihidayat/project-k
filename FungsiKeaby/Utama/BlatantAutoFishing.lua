@@ -1,5 +1,5 @@
 -- BlatantAutoFishing.lua
--- Mode Blatant: Ultra fast fishing for sleitnick_net system
+-- Mode Blatant: Ultra fast fishing (No rod detection needed)
 
 local BlatantAutoFishing = {}
 BlatantAutoFishing.Enabled = false
@@ -7,7 +7,7 @@ BlatantAutoFishing.Settings = {
     CastDelay = 0.001,
     ReelDelay = 0.001,
     RetryDelay = 0.001,
-    ChargeTime = 1.0,        -- Waktu charge rod (1.0 = 100%)
+    ChargeTime = 1.0,
     AutoShake = true,
     AutoReel = true,
 }
@@ -21,9 +21,9 @@ local localPlayer = Players.LocalPlayer
 local PlayerGUI = localPlayer:WaitForChild("PlayerGui")
 local FishingConnection = nil
 local ShakeConnection = nil
-local MinigameConnection = nil
 local isFishing = false
 local isMinigameActive = false
+local lastCastTime = 0
 
 -- Network events
 local netFolder = ReplicatedStorage
@@ -40,64 +40,28 @@ local RE_MinigameChanged = netFolder:WaitForChild("RE/FishingMinigameChanged")
 
 print("✅ Network events loaded successfully!")
 
--- Fungsi untuk get rod
-local function getRod()
-    local character = localPlayer.Character
-    if not character then return nil end
-    
-    for _, tool in pairs(character:GetChildren()) do
-        if tool:IsA("Tool") then
-            local name = tool.Name:lower()
-            if name:find("rod") or name:find("fishing") then
-                return tool
-            end
-        end
-    end
-    
-    -- Cari di backpack dan equip
-    local backpack = localPlayer:FindFirstChild("Backpack")
-    if backpack then
-        for _, tool in pairs(backpack:GetChildren()) do
-            if tool:IsA("Tool") then
-                local name = tool.Name:lower()
-                if name:find("rod") or name:find("fishing") then
-                    character.Humanoid:EquipTool(tool)
-                    task.wait(0.1)
-                    return tool
-                end
-            end
-        end
-    end
-    
-    return nil
-end
-
--- Fungsi untuk charge dan cast rod
+-- Fungsi untuk charge dan cast
 local function chargeCast()
+    if isFishing then return end
+    
+    local currentTime = tick()
+    if currentTime - lastCastTime < BlatantAutoFishing.Settings.CastDelay then
+        return
+    end
+    
     pcall(function()
-        local rod = getRod()
-        if not rod then 
-            warn("❌ Rod tidak ditemukan!")
-            return 
-        end
-        
-        if isFishing then
-            print("⏳ Sudah dalam proses fishing, skip cast")
-            return
-        end
-        
-        print("🎣 Charging rod...")
+        print("🎣 Charging and casting...")
         isFishing = true
+        lastCastTime = currentTime
         
-        -- Invoke ChargeFishingRod dengan charge time
         local success, result = pcall(function()
             return RF_ChargeFishingRod:InvokeServer(BlatantAutoFishing.Settings.ChargeTime)
         end)
         
         if success then
-            print("✅ Rod charged and casted! Charge:", BlatantAutoFishing.Settings.ChargeTime)
+            print("✅ Cast successful! Power:", BlatantAutoFishing.Settings.ChargeTime)
         else
-            warn("❌ Failed to charge rod:", result)
+            warn("❌ Cast failed:", result)
             isFishing = false
         end
     end)
@@ -105,13 +69,10 @@ end
 
 -- Fungsi untuk request minigame (reel)
 local function requestMinigame()
+    if not isFishing or isMinigameActive then return end
+    
     pcall(function()
-        if not isFishing then
-            print("⚠️ Tidak sedang fishing, skip minigame request")
-            return
-        end
-        
-        print("🎮 Requesting minigame...")
+        print("🎮 Requesting minigame (reel)...")
         
         local success, result = pcall(function()
             return RF_RequestMinigame:InvokeServer()
@@ -119,70 +80,47 @@ local function requestMinigame()
         
         if success then
             print("✅ Minigame requested!")
-            isMinigameActive = true
         else
-            warn("❌ Failed to request minigame:", result)
+            warn("❌ Minigame request failed:", result)
         end
     end)
 end
 
--- Fungsi untuk cancel fishing
-local function cancelFishing()
-    pcall(function()
-        print("❌ Canceling fishing...")
-        
-        RF_CancelFishingInputs:InvokeServer()
-        
-        isFishing = false
-        isMinigameActive = false
-        print("✅ Fishing canceled")
-    end)
-end
-
--- Listen untuk FishingCompleted event
-local function setupFishingCompletedListener()
-    RE_FishingCompleted.OnClientEvent:Connect(function(...)
-        local args = {...}
-        print("🐟 Fishing completed!", "Args:", table.concat(args, ", "))
-        
-        -- Reset state
-        isFishing = false
-        isMinigameActive = false
-        
-        -- Wait retry delay lalu cast lagi
-        task.wait(BlatantAutoFishing.Settings.RetryDelay)
-        
-        if BlatantAutoFishing.Enabled then
-            print("🔄 Retry fishing...")
-            task.wait(BlatantAutoFishing.Settings.CastDelay)
-            chargeCast()
-        end
-    end)
-end
-
--- Listen untuk MinigameChanged event
-local function setupMinigameListener()
-    RE_MinigameChanged.OnClientEvent:Connect(function(state)
-        print("🎮 Minigame state changed:", state)
-        
-        if state == true or state == "started" then
-            isMinigameActive = true
-            print("✅ Minigame active!")
-            
-            -- Auto complete minigame jika enabled
-            if BlatantAutoFishing.Settings.AutoShake then
-                -- Tunggu sebentar lalu spam complete
-                task.wait(0.1)
-                -- Minigame biasanya auto-complete atau perlu spam click
+-- Listen untuk FishingCompleted
+RE_FishingCompleted.OnClientEvent:Connect(function(...)
+    local args = {...}
+    print("🐟 Fishing completed!", unpack(args))
+    
+    -- Reset state
+    isFishing = false
+    isMinigameActive = false
+    
+    -- Auto retry
+    if BlatantAutoFishing.Enabled then
+        task.spawn(function()
+            task.wait(BlatantAutoFishing.Settings.RetryDelay)
+            if BlatantAutoFishing.Enabled then
+                print("🔄 Auto retry...")
+                chargeCast()
             end
-        elseif state == false or state == "ended" then
-            isMinigameActive = false
-            print("🎮 Minigame ended")
-        end
-    end)
-end
+        end)
+    end
+end)
 
--- Auto shake untuk minigame UI
+-- Listen untuk MinigameChanged
+RE_MinigameChanged.OnClientEvent:Connect(function(state)
+    print("🎮 Minigame state:", state)
+    
+    if state == true or state == "started" or state == "active" then
+        isMinigameActive = true
+        print("✅ Minigame active!")
+    elseif state == false or state == "ended" or state == "inactive" then
+        isMinigameActive = false
+        print("🎮 Minigame ended")
+    end
+end)
+
+-- Auto shake minigame UI
 local function autoShake()
     if ShakeConnection then
         ShakeConnection:Disconnect()
@@ -193,18 +131,14 @@ local function autoShake()
         if not isMinigameActive then return end
         
         pcall(function()
-            -- Cari minigame UI
             for _, gui in pairs(PlayerGUI:GetDescendants()) do
-                if gui:IsA("ScreenGui") or gui:IsA("Frame") then
+                if gui:IsA("ScreenGui") and gui.Enabled then
                     local name = gui.Name:lower()
                     
-                    if (name:find("fishing") or name:find("mini") or name:find("game")) and 
-                       (gui.Visible or (gui:IsA("ScreenGui") and gui.Enabled)) then
-                        
-                        -- Cari button atau clickable area
+                    if name:find("fishing") or name:find("mini") or name:find("game") then
+                        -- Spam click semua button
                         for _, button in pairs(gui:GetDescendants()) do
-                            if button:IsA("TextButton") or button:IsA("ImageButton") or button:IsA("Frame") then
-                                -- Spam click
+                            if button:IsA("TextButton") or button:IsA("ImageButton") then
                                 pcall(function()
                                     for _, connection in pairs(getconnections(button.MouseButton1Click)) do
                                         connection:Fire()
@@ -231,19 +165,17 @@ local function startFishing()
         if not BlatantAutoFishing.Enabled then return end
         
         pcall(function()
-            local rod = getRod()
-            if not rod then return end
-            
-            -- State machine untuk fishing
             if not isFishing and not isMinigameActive then
-                -- Idle state: perlu cast
+                -- Idle: cast rod
                 chargeCast()
                 
             elseif isFishing and not isMinigameActive then
-                -- Waiting for bite: coba request minigame
+                -- Waiting: request minigame after delay
                 if BlatantAutoFishing.Settings.AutoReel then
-                    task.wait(BlatantAutoFishing.Settings.ReelDelay)
-                    requestMinigame()
+                    local timeSinceCast = tick() - lastCastTime
+                    if timeSinceCast >= BlatantAutoFishing.Settings.ReelDelay then
+                        requestMinigame()
+                    end
                 end
             end
         end)
@@ -258,25 +190,21 @@ function BlatantAutoFishing.Start()
     end
     
     print("="..string.rep("=", 50))
-    print("🔥 BLATANT MODE STARTING...")
+    print("🔥 BLATANT MODE AKTIF!")
     print("="..string.rep("=", 50))
-    
-    -- Check rod
-    local rod = getRod()
-    if rod then
-        print("✅ Rod found:", rod.Name)
-    else
-        warn("❌ ROD TIDAK DITEMUKAN!")
-        return
-    end
+    print("⚡ Cast Delay:", BlatantAutoFishing.Settings.CastDelay, "s")
+    print("⚡ Reel Delay:", BlatantAutoFishing.Settings.ReelDelay, "s")
+    print("⚡ Retry Delay:", BlatantAutoFishing.Settings.RetryDelay, "s")
+    print("⚡ Charge Power:", BlatantAutoFishing.Settings.ChargeTime)
+    print("🎮 Auto Shake:", BlatantAutoFishing.Settings.AutoShake)
+    print("🎣 Auto Reel:", BlatantAutoFishing.Settings.AutoReel)
+    print("⚠️ WARNING: Mode ini sangat obvious!")
+    print("="..string.rep("=", 50))
     
     BlatantAutoFishing.Enabled = true
     isFishing = false
     isMinigameActive = false
-    
-    -- Setup event listeners
-    setupFishingCompletedListener()
-    setupMinigameListener()
+    lastCastTime = 0
     
     -- Start loops
     startFishing()
@@ -285,13 +213,7 @@ function BlatantAutoFishing.Start()
         autoShake()
     end
     
-    print("="..string.rep("=", 50))
-    print("✅ BLATANT MODE AKTIF!")
-    print("⚡ Cast Delay:", BlatantAutoFishing.Settings.CastDelay, "s")
-    print("⚡ Reel Delay:", BlatantAutoFishing.Settings.ReelDelay, "s")
-    print("⚡ Charge Time:", BlatantAutoFishing.Settings.ChargeTime)
-    print("⚠️ WARNING: Mode ini sangat obvious!")
-    print("="..string.rep("=", 50))
+    print("✅ Fishing loop started!")
 end
 
 -- Fungsi Stop
@@ -303,10 +225,13 @@ function BlatantAutoFishing.Stop()
     
     BlatantAutoFishing.Enabled = false
     
-    -- Cancel fishing yang sedang berjalan
-    if isFishing then
-        cancelFishing()
-    end
+    -- Cancel fishing
+    pcall(function()
+        if isFishing then
+            RF_CancelFishingInputs:InvokeServer()
+            print("❌ Fishing canceled")
+        end
+    end)
     
     if FishingConnection then
         FishingConnection:Disconnect()
@@ -318,6 +243,9 @@ function BlatantAutoFishing.Stop()
         ShakeConnection = nil
     end
     
+    isFishing = false
+    isMinigameActive = false
+    
     print("🔴 Blatant Mode dinonaktifkan")
 end
 
@@ -326,8 +254,11 @@ localPlayer.CharacterAdded:Connect(function()
     if BlatantAutoFishing.Enabled then
         task.wait(2)
         
+        print("🔄 Character respawned, restarting...")
+        
         isFishing = false
         isMinigameActive = false
+        lastCastTime = 0
         
         if FishingConnection then
             FishingConnection:Disconnect()
@@ -340,8 +271,6 @@ localPlayer.CharacterAdded:Connect(function()
         if BlatantAutoFishing.Settings.AutoShake then
             autoShake()
         end
-        
-        print("🔄 Blatant Mode restarted")
     end
 end)
 
