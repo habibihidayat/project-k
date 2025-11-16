@@ -1,181 +1,123 @@
 -- BlatantAutoFishing.lua
--- Mode Blatant: Aggressive auto fishing with bypass attempts
+-- Mode Blatant: Ultra fast fishing based on working Instant2X
 
 local BlatantAutoFishing = {}
 BlatantAutoFishing.Enabled = false
 BlatantAutoFishing.Settings = {
-    InstantCatch = true,      -- Instant catch tanpa delay
-    AutoShake = true,         -- Auto complete minigame
-    SpamClick = true,         -- Spam click minigame
-    BypassCooldown = true,    -- Bypass cooldown
-    MaxSpeed = true,          -- Max speed mode
+    FishingDelay = 0.01,      -- Delay setelah catch (blatant: 0.01s)
+    CancelDelay = 0.01,       -- Delay cancel (blatant: 0.01s)
+    HookDetectionDelay = 0.01, -- Delay deteksi hook (blatant: 0.01s)
+    RequestMinigameDelay = 0.01, -- Delay request minigame (blatant: 0.01s)
+    TimeoutDelay = 0.5,       -- Timeout fallback (blatant: 0.5s)
 }
 
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
 
--- Variables
-local PlayerGUI = localPlayer:WaitForChild("PlayerGui")
-local Connections = {}
-
 -- Network events
-local netFolder = ReplicatedStorage
-    :WaitForChild("Packages")
-    :WaitForChild("_Index")
-    :WaitForChild("sleitnick_net@0.2.0")
-    :WaitForChild("net")
+local netFolder = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("_Index")
+    :WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
 
 local RF_ChargeFishingRod = netFolder:WaitForChild("RF/ChargeFishingRod")
 local RF_RequestMinigame = netFolder:WaitForChild("RF/RequestFishingMinigameStarted")
+local RF_CancelFishingInputs = netFolder:WaitForChild("RF/CancelFishingInputs")
 local RE_FishingCompleted = netFolder:WaitForChild("RE/FishingCompleted")
 local RE_MinigameChanged = netFolder:WaitForChild("RE/FishingMinigameChanged")
+local RE_FishCaught = netFolder:WaitForChild("RE/FishCaught")
 
-print("✅ Blatant Mode - Network events loaded!")
+-- Variables
+local WaitingHook = false
+local CurrentCycle = 0
+local TotalFish = 0
+local MinigameConnection = nil
+local FishCaughtConnection = nil
 
--- Fungsi untuk spam cast (aggressive)
-local function aggressiveCast()
-    task.spawn(function()
-        while BlatantAutoFishing.Enabled do
-            pcall(function()
-                -- Spam invoke dengan max power
-                RF_ChargeFishingRod:InvokeServer(1)
-            end)
-            
-            -- Ultra fast loop
-            if BlatantAutoFishing.Settings.MaxSpeed then
-                task.wait(0.01)
-            else
-                task.wait(0.1)
-            end
-        end
-    end)
+local function log(msg)
+    print("[Blatant] " .. msg)
 end
 
--- Fungsi untuk auto complete minigame (aggressive spam)
-local function autoCompleteMinigame()
-    Connections.Minigame = RunService.Heartbeat:Connect(function()
-        if not BlatantAutoFishing.Enabled then return end
-        
-        pcall(function()
-            -- Method 1: Spam request minigame
-            if BlatantAutoFishing.Settings.InstantCatch then
-                RF_RequestMinigame:InvokeServer()
-            end
-            
-            -- Method 2: Find dan spam click UI
-            if BlatantAutoFishing.Settings.AutoShake then
-                for _, gui in pairs(PlayerGUI:GetDescendants()) do
-                    if gui:IsA("ScreenGui") and gui.Enabled then
-                        -- Cari minigame UI
-                        for _, frame in pairs(gui:GetDescendants()) do
-                            if frame:IsA("Frame") or frame:IsA("ImageLabel") then
-                                local name = frame.Name:lower()
-                                
-                                -- Deteksi minigame elements
-                                if name:find("bar") or name:find("safe") or name:find("zone") or 
-                                   name:find("progress") or name:find("mini") then
-                                    
-                                    -- Spam click di area tersebut
-                                    if BlatantAutoFishing.Settings.SpamClick then
-                                        for i = 1, 10 do
-                                            pcall(function()
-                                                -- Fire semua mouse events
-                                                for _, btn in pairs(frame:GetDescendants()) do
-                                                    if btn:IsA("GuiButton") then
-                                                        for _, sig in pairs(getconnections(btn.MouseButton1Click)) do
-                                                            sig:Fire()
-                                                        end
-                                                    end
-                                                end
-                                            end)
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end)
-    end)
-end
-
--- Hook FishingCompleted untuk instant retry
-local function setupInstantRetry()
-    Connections.FishingCompleted = RE_FishingCompleted.OnClientEvent:Connect(function(...)
-        if not BlatantAutoFishing.Enabled then return end
-        
-        print("🐟 Caught! Instant retry...")
-        
-        -- Instant cast lagi tanpa delay
-        task.spawn(function()
-            for i = 1, 3 do
-                pcall(function()
-                    RF_ChargeFishingRod:InvokeServer(1)
-                end)
-                task.wait(0.01)
-            end
-        end)
-    end)
-end
-
--- Monitor minigame state
-local function setupMinigameMonitor()
-    Connections.MinigameChanged = RE_MinigameChanged.OnClientEvent:Connect(function(state)
-        if not BlatantAutoFishing.Enabled then return end
-        
-        if state then
-            print("🎮 Minigame detected! Spamming completion...")
-            
-            -- Spam complete attempts
-            task.spawn(function()
-                for i = 1, 20 do
-                    pcall(function()
-                        RF_RequestMinigame:InvokeServer()
-                    end)
-                    task.wait(0.01)
-                end
-            end)
-        end
-    end)
-end
-
--- Fungsi untuk bypass detection (experimental)
-local function bypassAttempts()
-    if not BlatantAutoFishing.Settings.BypassCooldown then return end
+-- Fungsi Cast
+local function Cast()
+    if not BlatantAutoFishing.Enabled or WaitingHook then return end
     
-    task.spawn(function()
-        while BlatantAutoFishing.Enabled do
-            pcall(function()
-                -- Attempt 1: Manipulate workspace values
-                local character = localPlayer.Character
-                if character then
-                    for _, obj in pairs(character:GetDescendants()) do
-                        if obj:IsA("NumberValue") or obj:IsA("IntValue") then
-                            local name = obj.Name:lower()
-                            if name:find("cooldown") or name:find("timer") or name:find("wait") then
-                                obj.Value = 0
-                            end
-                        end
-                    end
-                end
+    CurrentCycle = CurrentCycle + 1
+    
+    pcall(function()
+        -- 1. Charge fishing rod
+        RF_ChargeFishingRod:InvokeServer({[22] = tick()})
+        log("🎣 Cast #" .. CurrentCycle)
+        
+        -- 2. Delay minimal lalu request minigame
+        task.wait(BlatantAutoFishing.Settings.RequestMinigameDelay)
+        RF_RequestMinigame:InvokeServer(9, 0, tick())
+        log("🎯 Minigame requested, waiting hook...")
+        
+        WaitingHook = true
+        
+        -- 3. Timeout fallback (jika hook tidak terdeteksi)
+        task.delay(BlatantAutoFishing.Settings.TimeoutDelay, function()
+            if WaitingHook and BlatantAutoFishing.Enabled then
+                WaitingHook = false
                 
-                -- Attempt 2: Clear GUI cooldown indicators
-                for _, gui in pairs(PlayerGUI:GetDescendants()) do
-                    if gui:IsA("Frame") or gui:IsA("TextLabel") then
-                        local name = gui.Name:lower()
-                        if name:find("cooldown") or name:find("timer") then
-                            gui.Visible = false
-                        end
-                    end
-                end
-            end)
+                -- Force complete
+                RE_FishingCompleted:FireServer()
+                log("⏱️ Timeout - Force complete")
+                
+                task.wait(BlatantAutoFishing.Settings.CancelDelay)
+                pcall(function() RF_CancelFishingInputs:InvokeServer() end)
+                
+                task.wait(BlatantAutoFishing.Settings.FishingDelay)
+                if BlatantAutoFishing.Enabled then Cast() end
+            end
+        end)
+    end)
+end
+
+-- Setup event listeners
+local function setupListeners()
+    -- Listen untuk MinigameChanged (hook detection)
+    if MinigameConnection then MinigameConnection:Disconnect() end
+    
+    MinigameConnection = RE_MinigameChanged.OnClientEvent:Connect(function(state)
+        if not BlatantAutoFishing.Enabled then return end
+        if not WaitingHook then return end
+        
+        -- Deteksi hook state
+        if typeof(state) == "string" and string.find(string.lower(state), "hook") then
+            WaitingHook = false
             
-            task.wait(0.5)
+            -- Delay minimal untuk hook detection
+            task.wait(BlatantAutoFishing.Settings.HookDetectionDelay)
+            
+            -- Complete fishing
+            RE_FishingCompleted:FireServer()
+            log("✅ Hook detected - Fish caught!")
+            
+            task.wait(BlatantAutoFishing.Settings.CancelDelay)
+            pcall(function() RF_CancelFishingInputs:InvokeServer() end)
+            
+            task.wait(BlatantAutoFishing.Settings.FishingDelay)
+            if BlatantAutoFishing.Enabled then Cast() end
         end
+    end)
+    
+    -- Listen untuk FishCaught
+    if FishCaughtConnection then FishCaughtConnection:Disconnect() end
+    
+    FishCaughtConnection = RE_FishCaught.OnClientEvent:Connect(function(fishName, data)
+        if not BlatantAutoFishing.Enabled then return end
+        
+        WaitingHook = false
+        TotalFish = TotalFish + 1
+        
+        log("🐟 Fish caught: " .. tostring(fishName) .. " | Total: " .. TotalFish)
+        
+        task.wait(BlatantAutoFishing.Settings.CancelDelay)
+        pcall(function() RF_CancelFishingInputs:InvokeServer() end)
+        
+        task.wait(BlatantAutoFishing.Settings.FishingDelay)
+        if BlatantAutoFishing.Enabled then Cast() end
     end)
 end
 
@@ -187,43 +129,31 @@ function BlatantAutoFishing.Start()
     end
     
     print("="..string.rep("=", 50))
-    print("🔥 BLATANT MODE AKTIF - AGGRESSIVE FISHING!")
+    print("🔥 BLATANT MODE AKTIF!")
     print("="..string.rep("=", 50))
-    print("⚡ Instant Catch:", BlatantAutoFishing.Settings.InstantCatch)
-    print("⚡ Auto Shake:", BlatantAutoFishing.Settings.AutoShake)
-    print("⚡ Spam Click:", BlatantAutoFishing.Settings.SpamClick)
-    print("⚡ Bypass Cooldown:", BlatantAutoFishing.Settings.BypassCooldown)
-    print("⚡ Max Speed:", BlatantAutoFishing.Settings.MaxSpeed)
+    print("⚡ Fishing Delay:", BlatantAutoFishing.Settings.FishingDelay, "s")
+    print("⚡ Cancel Delay:", BlatantAutoFishing.Settings.CancelDelay, "s")
+    print("⚡ Hook Detection Delay:", BlatantAutoFishing.Settings.HookDetectionDelay, "s")
+    print("⚡ Request Minigame Delay:", BlatantAutoFishing.Settings.RequestMinigameDelay, "s")
+    print("⚡ Timeout Delay:", BlatantAutoFishing.Settings.TimeoutDelay, "s")
     print("="..string.rep("=", 50))
-    print("⚠️ WARNING: SANGAT OBVIOUS! HIGH BAN RISK!")
+    print("⚠️ WARNING: Ultra fast mode - HIGH BAN RISK!")
     print("="..string.rep("=", 50))
     
     BlatantAutoFishing.Enabled = true
+    WaitingHook = false
+    CurrentCycle = 0
+    TotalFish = 0
     
-    -- Start all aggressive loops
+    -- Setup listeners
+    setupListeners()
+    log("✅ Event listeners installed")
+    
+    -- Start fishing
     task.wait(0.5)
+    Cast()
     
-    -- 1. Aggressive casting
-    aggressiveCast()
-    print("✅ Aggressive cast loop started")
-    
-    -- 2. Auto complete minigame
-    autoCompleteMinigame()
-    print("✅ Auto complete minigame started")
-    
-    -- 3. Instant retry on completion
-    setupInstantRetry()
-    print("✅ Instant retry hook installed")
-    
-    -- 4. Minigame monitor
-    setupMinigameMonitor()
-    print("✅ Minigame monitor started")
-    
-    -- 5. Bypass attempts
-    bypassAttempts()
-    print("✅ Bypass attempts started")
-    
-    print("🔥 BLATANT MODE FULLY ACTIVE!")
+    log("✅ Blatant fishing started!")
 end
 
 -- Fungsi Stop
@@ -234,44 +164,47 @@ function BlatantAutoFishing.Stop()
     end
     
     BlatantAutoFishing.Enabled = false
+    WaitingHook = false
     
-    -- Disconnect all connections
-    for name, connection in pairs(Connections) do
-        if connection then
-            connection:Disconnect()
-            print("🔴 Disconnected:", name)
-        end
+    -- Disconnect listeners
+    if MinigameConnection then
+        MinigameConnection:Disconnect()
+        MinigameConnection = nil
     end
-    Connections = {}
     
-    print("🔴 BLATANT MODE DINONAKTIFKAN")
+    if FishCaughtConnection then
+        FishCaughtConnection:Disconnect()
+        FishCaughtConnection = nil
+    end
+    
+    -- Cancel current fishing
+    pcall(function() RF_CancelFishingInputs:InvokeServer() end)
+    
+    log("🔴 Blatant Mode stopped | Total fish: " .. TotalFish)
 end
 
 -- Handle respawn
-localPlayer.CharacterAdded:Connect(function()
+Players.LocalPlayer.CharacterAdded:Connect(function()
     if BlatantAutoFishing.Enabled then
         task.wait(2)
         
-        print("🔄 Character respawned, restarting blatant mode...")
+        log("🔄 Character respawned, restarting...")
         
-        -- Clear old connections
-        for _, connection in pairs(Connections) do
-            if connection then connection:Disconnect() end
-        end
-        Connections = {}
+        WaitingHook = false
         
-        -- Restart
+        -- Reconnect listeners
+        if MinigameConnection then MinigameConnection:Disconnect() end
+        if FishCaughtConnection then FishCaughtConnection:Disconnect() end
+        
+        setupListeners()
+        
         task.wait(1)
-        aggressiveCast()
-        autoCompleteMinigame()
-        setupInstantRetry()
-        setupMinigameMonitor()
-        bypassAttempts()
+        Cast()
     end
 end)
 
 -- Cleanup
-game:GetService("Players").PlayerRemoving:Connect(function(player)
+Players.PlayerRemoving:Connect(function(player)
     if player == localPlayer then
         if BlatantAutoFishing.Enabled then
             BlatantAutoFishing.Stop()
