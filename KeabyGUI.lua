@@ -871,15 +871,6 @@ makeSlider(pnl2,"Force Reset Time",0.01,5.0,0.7,function(v) instant2x.Settings.F
 
 local pnl3=makePanel(mainPage,"🎣 No Fishing Animation","")
 
--- Method 1: Auto (tanpa perlu memancing)
-makeToggle(pnl3,"Auto Reel Pose",function(on) 
-    if on then 
-        NoFishingAnimation.Start() -- AUTO
-    else 
-        NoFishingAnimation.Stop() 
-    end 
-end)
-
 -- Method 2: Manual (backup jika auto gagal)
 makeToggle(pnl3,"Manual Capture (2s)",function(on) 
     if on then 
@@ -1361,6 +1352,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
