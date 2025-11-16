@@ -882,18 +882,23 @@ makeToggle(pnlBlatant,"Enable Blatant Mode (FAST!)",function(on)
     end 
 end)
 
+-- Slider Charge Time (power cast)
+makeSlider(pnlBlatant,"Charge Time (Power)",0.1,8.0,1.0,function(v) 
+    BlatantAutoFishing.Settings.ChargeTime = v
+end)
+
 -- Slider Cast Delay
-makeSlider(pnlBlatant,"Cast Delay",0.001,9.0,0.001,function(v) 
+makeSlider(pnlBlatant,"Cast Delay",0.001,8.0,0.001,function(v) 
     BlatantAutoFishing.Settings.CastDelay = v
 end)
 
 -- Slider Reel Delay
-makeSlider(pnlBlatant,"Reel Delay",0.001,9.0,0.001,function(v) 
+makeSlider(pnlBlatant,"Reel Delay",0.001,8.0,0.001,function(v) 
     BlatantAutoFishing.Settings.ReelDelay = v
 end)
 
 -- Slider Retry Delay
-makeSlider(pnlBlatant,"Retry Delay",0.001,9.0,0.001,function(v) 
+makeSlider(pnlBlatant,"Retry Delay",0.001,8.0,0.001,function(v) 
     BlatantAutoFishing.Settings.RetryDelay = v
 end)
 
@@ -1390,6 +1395,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
