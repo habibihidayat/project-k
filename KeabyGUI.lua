@@ -874,7 +874,7 @@ makeSlider(pnl2,"Force Reset Time",0.01,5.0,0.7,function(v) instant2x.Settings.F
 local pnlBlatant = makePanel(mainPage,"🔥 Blatant Auto Fishing","")
 
 -- Toggle utama
-makeToggle(pnlBlatant,"Enable Blatant Mode",function(on) 
+makeToggle(pnlBlatant,"Enable Blatant Mode (ULTRA FAST)",function(on) 
     if on then 
         BlatantAutoFishing.Start()
     else 
@@ -882,29 +882,29 @@ makeToggle(pnlBlatant,"Enable Blatant Mode",function(on)
     end 
 end)
 
--- Instant Catch
-makeToggle(pnlBlatant,"Instant Catch",function(on) 
-    BlatantAutoFishing.Settings.InstantCatch = on
+-- Slider Fishing Delay
+makeSlider(pnlBlatant,"Fishing Delay",0.001,9.0,0.01,function(v) 
+    BlatantAutoFishing.Settings.FishingDelay = v
 end)
 
--- Auto Shake
-makeToggle(pnlBlatant,"Auto Complete Minigame",function(on) 
-    BlatantAutoFishing.Settings.AutoShake = on
+-- Slider Cancel Delay
+makeSlider(pnlBlatant,"Cancel Delay",0.001,9.0,0.01,function(v) 
+    BlatantAutoFishing.Settings.CancelDelay = v
 end)
 
--- Spam Click
-makeToggle(pnlBlatant,"Spam Click (x10)",function(on) 
-    BlatantAutoFishing.Settings.SpamClick = on
+-- Slider Hook Detection Delay
+makeSlider(pnlBlatant,"Hook Detection Delay",0.001,9.0,0.01,function(v) 
+    BlatantAutoFishing.Settings.HookDetectionDelay = v
 end)
 
--- Bypass Cooldown
-makeToggle(pnlBlatant,"Bypass Cooldown",function(on) 
-    BlatantAutoFishing.Settings.BypassCooldown = on
+-- Slider Request Minigame Delay
+makeSlider(pnlBlatant,"Request Minigame Delay",0.001,9.0,0.01,function(v) 
+    BlatantAutoFishing.Settings.RequestMinigameDelay = v
 end)
 
--- Max Speed
-makeToggle(pnlBlatant,"Max Speed Mode",function(on) 
-    BlatantAutoFishing.Settings.MaxSpeed = on
+-- Slider Timeout Delay
+makeSlider(pnlBlatant,"Timeout Delay",0.1,9.0,0.5,function(v) 
+    BlatantAutoFishing.Settings.TimeoutDelay = v
 end)
 
 local pnl3=makePanel(mainPage,"🎣 No Fishing Animation","")
@@ -1390,6 +1390,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
