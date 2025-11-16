@@ -1,113 +1,65 @@
 -- NoFishingAnimation.lua
--- Membuat karakter tetap dalam posisi memancing
+-- Membuat karakter tetap dalam posisi memancing (Fixed)
 
 local NoFishingAnimation = {}
 NoFishingAnimation.Enabled = false
 NoFishingAnimation.Connection = nil
-NoFishingAnimation.AnimationConnection = nil
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local localPlayer = Players.LocalPlayer
 
--- Fungsi untuk freeze karakter dalam posisi memancing
-local function freezeFishingPose()
-    local character = localPlayer.Character
-    if not character then return end
-    
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if not humanoid then return end
-    
-    local animator = humanoid:FindFirstChildOfClass("Animator")
-    if not animator then return end
-    
-    -- Stop semua animasi fishing yang sedang berjalan
-    for _, track in pairs(animator:GetPlayingAnimationTracks()) do
-        if track.Animation then
-            local animId = track.Animation.AnimationId:lower()
-            -- Hentikan animasi cast, reel, dll tapi biarkan idle fishing pose
-            if animId:match("cast") or animId:match("reel") or animId:match("pull") then
-                track:Stop()
+-- Fungsi untuk disable animasi fishing
+local function disableFishingAnim()
+    pcall(function()
+        local character = localPlayer.Character
+        if not character then return end
+        
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if not humanoid then return end
+        
+        for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+            local name = track.Name:lower()
+            if name:find("fish") or name:find("rod") or name:find("cast") or name:find("reel") then
+                track:Stop(0)
             end
-        end
-    end
-    
-    -- Monitor dan stop animasi baru secara real-time
-    if not NoFishingAnimation.AnimationConnection then
-        NoFishingAnimation.AnimationConnection = animator.AnimationPlayed:Connect(function(track)
-            if NoFishingAnimation.Enabled and track.Animation then
-                local animId = track.Animation.AnimationId:lower()
-                -- Stop animasi yang mengganggu posisi idle
-                if animId:match("cast") or animId:match("reel") or animId:match("pull") then
-                    track:Stop()
-                end
-            end
-        end)
-    end
-    
-    -- Freeze pose menggunakan RunService
-    if NoFishingAnimation.Connection then
-        NoFishingAnimation.Connection:Disconnect()
-    end
-    
-    NoFishingAnimation.Connection = RunService.RenderStepped:Connect(function()
-        if not NoFishingAnimation.Enabled then return end
-        
-        local char = localPlayer.Character
-        if not char then return end
-        
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if not hum then return end
-        
-        local anim = hum:FindFirstChildOfClass("Animator")
-        if not anim then return end
-        
-        -- Cek dan stop animasi yang tidak diinginkan setiap frame
-        for _, track in pairs(anim:GetPlayingAnimationTracks()) do
-            if track.Animation then
-                local animId = track.Animation.AnimationId:lower()
-                if animId:match("cast") or animId:match("reel") or animId:match("pull") then
-                    track:Stop()
-                    track:AdjustSpeed(0) -- Set speed ke 0 untuk freeze
-                end
-            end
-        end
-        
-        -- Set Humanoid state untuk mencegah animasi default
-        if hum:GetState() ~= Enum.HumanoidStateType.Physics then
-            -- Biarkan karakter dalam state idle/standing
         end
     end)
 end
 
--- Fungsi untuk restore animasi normal
-local function restoreAnimations()
-    -- Disconnect semua connection
+-- Fungsi untuk freeze pose secara real-time
+local function startFreezing()
+    if NoFishingAnimation.Connection then
+        NoFishingAnimation.Connection:Disconnect()
+    end
+    
+    -- Loop setiap frame untuk stop animasi fishing
+    NoFishingAnimation.Connection = RunService.RenderStepped:Connect(function()
+        if not NoFishingAnimation.Enabled then return end
+        
+        pcall(function()
+            local character = localPlayer.Character
+            if not character then return end
+            
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if not humanoid then return end
+            
+            -- Stop semua animasi fishing setiap frame
+            for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+                local name = track.Name:lower()
+                if name:find("fish") or name:find("rod") or name:find("cast") or name:find("reel") then
+                    track:Stop(0)
+                end
+            end
+        end)
+    end)
+end
+
+-- Fungsi untuk stop freezing
+local function stopFreezing()
     if NoFishingAnimation.Connection then
         NoFishingAnimation.Connection:Disconnect()
         NoFishingAnimation.Connection = nil
-    end
-    
-    if NoFishingAnimation.AnimationConnection then
-        NoFishingAnimation.AnimationConnection:Disconnect()
-        NoFishingAnimation.AnimationConnection = nil
-    end
-    
-    -- Reset animator
-    local character = localPlayer.Character
-    if character then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            local animator = humanoid:FindFirstChildOfClass("Animator")
-            if animator then
-                -- Resume semua animasi yang di-pause
-                for _, track in pairs(animator:GetPlayingAnimationTracks()) do
-                    if track.Animation then
-                        track:AdjustSpeed(1) -- Kembalikan speed normal
-                    end
-                end
-            end
-        end
     end
 end
 
@@ -119,7 +71,13 @@ function NoFishingAnimation.Start()
     end
     
     NoFishingAnimation.Enabled = true
-    freezeFishingPose()
+    
+    -- Langsung disable animasi yang ada
+    disableFishingAnim()
+    
+    -- Mulai loop untuk prevent animasi baru
+    startFreezing()
+    
     print("✅ NoFishingAnimation diaktifkan - Karakter freeze dalam posisi memancing")
 end
 
@@ -131,33 +89,35 @@ function NoFishingAnimation.Stop()
     end
     
     NoFishingAnimation.Enabled = false
-    restoreAnimations()
+    stopFreezing()
+    
     print("🔴 NoFishingAnimation dinonaktifkan - Animasi memancing kembali normal")
 end
 
 -- Handle respawn
 localPlayer.CharacterAdded:Connect(function(character)
-    task.wait(1) -- Tunggu character sepenuhnya loaded
+    -- Tunggu character dan humanoid loaded
+    task.wait(1)
+    
     if NoFishingAnimation.Enabled then
-        -- Reset connections
-        if NoFishingAnimation.Connection then
-            NoFishingAnimation.Connection:Disconnect()
-            NoFishingAnimation.Connection = nil
-        end
-        if NoFishingAnimation.AnimationConnection then
-            NoFishingAnimation.AnimationConnection:Disconnect()
-            NoFishingAnimation.AnimationConnection = nil
-        end
-        -- Re-apply freeze
+        -- Reset connection jika ada
+        stopFreezing()
+        
+        -- Re-apply freeze setelah respawn
         task.wait(0.5)
-        freezeFishingPose()
+        disableFishingAnim()
+        startFreezing()
+        
+        print("🔄 NoFishingAnimation re-applied setelah respawn")
     end
 end)
 
--- Cleanup saat script dihapus
+-- Cleanup saat player leaving
 game:GetService("Players").PlayerRemoving:Connect(function(player)
     if player == localPlayer then
-        NoFishingAnimation.Stop()
+        if NoFishingAnimation.Enabled then
+            NoFishingAnimation.Stop()
+        end
     end
 end)
 
