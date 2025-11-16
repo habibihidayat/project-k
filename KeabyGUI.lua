@@ -869,11 +869,10 @@ makeSlider(pnl2,"Retry delay",0.01,5.0,0.05,function(v) instant2x.Settings.Retry
 makeSlider(pnl2,"Min Cycle Delay",0.01,5.0,0.8,function(v) instant2x.Settings.MinCycleDelay=v end)
 makeSlider(pnl2,"Force Reset Time",0.01,5.0,0.7,function(v) instant2x.Settings.ForceResetTime=v end)
 
--- Panel
 local pnl3=makePanel(mainPage,"🎣 No Fishing Animation","")
-makeToggle(pnl3,"Disable All Animations",function(on) 
+makeToggle(pnl3,"Freeze Fishing Pose (Auto)",function(on) 
     if on then 
-        NoFishingAnimation.Start()
+        NoFishingAnimation.Start() -- Detect otomatis
     else 
         NoFishingAnimation.Stop() 
     end 
@@ -1351,6 +1350,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
