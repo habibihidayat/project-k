@@ -17,6 +17,38 @@ local function new(class, props)
     return inst
 end
 
+local function SafeLoad(url)
+    local suc, res = pcall(function()
+        return game:HttpGet(url)
+    end)
+
+    if not suc then
+        warn("[KeabyGUI] HttpGet gagal: ", res)
+        return function() end
+    end
+
+    -- Jika GitHub balas HTML atau pesan error, jangan loadstring
+    if res:find("rate limit") or res:find("429") or res:find("<html") then
+        warn("[KeabyGUI] Rate limited (429) atau konten bukan script:", url)
+        return function() end
+    end
+
+    local ok, fn = pcall(loadstring, res)
+    if not ok then
+        warn("[KeabyGUI] Loadstring gagal: ", fn)
+        return function() end
+    end
+
+    local ok2, mod = pcall(fn)
+    if not ok2 then
+        warn("[KeabyGUI] Eksekusi script gagal:", ok2)
+        return function() end
+    end
+
+    return mod
+end
+
+
 local instant = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant.lua"))()
 local instant2x = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant2Xspeed.lua"))()
 local BlatantAutoFishing = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/BlatantAutoFishing.lua"))() -- ← TAMBAHKAN IN
@@ -1380,6 +1412,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
