@@ -278,3 +278,4 @@ end
 -- _G.FishingScript.Settings.ReleaseDelay = 0.001
 
 return fishing
+
