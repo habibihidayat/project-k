@@ -1,3 +1,4 @@
+-- GUI nya
 -- KeabyGUI_v4.0.lua - Ultra Modern Edition (MOBILE OPTIMIZED)
 -- Neon Cyberpunk Theme with Refined Design 🌟
 
@@ -17,19 +18,14 @@ local function new(class, props)
     return inst
 end
 
-local instant = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant.lua"))()
-local instant2x = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant2Xspeed.lua"))()
-local BlatantAutoFishing = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/BlatantAutoFishing.lua"))() -- ← TAMBAHKAN IN
-local NoFishingAnimation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/NoFishingAnimation.lua"))()
-local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
-local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/TeleportToPlayer.lua"))()
-local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
-local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
-local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/AntiAFK.lua"))()
-local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
-local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoBuyWeather.lua"))()
-
-
+local instant = loadstring(game:HttpGet("https://raw.githubusercontent.com/Habibihidayat42/keaby/refs/heads/main/FungsiKeaby/Instant.lua"))()
+local instant2x = loadstring(game:HttpGet("https://raw.githubusercontent.com/Habibihidayat42/keaby/refs/heads/main/FungsiKeaby/Instant2Xspeed.lua"))()
+local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/Habibihidayat42/keaby/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
+local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.com/Habibihidayat42/keaby/refs/heads/main/FungsiKeaby/TeleportSystem/TeleportToPlayer.lua"))()
+local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/Habibihidayat42/keaby/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
+local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/Habibihidayat42/keaby/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
+local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/Habibihidayat42/keaby/refs/heads/main/FungsiKeaby/Misc/AntiAFK.lua"))()
+local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/Habibihidayat42/keaby/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
 
 
 
@@ -856,57 +852,19 @@ end
 local pnl1=makePanel(mainPage,"⚡ Instant Fishing","")
 makeToggle(pnl1,"Enable Instant Fishing",function(on) if on then instant.Start() else instant.Stop() end end)
 makeSlider(pnl1,"Fishing Delay",0.01,5.0,1.30,function(v) instant.Settings.MaxWaitTime=v end)
-makeSlider(pnl1,"Retry Delay",0.01,5.0,0.001,function(v) instant.Settings.RetryDelay=v end)
-makeSlider(pnl1,"Hook Detection Delay",0.01,1.5,0.19,function(v) instant.Settings.HookDetectionDelay=v end)
+makeSlider(pnl1,"Cast Delay",0.01,5.0,1.0,function(v) instant.Settings.ChargeTime=v end)
+makeSlider(pnl1,"Cast Delay",0.01,5.0,0.001,function(v) instant.Settings.ReleaseDelay=v end)
 makeSlider(pnl1,"Cancel Delay",0.01,1.5,0.19,function(v) instant.Settings.CancelDelay=v end)
-
 
 local pnl2=makePanel(mainPage,"🚀 Instant 2x Speed","")
 makeToggle(pnl2,"Enable Instant 2x Speed",function(on) if on then instant2x.Start() else instant2x.Stop() end end)
 makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
 makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
 makeSlider(pnl2,"Hook detection Delay",0.01,5.0,0.19,function(v) instant2x.Settings.HookDetectionDelay=v end)
-makeSlider(pnl2,"Retry delay",0.01,5.0,0.05,function(v) instant2x.Settings.RetryDelay=v end)
-makeSlider(pnl2,"Min Cycle Delay",0.01,5.0,0.8,function(v) instant2x.Settings.MinCycleDelay=v end)
-makeSlider(pnl2,"Force Reset Time",0.01,5.0,0.7,function(v) instant2x.Settings.ForceResetTime=v end)
+makeSlider(pnl2,"Max wait time",0.01,5.0,0.19,function(v) instant2x.Settings.MaxWaitTime=v end)
+makeSlider(pnl2,"Anim Disable",0.01,5.0,0.19,function(v) instant2x.Settings.RetryDelay=v end)
 
--- === TRUE BLATANT MODE PANEL ===
-local pnlBlatant = makePanel(mainPage,"🔥 TRUE BLATANT MODE","")
 
--- Toggle utama
-makeToggle(pnlBlatant,"🔥 ENABLE EXTREME BLATANT 🔥",function(on) 
-    if on then 
-        BlatantAutoFishing.Start()
-    else 
-        BlatantAutoFishing.Stop() 
-    end 
-end)
-
--- Instant Catch
-makeToggle(pnlBlatant,"Instant Catch (No Wait)",function(on) 
-    BlatantAutoFishing.Settings.InstantCatch = on
-end)
-
--- Auto Complete
-makeToggle(pnlBlatant,"Auto Complete Everything",function(on) 
-    BlatantAutoFishing.Settings.AutoComplete = on
-end)
-
--- Spam Rate Slider
-makeSlider(pnlBlatant,"Spam Rate (ms)",0.001,0.1,0.001,function(v) 
-    BlatantAutoFishing.Settings.SpamRate = v
-end)
-
-local pnl3=makePanel(mainPage,"🎣 No Fishing Animation","")
-
--- Method 2: Manual (backup jika auto gagal)
-makeToggle(pnl3,"Manual Capture (2s)",function(on) 
-    if on then 
-        NoFishingAnimation.StartWithDelay()
-    else 
-        NoFishingAnimation.Stop() 
-    end 
-end)
 
 -- Teleport Page with Dropdowns
 local locationItems = {}
@@ -1114,35 +1072,6 @@ makeButton(pnlTimer, "Stop Auto Sell", function()
 		warn("❌ AutoSellTimer belum dimuat!")
 	end
 end)
-
--- === AUTO BUY WEATHER PANEL ===
-local pnlWeather = makePanel(shopPage, "🌦️ Auto Buy Weather", "")
-
--- Dropdown multi-select untuk memilih cuaca
-local selectedWeathers = {}
-local weatherDropdown = makeDropdown(pnlWeather, "Select Weathers", "☁️", AutoBuyWeather.AllWeathers, function(weather)
-    -- Toggle selection
-    local idx = table.find(selectedWeathers, weather)
-    if idx then
-        table.remove(selectedWeathers, idx)
-    else
-        table.insert(selectedWeathers, weather)
-    end
-    -- Update AutoBuyWeather module
-    AutoBuyWeather.SetSelected(selectedWeathers)
-end, "WeatherDropdown")
-
--- Toggle untuk mulai/stop AutoWeather
-makeSwitch(pnlWeather, "Enable Auto Weather", false, function(on)
-    if on then
-        AutoBuyWeather.Start()
-        print("🟢 AutoWeather started")
-    else
-        AutoBuyWeather.Stop()
-        print("🔴 AutoWeather stopped")
-    end
-end)
-
 
 -- Settings Page
 local settingsPnl = makePanel(settingsPage,"⚙️ General Settings","")
@@ -1380,37 +1309,6 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
