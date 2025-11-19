@@ -37,17 +37,17 @@ local fishing = {
     OKCasts = 0,
     Connections = {},
     Settings = {
-        FishingDelay = 0.01,
-        CancelDelay = 0.19,
-        HookDetectionDelay = 0.01,
-        RetryDelay = 0.60,
-        MaxWaitTime = 1.3,
+        FishingDelay = 0.01,           -- Delay antar cast
+        CancelDelay = 0.19,            -- Delay cancel input
+        HookDetectionDelay = 0.01,     -- Delay deteksi hook
+        RetryDelay = 0.60,             -- Delay retry jika gagal
+        MaxWaitTime = 1.3,             -- Max wait untuk hook
         
-        -- 🎯 PERFECT CAST SETTINGS (Tuning untuk PERFECT)
-        PerfectChargeTime = 0.999,  -- Tepat di zona perfect (99.9%)
-        PerfectReleaseDelay = 0.0001, -- Ultra minimal delay
-        PerfectPower = 0.999,  -- Power calculation untuk perfect
-        UseAdaptiveTiming = true, -- Auto-adjust berdasarkan hasil
+        -- 🎯 PERFECT CAST SETTINGS (Optimal untuk PERFECT)
+        PerfectChargeTime = 0.999,     -- Charge time (0.99-1.0 = PERFECT zone)
+        PerfectReleaseDelay = 0.001,   -- Release delay (0.001-0.01)
+        PerfectPower = 0.999,          -- Power value (0.995-1.0 = PERFECT)
+        UseAdaptiveTiming = true,      -- Auto-adjust berdasarkan hasil
     }
 }
 
