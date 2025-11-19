@@ -1,5 +1,5 @@
--- ⚡ ULTRA PERFECT CAST AUTO FISHING v31.0
--- 🎯 ALWAYS PERFECT/AMAZING - NEVER OK/GOOD/GREAT
+-- ⚡ ULTRA PERFECT CAST AUTO FISHING v32.0
+-- 🎯 ALWAYS PERFECT/AMAZING - OPTIMIZED TIMING
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -37,21 +37,22 @@ local fishing = {
     AmazingCasts = 0,
     Connections = {},
     Settings = {
-        FishingDelay = 0.01,           -- Delay antar cast
-        CancelDelay = 0.12,            -- ⚡ DIPERCEPAT: Delay cancel input
-        HookDetectionDelay = 0.005,    -- ⚡ DIPERCEPAT: Delay deteksi hook
-        RetryDelay = 0.35,             -- ⚡ DIPERCEPAT: Delay retry jika gagal
-        MaxWaitTime = 0.8,             -- ⚡ DIPERCEPAT: Max wait untuk hook
+        FishingDelay = 0.15,           -- ⚡ OPTIMAL: Delay antar cast
+        CancelDelay = 0.25,            -- ⚡ OPTIMAL: Delay cancel input  
+        HookDetectionDelay = 0.05,     -- ⚡ OPTIMAL: Delay deteksi hook
+        RetryDelay = 0.5,              -- ⚡ OPTIMAL: Delay retry jika gagal
+        MaxWaitTime = 2.0,             -- ⚡ OPTIMAL: Max wait untuk hook (dinaikkan)
         
         -- 🎯 PERFECT/AMAZING CAST SETTINGS (Optimized)
-        PerfectChargeTime = 0.998,     -- ⚡ OPTIMAL: Charge time untuk Perfect/Amazing
-        PerfectReleaseDelay = 0.0005,  -- ⚡ DIPERCEPAT: Release delay
-        PerfectPower = 0.997,          -- ⚡ OPTIMAL: Power value untuk Perfect/Amazing
-        UseAdaptiveTiming = true,      -- Auto-adjust berdasarkan hasil
+        PerfectChargeTime = 1.0,       -- ⚡ OPTIMAL: Charge time untuk Perfect/Amazing
+        PerfectReleaseDelay = 0.01,    -- ⚡ OPTIMAL: Release delay
+        PerfectPower = 1.0,            -- ⚡ OPTIMAL: Power value untuk Perfect/Amazing
+        UseAdaptiveTiming = false,     -- ⚡ NON-ACTIVE: Sementara matikan adaptive
         
-        -- ⚡ HIGH-SPEED FISHING
+        -- ⚡ OPTIMIZED FISHING
         ImmediateRecast = true,        -- ⚡ LANGSUNG lempar setelah dapat ikan
-        QuickCancel = true,            -- ⚡ Cancel inputs lebih cepat
+        QuickCancel = false,           -- ⚡ NON-ACTIVE: Cancel inputs normal dulu
+        UsePreciseHookDetection = true,-- ⚡ AKTIFKAN: Deteksi hook lebih akurat
     }
 }
 
@@ -87,7 +88,7 @@ local function disableFishingAnim()
     end)
 end
 
--- 🎯 FUNGSI CAST PERFECT/AMAZING - Optimized
+-- 🎯 FUNGSI CAST PERFECT/AMAZING - FIXED TIMING
 function fishing.PerfectCast()
     if not fishing.Running or fishing.WaitingHook then return end
 
@@ -97,71 +98,77 @@ function fishing.PerfectCast()
     log("🎯 PERFECT/AMAZING Cast #" .. fishing.CurrentCycle)
 
     local castSuccess = pcall(function()
-        -- ===== STRATEGY 1: ULTRA-PRECISE TIMING =====
+        -- ===== STRATEGY 1: CONSISTENT TIMING =====
         local startTime = tick()
         
         -- Mulai charge dengan timestamp akurat
         local chargeData = {[1] = startTime}
         local chargeResult = RF_ChargeFishingRod:InvokeServer(chargeData)
         
-        -- ===== STRATEGY 2: FRAME-PERFECT WAIT =====
+        -- ===== STRATEGY 2: PRECISE WAIT =====
         local targetCharge = fishing.Settings.PerfectChargeTime
-        local accumulated = 0
         
-        -- ⚡ HIGH-PRECISION WAIT dengan Heartbeat
-        local connection
-        connection = RunService.Heartbeat:Connect(function(deltaTime)
-            accumulated += deltaTime
-            if accumulated >= targetCharge then
-                connection:Disconnect()
-            end
-        end)
+        -- ⚡ GUNAKAN WAIT BIASA UNTUK KONSISTENSI
+        task.wait(targetCharge)
         
-        -- Wait ultra-presisi
-        while accumulated < targetCharge and fishing.Running do
-            task.wait()
-        end
-        
-        -- ===== STRATEGY 3: ULTRA-FAST RELEASE =====
+        -- ===== STRATEGY 3: OPTIMAL RELEASE =====
         task.wait(fishing.Settings.PerfectReleaseDelay)
         
-        -- ===== STRATEGY 4: PERFECT/AMAZING POWER CALCULATION =====
+        -- ===== STRATEGY 4: PERFECT POWER =====
         local releaseTime = tick()
         local actualCharge = releaseTime - startTime
         
-        -- ⚡ POWER OPTIMAL untuk Perfect/Amazing saja
+        -- ⚡ POWER OPTIMAL untuk Perfect/Amazing
         local perfectPower = fishing.Settings.PerfectPower
         
         -- Kirim request dengan parameter optimal
         local minigameResult = RF_RequestMinigame:InvokeServer(
-            perfectPower,  -- Power (0.997 = optimal untuk Perfect/Amazing)
+            perfectPower,  -- Power (1.0 = optimal untuk Perfect)
             0,             -- Direction (0 = straight)
             releaseTime    -- Release timestamp
         )
         
         fishing.WaitingHook = true
-        log(string.format("⚡ Cast Released! (Charge: %.4fs, Power: %.3f)", actualCharge, perfectPower))
+        log(string.format("⚡ Cast Released! (Charge: %.3fs, Power: %.2f)", actualCharge, perfectPower))
         
-        -- ===== STRATEGY 5: ADAPTIVE ADJUSTMENT =====
-        if fishing.Settings.UseAdaptiveTiming then
-            fishing.CastResults = fishing.CastResults or {}
-            table.insert(fishing.CastResults, {
-                charge = actualCharge,
-                power = perfectPower,
-                timestamp = releaseTime
-            })
+        -- ===== STRATEGY 5: IMPROVED HOOK DETECTION =====
+        local hookDetected = false
+        
+        -- Multiple hook detection methods
+        if fishing.Settings.UsePreciseHookDetection then
+            -- Method 1: Event-based detection
+            local hookConnection
+            hookConnection = RE_MinigameChanged.OnClientEvent:Connect(function(state)
+                if fishing.WaitingHook and typeof(state) == "string" then
+                    local stateLower = string.lower(state)
+                    if stateLower:find("hook") or stateLower:find("bite") or stateLower:find("catch") then
+                        hookDetected = true
+                        hookConnection:Disconnect()
+                    end
+                end
+            end)
             
-            -- Keep only last 3 results untuk responsiveness lebih baik
-            if #fishing.CastResults > 3 then
-                table.remove(fishing.CastResults, 1)
-            end
+            -- Method 2: Visual/audio detection (placeholder)
+            task.delay(0.5, function()
+                if fishing.WaitingHook and not hookDetected then
+                    -- Check for visual cues
+                    pcall(function()
+                        -- Tambahkan detection tambahan di sini jika diperlukan
+                    end)
+                end
+            end)
         end
 
-        -- ⚡ OPTIMIZED TIMEOUT PROTECTION
-        task.delay(fishing.Settings.MaxWaitTime, function()
+        -- ⚡ IMPROVED TIMEOUT PROTECTION
+        local timeoutThread = task.delay(fishing.Settings.MaxWaitTime, function()
             if fishing.WaitingHook and fishing.Running then
                 fishing.WaitingHook = false
-                log("⚠️ Timeout - Force complete", true)
+                
+                if not hookDetected then
+                    log("⏰ No hook detected - Timeout", true)
+                else
+                    log("🎣 Hook processed - Completing")
+                end
                 
                 pcall(function()
                     RE_FishingCompleted:FireServer()
@@ -189,46 +196,7 @@ function fishing.PerfectCast()
     end
 end
 
--- Auto-adjust timing berdasarkan hasil cast
-function fishing.AdjustTiming(resultType)
-    if not fishing.Settings.UseAdaptiveTiming then return end
-    
-    -- ⚡ ADJUSTMENT UNTUK PERFECT/AMAZING ONLY
-    if resultType == "Perfect" then
-        -- Jika Perfect, pertahankan atau sedikit naikkan
-        fishing.Settings.PerfectChargeTime = math.min(0.999, fishing.Settings.PerfectChargeTime + 0.0001)
-        fishing.Settings.PerfectPower = math.min(0.999, fishing.Settings.PerfectPower + 0.0001)
-    elseif resultType == "Amazing" then
-        -- Jika Amazing, naikkan sedikit untuk target Perfect
-        fishing.Settings.PerfectChargeTime = math.min(0.999, fishing.Settings.PerfectChargeTime + 0.0002)
-        fishing.Settings.PerfectPower = math.min(0.999, fishing.Settings.PerfectPower + 0.0002)
-    else
-        -- Jika dapat hasil selain Perfect/Amazing, adjust lebih agresif
-        fishing.Settings.PerfectChargeTime = 0.998  -- Reset ke optimal
-        fishing.Settings.PerfectPower = 0.997       -- Reset ke optimal
-    end
-    
-    log(string.format("🔧 Timing Adjusted - Charge: %.4fs, Power: %.3f", 
-        fishing.Settings.PerfectChargeTime, fishing.Settings.PerfectPower))
-end
-
--- ⚡ HIGH-SPEED FISHING COMPLETION
-local function quickFinishFishing()
-    if not fishing.Running then return end
-    
-    fishing.WaitingHook = false
-    
-    -- ⚡ LANGSUNG lempar lagi setelah dapat ikan
-    if fishing.Settings.ImmediateRecast then
-        task.wait(fishing.Settings.FishingDelay)
-        if fishing.Running then
-            fishing.AdjustTiming("Perfect") -- Assume Perfect untuk adjustment
-            fishing.PerfectCast()
-        end
-    end
-end
-
--- Start Function
+-- Start Function - OPTIMIZED
 function fishing.Start()
     if fishing.Running then return end
     fishing.Running = true
@@ -236,37 +204,40 @@ function fishing.Start()
     fishing.TotalFish = 0
     fishing.PerfectCasts = 0
     fishing.AmazingCasts = 0
-    fishing.CastResults = {}
 
     log("🚀 PERFECT/AMAZING AUTO FISHING STARTED!")
-    log("🎯 Target: ONLY PERFECT & AMAZING (No OK/Good/Great)")
+    log("🎯 Target: PERFECT & AMAZING Casts")
+    log("⚡ Optimized for consistency and speed")
     disableFishingAnim()
 
-    -- Hook detection listener
+    -- ⚡ IMPROVED HOOK DETECTION SYSTEM
     fishing.Connections.Minigame = RE_MinigameChanged.OnClientEvent:Connect(function(state)
         if fishing.WaitingHook and typeof(state) == "string" then
             local stateLower = string.lower(state)
-            if string.find(stateLower, "hook") or string.find(stateLower, "bite") or string.find(stateLower, "catch") then
+            if stateLower:find("hook") or stateLower:find("bite") or stateLower:find("catch") or stateLower:find("!") then
                 fishing.WaitingHook = false
-                task.wait(fishing.Settings.HookDetectionDelay)
+                log("🎣 Hook detected — Reeling in!")
 
+                task.wait(fishing.Settings.HookDetectionDelay)
                 pcall(function()
                     RE_FishingCompleted:FireServer()
-                    log("🎣 Hook detected — Reeling!")
                 end)
 
-                -- ⚡ QUICK CANCEL OPTIMIZATION
-                if fishing.Settings.QuickCancel then
-                    task.wait(fishing.Settings.CancelDelay)
-                    pcall(function()
-                        RF_CancelFishingInputs:InvokeServer()
-                    end)
+                task.wait(fishing.Settings.CancelDelay)
+                pcall(function()
+                    RF_CancelFishingInputs:InvokeServer()
+                end)
+
+                -- ⚡ QUICK RECAST AFTER HOOK
+                task.wait(fishing.Settings.FishingDelay)
+                if fishing.Running then
+                    fishing.PerfectCast()
                 end
             end
         end
     end)
 
-    -- Fish caught listener - ⚡ OPTIMIZED FOR SPEED
+    -- ⚡ OPTIMIZED FISH CAUGHT HANDLER
     fishing.Connections.Caught = RE_FishCaught.OnClientEvent:Connect(function(name, data)
         if fishing.Running then
             fishing.WaitingHook = false
@@ -276,56 +247,58 @@ function fishing.Start()
             local rarity = data and data.Rarity or "Common"
             local castResult = data and data.CastResult or "Unknown"
             
-            -- ⚡ DETECT CAST RESULT UNTUK PERFECT/AMAZING
+            -- ⚡ DETECT CAST RESULT
             if castResult == "Perfect" then
                 fishing.PerfectCasts += 1
-                fishing.AdjustTiming("Perfect")
-                log(string.format("🌟 PERFECT! Caught: %s [%s] (%.2fkg)", 
+                log(string.format("🌟 PERFECT! %s [%s] (%.2fkg)", 
                     tostring(name), rarity, weight))
             elseif castResult == "Amazing" then
                 fishing.AmazingCasts += 1
-                fishing.AdjustTiming("Amazing")
-                log(string.format("💫 AMAZING! Caught: %s [%s] (%.2fkg)", 
+                log(string.format("💫 AMAZING! %s [%s] (%.2fkg)", 
                     tostring(name), rarity, weight))
             else
-                log(string.format("❌ %s! Caught: %s [%s] (%.2fkg) - Adjusting...", 
-                    castResult, tostring(name), rarity, weight), true)
-                fishing.AdjustTiming("Other")
+                log(string.format("🎣 %s! %s [%s] (%.2fkg)", 
+                    castResult, tostring(name), rarity, weight))
             end
 
-            -- ⚡ QUICK CANCEL SETELAH DAPAT IKAN
-            pcall(function()
+            -- ⚡ FAST RECAST AFTER CATCH
+            if fishing.Settings.ImmediateRecast then
                 task.wait(fishing.Settings.CancelDelay)
-                RF_CancelFishingInputs:InvokeServer()
-            end)
+                pcall(function()
+                    RF_CancelFishingInputs:InvokeServer()
+                end)
 
-            -- ⚡ HIGH-SPEED RECAST
-            quickFinishFishing()
+                task.wait(fishing.Settings.FishingDelay)
+                if fishing.Running then
+                    fishing.PerfectCast()
+                end
+            end
         end
     end)
 
-    -- Animation disabler (continuous)
+    -- Animation disabler
     fishing.Connections.AnimDisabler = task.spawn(function()
         while fishing.Running do
             disableFishingAnim()
-            task.wait(0.08) -- ⚡ DIPERCEPAT
+            task.wait(0.1)
         end
     end)
 
-    -- Stats reporter (every 30 seconds)
+    -- Stats reporter
     fishing.Connections.StatsReporter = task.spawn(function()
         while fishing.Running do
             task.wait(30)
             if fishing.TotalFish > 0 then
                 local perfectRate = (fishing.PerfectCasts / fishing.TotalFish) * 100
                 local amazingRate = (fishing.AmazingCasts / fishing.TotalFish) * 100
-                log(string.format("📊 Stats: %d fish | %.1f%% PERFECT | %.1f%% AMAZING", 
-                    fishing.TotalFish, perfectRate, amazingRate))
+                local totalGood = perfectRate + amazingRate
+                log(string.format("📊 Stats: %d fish | %.1f%% PERFECT | %.1f%% AMAZING | %.1f%% TOTAL GOOD", 
+                    fishing.TotalFish, perfectRate, amazingRate, totalGood))
             end
         end
     end)
 
-    task.wait(0.3) -- ⚡ DIPERCEPAT startup delay
+    task.wait(0.5)
     fishing.PerfectCast()
 end
 
@@ -353,11 +326,11 @@ end
 -- 🎯 QUICK COMMANDS:
 -- _G.FishingScript.Start()
 -- _G.FishingScript.Stop()
---
--- ⚡ MANUAL FINE-TUNING (jika masih dapat Good/Great):
--- _G.FishingScript.Settings.PerfectChargeTime = 0.999  -- Naikkan untuk lebih Perfect
--- _G.FishingScript.Settings.PerfectPower = 0.998       -- Turunkan sedikit untuk Amazing
--- _G.FishingScript.Settings.PerfectReleaseDelay = 0.0001
--- _G.FishingScript.Settings.UseAdaptiveTiming = true
+
+-- ⚡ MANUAL TUNING JIKA PERLU:
+-- _G.FishingScript.Settings.PerfectChargeTime = 1.0    -- Standard Perfect
+-- _G.FishingScript.Settings.PerfectPower = 1.0         -- Standard Perfect  
+-- _G.FishingScript.Settings.MaxWaitTime = 2.0          -- Tunggu hook lebih lama
+-- _G.FishingScript.Settings.FishingDelay = 0.15        -- Delay antar cast
 
 return fishing
