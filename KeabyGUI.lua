@@ -861,7 +861,7 @@ makeSlider(pnl1,"Retry Delay",0.01,5.0,0.001,function(v) instant.Settings.RetryD
 makeSlider(pnl1,"Hook Detection Delay",0.01,1.5,0.19,function(v) instant.Settings.HookDetectionDelay=v end)
 makeSlider(pnl1,"Cancel Delay",0.01,1.5,0.19,function(v) instant.Settings.CancelDelay=v end)
 -- 🎯 PERFECT CAST SLIDERS (Yang paling penting!)
-makeSlider(pnl1, "Perfect Charge Time", 0.90, 3.05, 0.999, function(v) 
+makeSlider(pnl1, "Perfect Charge Time", 0.0, 3.05, 0.999, function(v) 
     _G.FishingScript.Settings.PerfectChargeTime = v 
 end)
 
@@ -869,7 +869,7 @@ makeSlider(pnl1, "Perfect Release Delay", 0.001, 4.0, 0.001, function(v)
     _G.FishingScript.Settings.PerfectReleaseDelay = v 
 end)
 
-makeSlider(pnl1, "Perfect Power", 0.90, 4.0, 0.999, function(v) 
+makeSlider(pnl1, "Perfect Power", 0.0, 4.0, 0.999, function(v) 
     _G.FishingScript.Settings.PerfectPower = v 
 end)
 
@@ -1398,6 +1398,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
