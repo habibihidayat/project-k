@@ -148,6 +148,11 @@ function fishing.Start()
     log("🚀 AUTO FISHING STARTED!")
     disableFishingAnim()
 
+    RE_MinigameChanged.OnClientEvent:Connect(function(state)
+        warn("STATE:", state)
+    end)
+
+
     fishing.Connections = {}
 
     fishing.Connections.Minigame = RE_MinigameChanged.OnClientEvent:Connect(function(state)
@@ -214,3 +219,4 @@ function fishing.Stop()
 end
 
 return fishing
+
