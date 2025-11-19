@@ -934,9 +934,9 @@ makeSlider(pnl4,"Max Wait Time",0.01,5.0,1.30,function(v) instant2.Settings.MaxW
 makeSlider(pnl4,"Retry Delay",0.01,5.0,0.001,function(v) instant2.Settings.RetryDelay=v end)
 makeSlider(pnl4,"Hook Detection Delay",0.01,1.5,0.19,function(v) instant2.Settings.HookDetectionDelay=v end)
 makeSlider(pnl4,"Cancel Delay",0.01,1.5,0.19,function(v) instant2.Settings.CancelDelay=v end)
-makeSlider(pnl4,"Perfect Charge Time",0.001,4.0,1.0,function(v) instant2.Settings.PerfectChargeTime=v end)
-makeSlider(pnl4,"Perfect Release Delay",0.0001,4.0,0.01,function(v) instant2.Settings.PerfectReleaseDelay=v end)
-makeSlider(pnl4,"Perfect Power",0.001,4.0,1.0,function(v) instant2.Settings.PerfectPower=v end)
+makeSlider(pnl4,"Perfect Charge Time",0.001,4.0,0.8,function(v) instant2.Settings.PerfectChargeTime=v end)
+makeSlider(pnl4,"Perfect Release Delay",0.0001,4.0,0.005,function(v) instant2.Settings.PerfectReleaseDelay=v end)
+makeSlider(pnl4,"Perfect Power",0.001,4.0,0.95,function(v) instant2.Settings.PerfectPower=v end)
 
 -- Teleport Page with Dropdowns
 local locationItems = {}
@@ -1410,6 +1410,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
