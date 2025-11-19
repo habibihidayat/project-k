@@ -854,22 +854,15 @@ local function makeDropdown(parent, title, icon, items, onSelect, uniqueId)
 end
 
 -- Main Page Content
-local pnl1=makePanel(mainPage,"⚡ Instant Fishing","")
+local pnl1=makePanel(mainPage,"⚡ Instant Fishing Fast","")
 makeToggle(pnl1,"Enable Instant Fishing",function(on) if on then instant.Start() else instant.Stop() end end)
-makeSlider(pnl1,"Fishing Delay",0.01,5.0,0.01,function(v) instant.Settings.FishingDelay=v end)
-makeSlider(pnl1,"Max Wait Time",0.01,5.0,1.30,function(v) instant.Settings.MaxWaitTime=v end)
-makeSlider(pnl1,"Retry Delay",0.01,5.0,0.001,function(v) instant.Settings.RetryDelay=v end)
-makeSlider(pnl1,"Hook Detection Delay",0.01,1.5,0.19,function(v) instant.Settings.HookDetectionDelay=v end)
+makeSlider(pnl1,"Fishing delay",0.01,5.0,1.50,function(v) instant.Settings.MaxWaitTime=v end)
 makeSlider(pnl1,"Cancel Delay",0.01,1.5,0.19,function(v) instant.Settings.CancelDelay=v end)
 
-local pnl2=makePanel(mainPage,"🚀 Instant 2x Speed","")
-makeToggle(pnl2,"Enable Instant 2x Speed",function(on) if on then instant2x.Start() else instant2x.Stop() end end)
-makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
-makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
-makeSlider(pnl2,"Hook detection Delay",0.01,5.0,0.19,function(v) instant2x.Settings.HookDetectionDelay=v end)
-makeSlider(pnl2,"Retry delay",0.01,5.0,0.05,function(v) instant2x.Settings.RetryDelay=v end)
-makeSlider(pnl2,"Min Cycle Delay",0.01,5.0,0.8,function(v) instant2x.Settings.MinCycleDelay=v end)
-makeSlider(pnl2,"Force Reset Time",0.01,5.0,0.7,function(v) instant2x.Settings.ForceResetTime=v end)
+local pnl2=makePanel(mainPage,"⚡ Instant Fishing Perfect","")
+makeToggle(pnl2,"Enable Instant Fishing",function(on) if on then instant2.Start() else instant2.Stop() end end)
+makeSlider(pnl2,"Fishing Delay",0.01,5.0,1.30,function(v) instant2.Settings.MaxWaitTime=v end)
+makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2.Settings.CancelDelay=v end)
 
 -- === TRUE BLATANT MODE PANEL ===
 local pnlBlatant = makePanel(mainPage,"🔥 TRUE BLATANT MODE","")
@@ -908,11 +901,6 @@ makeToggle(pnl3,"Manual Capture (2s)",function(on)
         NoFishingAnimation.Stop() 
     end 
 end)
-
-local pnl4=makePanel(mainPage,"⚡ Instant Fishing","")
-makeToggle(pnl4,"Enable Instant Fishing",function(on) if on then instant2.Start() else instant2.Stop() end end)
-makeSlider(pnl4,"Max Wait Time",0.01,5.0,1.30,function(v) instant2.Settings.MaxWaitTime=v end)
-makeSlider(pnl4,"Cancel Delay",0.01,1.5,0.19,function(v) instant2.Settings.CancelDelay=v end)
 
 
 -- Teleport Page with Dropdowns
@@ -1387,6 +1375,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
