@@ -37,14 +37,14 @@ local fishing = {
     AmazingCasts = 0,
     Connections = {},
     Settings = {
-        FishingDelay = 0.1,            -- ⚡ OPTIMAL: Delay antar cast
-        CancelDelay = 0.2,             -- ⚡ OPTIMAL: Delay cancel input  
-        HookDetectionDelay = 0.05,     -- ⚡ OPTIMAL: Delay deteksi hook
-        RetryDelay = 0.3,              -- ⚡ OPTIMAL: Delay retry jika gagal
-        MaxWaitTime = 3.0,             -- ⚡ OPTIMAL: Max wait untuk hook
+        FishingDelay = 0.07,            -- ⚡ OPTIMAL: Delay antar cast
+        CancelDelay = 0.19,             -- ⚡ OPTIMAL: Delay cancel input  
+        HookDetectionDelay = 0.03,     -- ⚡ OPTIMAL: Delay deteksi hook
+        RetryDelay = 0.04,              -- ⚡ OPTIMAL: Delay retry jika gagal
+        MaxWaitTime = 1.5,             -- ⚡ OPTIMAL: Max wait untuk hook
         
         -- 🎯 PERFECT/AMAZING CAST SETTINGS
-        PerfectChargeTime = 0.8,       -- ⚡ OPTIMAL: Charge time lebih pendek
+        PerfectChargeTime = 0.34,       -- ⚡ OPTIMAL: Charge time lebih pendek
         PerfectReleaseDelay = 0.005,   -- ⚡ OPTIMAL: Release delay
         PerfectPower = 0.95,           -- ⚡ OPTIMAL: Power value untuk Perfect/Amazing
         
