@@ -860,23 +860,18 @@ makeSlider(pnl1,"Max Wait Time",0.01,5.0,1.30,function(v) instant.Settings.MaxWa
 makeSlider(pnl1,"Retry Delay",0.01,5.0,0.001,function(v) instant.Settings.RetryDelay=v end)
 makeSlider(pnl1,"Hook Detection Delay",0.01,1.5,0.19,function(v) instant.Settings.HookDetectionDelay=v end)
 makeSlider(pnl1,"Cancel Delay",0.01,1.5,0.19,function(v) instant.Settings.CancelDelay=v end)
--- 🎯 PERFECT CAST SLIDERS (Yang paling penting!)
-makeSlider(pnl1, "Perfect Charge Time", 0.90, 1.05, 0.999, function(v) 
+-- 🎯 PERFECT CAST SETTINGS (CRITICAL - Jangan ubah dari default!)
+makeSlider(pnl1, "Perfect Charge Time", 0.95, 1.05, 1.0, function(v) 
     _G.FishingScript.Settings.PerfectChargeTime = v 
 end)
 
-makeSlider(pnl1, "Perfect Release Delay", 0.001, 0.1, 0.001, function(v) 
+makeSlider(pnl1, "Perfect Release Delay", 0.001, 0.01, 0.001, function(v) 
     _G.FishingScript.Settings.PerfectReleaseDelay = v 
 end)
 
-makeSlider(pnl1, "Perfect Power", 0.90, 1.0, 0.999, function(v) 
+makeSlider(pnl1, "Perfect Power", 0.95, 1.0, 1.0, function(v) 
     _G.FishingScript.Settings.PerfectPower = v 
 end)
-
--- Toggle adaptive timing
-makeToggle(pnl1, "Auto-Adjust Timing", function(on) 
-    _G.FishingScript.Settings.UseAdaptiveTiming = on 
-end, true) -- true = default ON
 
 
 local pnl2=makePanel(mainPage,"🚀 Instant 2x Speed","")
@@ -1398,6 +1393,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
