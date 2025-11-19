@@ -18,6 +18,7 @@ local function new(class, props)
 end
 
 local instant = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant.lua"))()
+local instant2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant2.lua"))()
 local instant2x = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant2Xspeed.lua"))()
 local BlatantAutoFishing = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/BlatantAutoFishing.lua"))() -- ← TAMBAHKAN IN
 local NoFishingAnimation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/NoFishingAnimation.lua"))()
@@ -926,6 +927,15 @@ makeToggle(pnl3,"Manual Capture (2s)",function(on)
     end 
 end)
 
+local pnl4=makePanel(mainPage,"⚡ Instant Fishing","")
+makeToggle(pnl4,"Enable Instant Fishing",function(on) if on then instant2.Start() else instant2.Stop() end end)
+makeSlider(pnl4,"Fishing Delay",0.01,5.0,0.01,function(v) instant2.Settings.FishingDelay=v end)
+makeSlider(pnl4,"Max Wait Time",0.01,5.0,1.30,function(v) instant2.Settings.MaxWaitTime=v end)
+makeSlider(pnl4,"Retry Delay",0.01,5.0,0.001,function(v) instant2.Settings.RetryDelay=v end)
+makeSlider(pnl4,"Hook Detection Delay",0.01,1.5,0.19,function(v) instant2.Settings.HookDetectionDelay=v end)
+makeSlider(pnl4,"Cancel Delay",0.01,1.5,0.19,function(v) instant2.Settings.CancelDelay=v end)
+makeSlider(pnl4,"Force Perfect Power",0.001,4.000,0.987,function(v) instant2.Settings.ForcePerfectPower=v end)
+
 -- Teleport Page with Dropdowns
 local locationItems = {}
 for name, _ in pairs(TeleportModule.Locations) do
@@ -1398,6 +1408,7 @@ print("✨ Keaby GUI v4.0 Ultra MOBILE OPTIMIZED loaded!")
 print("📱 Perfect for mobile devices")
 print("🔧 Smaller UI, dropdown teleport system")
 print("💎 Created by Keaby Team")
+
 
 
 
