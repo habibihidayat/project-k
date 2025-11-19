@@ -148,9 +148,9 @@ function fishing.Start()
     log("🚀 AUTO FISHING STARTED!")
     disableFishingAnim()
 
-    RE_MinigameChanged.OnClientEvent:Connect(function(state)
-        warn("STATE:", state)
-    end)
+ for _, child in ipairs(netFolder:GetChildren()) do
+    print("NET CHILD:", child.Name)
+end
 
 
     fishing.Connections = {}
@@ -219,4 +219,5 @@ function fishing.Stop()
 end
 
 return fishing
+
 
