@@ -138,7 +138,7 @@ local logoContainer = new("ImageLabel",{
     BackgroundColor3=colors.primary,
     BackgroundTransparency=0.2,
     BorderSizePixel=0,
-    Image=LOGO_URL,
+    Image="",
     ScaleType=Enum.ScaleType.Fit,
     ZIndex=6
 })
@@ -169,19 +169,27 @@ local logoText = new("TextLabel",{
     TextSize=isMobile and 26 or 32,
     BackgroundTransparency=1,
     TextColor3=colors.text,
-    Visible=false,
+    Visible=true,
     ZIndex=7
 })
 
 task.spawn(function()
-    local success = pcall(function()
+    task.wait(0.5)
+    print("⏳ Mencoba load logo dari: " .. LOGO_URL)
+    
+    local success, result = pcall(function()
         logoContainer.Image = LOGO_URL
+        task.wait(1)
+        return true
     end)
-    if not success then
-        logoText.Visible = true
-        print("⚠️ Logo gagal dimuat, menggunakan fallback text")
-    else
+    
+    if success and logoContainer.Image ~= "" then
+        logoText.Visible = false
         print("✅ Logo berhasil dimuat dari GitHub!")
+    else
+        logoText.Visible = true
+        print("⚠️ Logo gagal dimuat, menggunakan fallback text 'L'")
+        print("🔗 URL yang dicoba: " .. LOGO_URL)
     end
 end)
 
@@ -1262,7 +1270,7 @@ local function createMinimizedIcon()
         BackgroundColor3=colors.primary,
         BackgroundTransparency=0.2,
         BorderSizePixel=0,
-        Image=LOGO_URL,
+        Image="",
         ScaleType=Enum.ScaleType.Fit,
         ZIndex=100
     })
@@ -1291,9 +1299,20 @@ local function createMinimizedIcon()
         TextSize=isMobile and 28 or 32,
         BackgroundTransparency=1,
         TextColor3=colors.text,
-        Visible=false,
+        Visible=true,
         ZIndex=101
     })
+    
+    task.spawn(function()
+        task.wait(0.2)
+        icon.Image = LOGO_URL
+        task.wait(1)
+        if icon.Image ~= "" then
+            logoK.Visible = false
+        else
+            logoK.Visible = true
+        end
+    end)
     
     local dragging,dragStart,startPos,dragMoved = false,nil,nil,false
     icon.InputBegan:Connect(function(input)
