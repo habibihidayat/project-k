@@ -136,31 +136,16 @@ local logoContainer = new("ImageLabel",{
     Size=isMobile and UDim2.new(0,42,0,42) or UDim2.new(0,50,0,50),
     Position=isMobile and UDim2.new(0.5,-21,0,15) or UDim2.new(0.5,-25,0,18),
     BackgroundColor3=colors.primary,
-    BackgroundTransparency=0.2,
+    BackgroundTransparency=0,
     BorderSizePixel=0,
     Image="",
-    ScaleType=Enum.ScaleType.Fit,
+    ScaleType=Enum.ScaleType.Stretch,
+    ImageTransparency=0,
     ZIndex=6
 })
 new("UICorner",{Parent=logoContainer,CornerRadius=UDim.new(0,14)})
-new("UIGradient",{
-    Parent=logoContainer,
-    Color=ColorSequence.new{
-        ColorSequenceKeypoint.new(0, colors.primary),
-        ColorSequenceKeypoint.new(0.5, colors.accent),
-        ColorSequenceKeypoint.new(1, colors.secondary)
-    },
-    Rotation=45
-})
 
-new("UIStroke",{
-    Parent=logoContainer,
-    Color=colors.primary,
-    Thickness=2,
-    Transparency=0.5
-})
-
--- Fallback text
+-- Ganti fallback text
 local logoText = new("TextLabel",{
     Parent=logoContainer,
     Text="L",
@@ -184,11 +169,14 @@ task.spawn(function()
         
         local success = pcall(function()
             logoContainer.Image = LOGO_URL
+            logoContainer.ImageTransparency = 0
+            logoContainer.BackgroundTransparency = 1
         end)
         
         if logoContainer.Image ~= "" then
             logoText.Visible = false
-            print("✅ Logo berhasil dimuat dari GitHub!")
+            print("✅ Logo berhasil dimuat dan ditampilkan!")
+            print("🎨 Image Transparency: " .. logoContainer.ImageTransparency)
             break
         end
         
@@ -199,7 +187,7 @@ task.spawn(function()
         logoText.Visible = true
         print("⚠️ Logo gagal dimuat setelah 3 kali coba")
         print("🔗 URL: " .. LOGO_URL)
-        print("💡 Gunakan fallback text 'L'")
+        print("💡 Menggunakan fallback text 'L'")
     end
 end)
 
