@@ -1,5 +1,5 @@
 -- LynxGUI_v2.1.lua - Ultra Premium Enhanced Edition ✨
--- Glass Morphism with Enhanced Colors & Perfect Resize
+-- Lynx Orange Theme with Direct GitHub Logo Loading
 
 repeat task.wait() until game:IsLoaded()
 
@@ -33,27 +33,30 @@ local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habib
 local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
 local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoBuyWeather.lua"))()
 
--- Enhanced Premium Color Palette with Vibrant Colors
+-- Enhanced Lynx Orange Theme Color Palette
 local colors = {
-    primary = Color3.fromRGB(99, 115, 255),      -- Brighter primary
-    secondary = Color3.fromRGB(138, 161, 255),   -- Brighter secondary
-    accent = Color3.fromRGB(255, 130, 255),      -- Brighter accent
-    success = Color3.fromRGB(77, 201, 149),      -- Brighter success
-    warning = Color3.fromRGB(255, 186, 46),      -- Brighter warning
-    danger = Color3.fromRGB(255, 86, 89),        -- Brighter danger
+    primary = Color3.fromRGB(255, 107, 53),      -- Lynx Orange
+    secondary = Color3.fromRGB(255, 140, 80),    -- Light Orange
+    accent = Color3.fromRGB(255, 69, 58),        -- Red accent
+    success = Color3.fromRGB(77, 201, 149),      -- Green
+    warning = Color3.fromRGB(255, 186, 46),      -- Yellow
+    danger = Color3.fromRGB(255, 86, 89),        -- Red
     
-    bg1 = Color3.fromRGB(20, 22, 30),            -- Slightly lighter
-    bg2 = Color3.fromRGB(28, 31, 40),            -- Slightly lighter
-    bg3 = Color3.fromRGB(36, 40, 52),            -- Slightly lighter
-    bg4 = Color3.fromRGB(44, 48, 62),            -- Slightly lighter
+    bg1 = Color3.fromRGB(18, 20, 28),            -- Dark background
+    bg2 = Color3.fromRGB(25, 28, 35),            -- Darker panel
+    bg3 = Color3.fromRGB(32, 36, 45),            -- Medium panel
+    bg4 = Color3.fromRGB(40, 44, 55),            -- Light panel
     
     text = Color3.fromRGB(255, 255, 255),
-    textDim = Color3.fromRGB(180, 187, 205),     -- Brighter
-    textDimmer = Color3.fromRGB(130, 135, 145),  -- Brighter
+    textDim = Color3.fromRGB(180, 187, 205),
+    textDimmer = Color3.fromRGB(130, 135, 145),
     
     border = Color3.fromRGB(57, 59, 64),
-    glow = Color3.fromRGB(99, 115, 255),
+    glow = Color3.fromRGB(255, 107, 53),         -- Lynx Orange glow
 }
+
+-- Logo URL from GitHub
+local LOGO_URL = "https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg"
 
 -- Window size based on device
 local windowSize = isMobile and UDim2.new(0,380,0,520) or UDim2.new(0,650,0,450)
@@ -73,7 +76,7 @@ local gui = new("ScreenGui",{
 local overlay = new("Frame",{
     Parent=gui,
     Size=UDim2.new(1,0,1,0),
-    BackgroundTransparency=1,  -- Fully transparent
+    BackgroundTransparency=1,
     BorderSizePixel=0,
     Visible=false,
     ZIndex=1
@@ -85,14 +88,14 @@ local win = new("Frame",{
     Size=windowSize,
     Position=UDim2.new(0.5,-windowSize.X.Offset/2,0.5,-windowSize.Y.Offset/2),
     BackgroundColor3=colors.bg1,
-    BackgroundTransparency=0.25,  -- More transparent
+    BackgroundTransparency=0.25,
     BorderSizePixel=0,
     ClipsDescendants=false,
     ZIndex=3
 })
 new("UICorner",{Parent=win,CornerRadius=UDim.new(0,18)})
 
--- Enhanced Glassmorphism effect with subtle glow
+-- Enhanced Glassmorphism effect
 local glassBlur = new("Frame",{
     Parent=win,
     Size=UDim2.new(1,0,1,0),
@@ -117,14 +120,14 @@ local sidebar = new("Frame",{
     Parent=win,
     Size=isMobile and UDim2.new(0,75,1,0) or UDim2.new(0,180,1,0),
     BackgroundColor3=colors.bg2,
-    BackgroundTransparency=0.3,  -- More transparent
+    BackgroundTransparency=0.3,
     BorderSizePixel=0,
     ClipsDescendants=true,
     ZIndex=4
 })
 new("UICorner",{Parent=sidebar,CornerRadius=UDim.new(0,18)})
 
--- Sidebar Header with Custom Logo Support
+-- Sidebar Header
 local sidebarHeader = new("Frame",{
     Parent=sidebar,
     Size=isMobile and UDim2.new(1,0,0,85) or UDim2.new(1,0,0,90),
@@ -133,30 +136,47 @@ local sidebarHeader = new("Frame",{
     ZIndex=5
 })
 
--- Logo Container with enhanced gradient
+-- Logo Container with GitHub Image
 local logoContainer = new("ImageLabel",{
     Parent=sidebarHeader,
     Size=isMobile and UDim2.new(0,42,0,42) or UDim2.new(0,50,0,50),
     Position=isMobile and UDim2.new(0.5,-21,0,15) or UDim2.new(0.5,-25,0,18),
-    BackgroundColor3=colors.primary,
-    BackgroundTransparency=0.2,
+    BackgroundColor3=colors.bg3,
+    BackgroundTransparency=0.3,
     BorderSizePixel=0,
-    Image="",
+    Image=LOGO_URL,
     ScaleType=Enum.ScaleType.Fit,
+    ImageTransparency=0,
     ZIndex=6
 })
 new("UICorner",{Parent=logoContainer,CornerRadius=UDim.new(0,14)})
-new("UIGradient",{
+
+-- Animated glow effect for logo
+local logoGlow = new("ImageLabel",{
     Parent=logoContainer,
-    Color=ColorSequence.new{
-        ColorSequenceKeypoint.new(0, colors.primary),
-        ColorSequenceKeypoint.new(0.5, colors.accent),
-        ColorSequenceKeypoint.new(1, colors.secondary)
-    },
-    Rotation=45
+    Size=UDim2.new(1.3,0,1.3,0),
+    Position=UDim2.new(0.5,0,0.5,0),
+    AnchorPoint=Vector2.new(0.5,0.5),
+    BackgroundTransparency=1,
+    Image=LOGO_URL,
+    ImageTransparency=0.7,
+    ImageColor3=colors.primary,
+    ScaleType=Enum.ScaleType.Fit,
+    ZIndex=5
 })
 
--- Enhanced glow for logo
+-- Pulse animation for logo glow
+task.spawn(function()
+    while logoContainer and logoContainer.Parent do
+        TweenService:Create(logoGlow,TweenInfo.new(2,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut,-1,true),{
+            ImageTransparency=0.3,
+            Size=UDim2.new(1.4,0,1.4,0)
+        }):Play()
+        task.wait(4)
+    end
+end)
+
+-- Enhanced stroke for logo
 new("UIStroke",{
     Parent=logoContainer,
     Color=colors.primary,
@@ -164,7 +184,7 @@ new("UIStroke",{
     Transparency=0.5
 })
 
--- Fallback text if no image
+-- Fallback text if image fails to load
 local logoText = new("TextLabel",{
     Parent=logoContainer,
     Text="L",
@@ -173,17 +193,22 @@ local logoText = new("TextLabel",{
     TextSize=isMobile and 26 or 32,
     BackgroundTransparency=1,
     TextColor3=colors.text,
-    Visible=logoContainer.Image == "",
+    Visible=false,
     ZIndex=7
 })
 
-logoContainer:GetPropertyChangedSignal("Image"):Connect(function()
-    logoText.Visible = (logoContainer.Image == "")
+-- Check if logo loaded
+task.spawn(function()
+    task.wait(2)
+    if logoContainer.Image == "" or not logoContainer.IsLoaded then
+        logoText.Visible = true
+        print("⚠️ Logo gagal dimuat, menggunakan fallback 'L'")
+    end
 end)
 
 local brandName = new("TextLabel",{
     Parent=sidebarHeader,
-    Text=isMobile and "LYNX" or "LYNX",
+    Text="LYNX",
     Size=UDim2.new(1,0,0,18),
     Position=isMobile and UDim2.new(0,0,0,62) or UDim2.new(0,0,0,72),
     Font=Enum.Font.GothamBold,
@@ -196,7 +221,7 @@ local brandName = new("TextLabel",{
 
 local brandVersion = new("TextLabel",{
     Parent=sidebarHeader,
-    Text="v2.1 Enhanced",
+    Text="v2.1 Orange",
     Size=UDim2.new(1,0,0,12),
     Position=UDim2.new(0,0,0,88),
     Font=Enum.Font.Gotham,
@@ -227,20 +252,20 @@ new("UIListLayout",{
     SortOrder=Enum.SortOrder.LayoutOrder
 })
 
--- Content Area with enhanced transparency
+-- Content Area
 local contentBg = new("Frame",{
     Parent=win,
     Size=isMobile and UDim2.new(1,-85,1,-15) or UDim2.new(1,-190,1,-15),
     Position=isMobile and UDim2.new(0,80,0,10) or UDim2.new(0,185,0,10),
     BackgroundColor3=colors.bg2,
-    BackgroundTransparency=0.4,  -- More transparent
+    BackgroundTransparency=0.4,
     BorderSizePixel=0,
     ClipsDescendants=true,
     ZIndex=4
 })
 new("UICorner",{Parent=contentBg,CornerRadius=UDim.new(0,16)})
 
--- Top bar with controls - DRAGGABLE AREA
+-- Top bar with controls
 local topBar = new("Frame",{
     Parent=contentBg,
     Size=UDim2.new(1,0,0,45),
@@ -251,7 +276,7 @@ local topBar = new("Frame",{
 })
 new("UICorner",{Parent=topBar,CornerRadius=UDim.new(0,16)})
 
--- Enhanced Drag Handle Indicator
+-- Drag Handle Indicator
 local dragHandle = new("Frame",{
     Parent=topBar,
     Size=UDim2.new(0,40,0,4),
@@ -328,27 +353,80 @@ end
 local btnMin = createControlBtn("─", colors.warning)
 local btnClose = createControlBtn("×", colors.danger)
 
--- FIXED Resize Handle (Bottom Right Corner) - Only expands right and down
-local resizeHandle = new("TextButton",{
+-- ENHANCED Resize Handle (Bottom Right Corner) - Beautiful Modern Design
+local resizeHandle = new("Frame",{
     Parent=win,
-    Size=UDim2.new(0,20,0,20),
-    Position=UDim2.new(1,-20,1,-20),
-    BackgroundColor3=colors.primary,
-    BackgroundTransparency=0.5,
+    Size=UDim2.new(0,32,0,32),
+    Position=UDim2.new(1,-32,1,-32),
+    BackgroundColor3=colors.bg3,
+    BackgroundTransparency=0.2,
     BorderSizePixel=0,
-    Text="⋰",
-    Font=Enum.Font.GothamBold,
-    TextSize=12,
-    TextColor3=colors.text,
-    AutoButtonColor=false,
     ZIndex=100
 })
-new("UICorner",{Parent=resizeHandle,CornerRadius=UDim.new(0,6)})
+new("UICorner",{Parent=resizeHandle,CornerRadius=UDim.new(0,10)})
+
+-- Gradient overlay for resize handle
+local resizeGradient = new("Frame",{
+    Parent=resizeHandle,
+    Size=UDim2.new(1,0,1,0),
+    BackgroundTransparency=0.5,
+    BorderSizePixel=0,
+    ZIndex=101
+})
+new("UICorner",{Parent=resizeGradient,CornerRadius=UDim.new(0,10)})
+new("UIGradient",{
+    Parent=resizeGradient,
+    Color=ColorSequence.new{
+        ColorSequenceKeypoint.new(0, colors.primary),
+        ColorSequenceKeypoint.new(1, colors.accent)
+    },
+    Rotation=45
+})
+
+-- Outer glow stroke
 new("UIStroke",{
     Parent=resizeHandle,
     Color=colors.primary,
-    Thickness=1,
-    Transparency=0.6
+    Thickness=1.5,
+    Transparency=0.4,
+    ApplyStrokeMode=Enum.ApplyStrokeMode.Border
+})
+
+-- Inner shadow effect
+local innerShadow = new("Frame",{
+    Parent=resizeHandle,
+    Size=UDim2.new(1,-4,1,-4),
+    Position=UDim2.new(0,2,0,2),
+    BackgroundColor3=Color3.fromRGB(0,0,0),
+    BackgroundTransparency=0.7,
+    BorderSizePixel=0,
+    ZIndex=100
+})
+new("UICorner",{Parent=innerShadow,CornerRadius=UDim.new(0,8)})
+
+-- Three diagonal lines (resize icon)
+for i = 1, 3 do
+    local line = new("Frame",{
+        Parent=resizeHandle,
+        Size=UDim2.new(0,14 - (i*2),0,2),
+        Position=UDim2.new(1,-(6 + i*4),1,-(6 + i*4)),
+        AnchorPoint=Vector2.new(1,1),
+        BackgroundColor3=colors.text,
+        BackgroundTransparency=0.2,
+        BorderSizePixel=0,
+        Rotation=45,
+        ZIndex=102
+    })
+    new("UICorner",{Parent=line,CornerRadius=UDim.new(1,0)})
+end
+
+-- Clickable button overlay
+local resizeBtn = new("TextButton",{
+    Parent=resizeHandle,
+    Size=UDim2.new(1,0,1,0),
+    BackgroundTransparency=1,
+    Text="",
+    ZIndex=103
 })
 
 -- Pages
@@ -392,7 +470,7 @@ local settingsPage = createPage("Settings")
 local infoPage = createPage("Info")
 mainPage.Visible = true
 
--- Nav Button Function (Enhanced)
+-- Nav Button Function
 local function createNavButton(text, icon, page, order)
     local btn = new("TextButton",{
         Parent=navContainer,
@@ -486,7 +564,7 @@ btnShop.MouseButton1Click:Connect(function() switchPage("Shop", "Shop Features")
 btnSettings.MouseButton1Click:Connect(function() switchPage("Settings", "Settings") end)
 btnInfo.MouseButton1Click:Connect(function() switchPage("Info", "About Lynx") end)
 
--- Modern Category with enhanced colors
+-- Modern Category
 local function makeCategory(parent, title, icon)
     local categoryFrame = new("Frame",{
         Parent=parent,
@@ -1191,10 +1269,10 @@ local infoText = new("TextLabel",{
     Position=UDim2.new(0,20,0,20),
     BackgroundTransparency=1,
     Text=[[
-✨ LYNX v2.1 ENHANCED
+✨ LYNX v2.1 ORANGE THEME
 
 Modern Premium Interface
-Optimized for All Devices
+Direct GitHub Logo Loading
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1225,14 +1303,14 @@ Optimized for All Devices
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
-💡 NEW IN v2.1
-✓ Enhanced vibrant colors
-✓ Increased transparency
-✓ No dark background overlay
-✓ FIXED resize (right/down only)
-✓ Improved glass morphism
+💡 NEW IN v2.1 ORANGE
+✓ Lynx Orange color theme
+✓ Direct GitHub logo loading
+✓ Enhanced resize handle design
+✓ Premium gradient effects
+✓ Animated logo glow
+✓ Smooth hover animations
 ✓ Better visual contrast
-✓ Smoother animations
 
 🎮 CONTROLS
 • Click categories to expand
@@ -1243,8 +1321,8 @@ Optimized for All Devices
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
-Created with 💎 by Lynx Team
-Premium Enhanced Edition 2024
+Created with 🧡 by Lynx Team
+Premium Orange Edition 2024
     ]],
     Font=Enum.Font.Gotham,
     TextSize=11,
@@ -1267,11 +1345,12 @@ local function createMinimizedIcon()
         Parent=gui,
         Size=UDim2.new(0,iconSize,0,iconSize),
         Position=savedIconPos,
-        BackgroundColor3=colors.primary,
-        BackgroundTransparency=0.2,
+        BackgroundColor3=colors.bg2,
+        BackgroundTransparency=0.1,
         BorderSizePixel=0,
-        Image="",
+        Image=LOGO_URL,
         ScaleType=Enum.ScaleType.Fit,
+        ImageTransparency=0,
         ZIndex=100
     })
     new("UICorner",{Parent=icon,CornerRadius=UDim.new(0,15)})
@@ -1282,14 +1361,39 @@ local function createMinimizedIcon()
             ColorSequenceKeypoint.new(0.5, colors.accent),
             ColorSequenceKeypoint.new(1, colors.secondary)
         },
-        Rotation=45
+        Rotation=45,
+        Transparency=NumberSequence.new(0.7)
     })
     new("UIStroke",{
         Parent=icon,
         Color=colors.primary,
         Thickness=2,
-        Transparency=0.5
+        Transparency=0.3
     })
+    
+    -- Pulsing glow effect
+    local iconGlow = new("ImageLabel",{
+        Parent=icon,
+        Size=UDim2.new(1.2,0,1.2,0),
+        Position=UDim2.new(0.5,0,0.5,0),
+        AnchorPoint=Vector2.new(0.5,0.5),
+        BackgroundTransparency=1,
+        Image=LOGO_URL,
+        ImageTransparency=0.7,
+        ImageColor3=colors.primary,
+        ScaleType=Enum.ScaleType.Fit,
+        ZIndex=99
+    })
+    
+    task.spawn(function()
+        while icon and icon.Parent do
+            TweenService:Create(iconGlow,TweenInfo.new(1.5,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut,-1,true),{
+                ImageTransparency=0.3,
+                Size=UDim2.new(1.3,0,1.3,0)
+            }):Play()
+            task.wait(3)
+        end
+    end)
     
     local logoK = new("TextLabel",{
         Parent=icon,
@@ -1299,12 +1403,24 @@ local function createMinimizedIcon()
         TextSize=isMobile and 28 or 32,
         BackgroundTransparency=1,
         TextColor3=colors.text,
-        Visible=icon.Image == "",
+        Visible=false,
         ZIndex=101
     })
     
-    icon.Image = logoContainer.Image
-    logoK.Visible = (icon.Image == "")
+    -- Hover effect for minimized icon
+    icon.MouseEnter:Connect(function()
+        TweenService:Create(icon,TweenInfo.new(0.3,Enum.EasingStyle.Back),{
+            Size=UDim2.new(0,iconSize + 8,0,iconSize + 8),
+            Rotation=5
+        }):Play()
+    end)
+    
+    icon.MouseLeave:Connect(function()
+        TweenService:Create(icon,TweenInfo.new(0.3,Enum.EasingStyle.Back),{
+            Size=UDim2.new(0,iconSize,0,iconSize),
+            Rotation=0
+        }):Play()
+    end)
     
     local dragging,dragStart,startPos,dragMoved = false,nil,nil,false
     icon.InputBegan:Connect(function(input)
@@ -1402,10 +1518,19 @@ local resizing = false
 local resizeStart,startSize,startPos = nil,nil,nil
 local resizeTween = nil
 
-resizeHandle.InputBegan:Connect(function(input)
+resizeBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         resizing,resizeStart,startSize,startPos = true,input.Position,win.Size,win.Position
         if resizeTween then resizeTween:Cancel() end
+        
+        -- Animate on press
+        TweenService:Create(resizeHandle,TweenInfo.new(0.1),{
+            Size=UDim2.new(0,28,0,28),
+            BackgroundTransparency=0
+        }):Play()
+        TweenService:Create(resizeGradient,TweenInfo.new(0.1),{
+            BackgroundTransparency=0.2
+        }):Play()
     end
 end)
 
@@ -1439,16 +1564,55 @@ end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then 
-        resizing = false 
+        if resizing then
+            resizing = false
+            -- Animate on release
+            TweenService:Create(resizeHandle,TweenInfo.new(0.2),{
+                Size=UDim2.new(0,32,0,32),
+                BackgroundTransparency=0.2
+            }):Play()
+            TweenService:Create(resizeGradient,TweenInfo.new(0.2),{
+                BackgroundTransparency=0.5
+            }):Play()
+        end
     end
 end)
 
--- Opening Animation (No dark background)
+-- Enhanced hover effect for resize handle
+resizeBtn.MouseEnter:Connect(function()
+    TweenService:Create(resizeHandle,TweenInfo.new(0.2),{
+        Size=UDim2.new(0,36,0,36),
+        BackgroundTransparency=0.1
+    }):Play()
+    TweenService:Create(resizeGradient,TweenInfo.new(0.2),{
+        BackgroundTransparency=0.3
+    }):Play()
+    
+    -- Rotate animation
+    TweenService:Create(resizeHandle,TweenInfo.new(0.3,Enum.EasingStyle.Back),{
+        Rotation=5
+    }):Play()
+end)
+
+resizeBtn.MouseLeave:Connect(function()
+    if not resizing then
+        TweenService:Create(resizeHandle,TweenInfo.new(0.2),{
+            Size=UDim2.new(0,32,0,32),
+            BackgroundTransparency=0.2,
+            Rotation=0
+        }):Play()
+        TweenService:Create(resizeGradient,TweenInfo.new(0.2),{
+            BackgroundTransparency=0.5
+        }):Play()
+    end
+end)
+
+-- Opening Animation
 task.spawn(function()
     win.Size = UDim2.new(0,0,0,0)
     win.Position = UDim2.new(0.5,-windowSize.X.Offset/2,0.5,-windowSize.Y.Offset/2)
     win.Rotation = 0
-    overlay.Visible = false  -- No overlay needed
+    overlay.Visible = false
     
     task.wait(0.1)
     
@@ -1457,26 +1621,10 @@ task.spawn(function()
     }):Play()
 end)
 
--- Hover effect for resize handle
-resizeHandle.MouseEnter:Connect(function()
-    TweenService:Create(resizeHandle,TweenInfo.new(0.2),{
-        BackgroundTransparency=0.2,
-        Size=UDim2.new(0,24,0,24)
-    }):Play()
-end)
-
-resizeHandle.MouseLeave:Connect(function()
-    if not resizing then
-        TweenService:Create(resizeHandle,TweenInfo.new(0.2),{
-            BackgroundTransparency=0.5,
-            Size=UDim2.new(0,20,0,20)
-        }):Play()
-    end
-end)
-
-print("✨ Lynx GUI v2.1 Enhanced loaded!")
-print("🎨 Ultra Premium Glass Edition")
+print("✨ Lynx GUI v2.1 Orange Theme loaded!")
+print("🎨 Ultra Premium Orange Edition")
 print("📱 Mobile & PC Optimized")
 print("🖱️ Drag from top | Resize from corner (right/down only)")
-print("🎨 Enhanced colors & transparency")
+print("🎨 Enhanced Lynx Orange colors & logo")
+print("🖼️ Logo loaded from: " .. LOGO_URL)
 print("💎 Created by Lynx Team")
