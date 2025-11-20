@@ -34,7 +34,7 @@ local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/hab
 local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoBuyWeather.lua"))()
 
 -- GitHub Raw Logo URL
-local LOGO_URL = "https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/src/logo.jpg"
+local LOGO_URL = "https://github.com/habibihidayat/project-k/raw/main/src/logo.jpg"
 
 -- Enhanced Premium Color Palette with Vibrant Colors
 local colors = {
