@@ -141,7 +141,7 @@ local logoContainer = new("ImageLabel",{
     BackgroundColor3=colors.primary,
     BackgroundTransparency=0.2,
     BorderSizePixel=0,
-    Image="",
+    Image="https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg",
     ScaleType=Enum.ScaleType.Fit,
     ZIndex=6
 })
@@ -173,7 +173,7 @@ local logoText = new("TextLabel",{
     TextSize=isMobile and 26 or 32,
     BackgroundTransparency=1,
     TextColor3=colors.text,
-    Visible=logoContainer.Image == "",
+    Visible=logoContainer.Image == "https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg",
     ZIndex=7
 })
 
@@ -1270,7 +1270,7 @@ local function createMinimizedIcon()
         BackgroundColor3=colors.primary,
         BackgroundTransparency=0.2,
         BorderSizePixel=0,
-        Image="",
+        Image="https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg",
         ScaleType=Enum.ScaleType.Fit,
         ZIndex=100
     })
@@ -1299,7 +1299,7 @@ local function createMinimizedIcon()
         TextSize=isMobile and 28 or 32,
         BackgroundTransparency=1,
         TextColor3=colors.text,
-        Visible=icon.Image == "",
+        Visible=icon.Image == "https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg",
         ZIndex=101
     })
     
