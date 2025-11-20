@@ -33,10 +33,10 @@ local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habib
 local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
 local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoBuyWeather.lua"))()
 
--- Logo URLs - Dari Roblox Asset ID Anda
+-- Logo URLs - Format Asset ID yang benar untuk Roblox
 local LOGO_URLS = {
-    "rbxasset://textures/71199842701052", -- Logo Lynx (Asset ID Roblox)
-    "rbxassetid://71199842701052", -- Format alternatif
+    "rbxassetid://71199842701052", -- Format Asset ID yang benar
+    "https://assetdelivery.roblox.com/v1/asset/?id=71199842701052", -- CDN backup
 }
 
 local LOGO_URL = LOGO_URLS[1]
