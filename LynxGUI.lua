@@ -58,6 +58,31 @@ local colors = {
 -- Logo URL from GitHub
 local LOGO_URL = "https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg"
 
+local ContentProvider = game:GetService("ContentProvider")
+
+-- Preload logo dulu supaya tidak blur ketika muncul
+local function preloadImage(url)
+    local temp = Instance.new("ImageLabel")
+    temp.Image = url
+    temp.Size = UDim2.new(0,1,0,1)
+    temp.BackgroundTransparency = 1
+    temp.Visible = false
+    temp.Parent = gui
+
+    local ok = pcall(function()
+        ContentProvider:PreloadAsync({temp})
+    end)
+
+    temp:Destroy()
+    return ok
+end
+
+-- Preload logo sebelum ditampilkan
+task.spawn(function()
+    preloadImage(LOGO_URL)
+end)
+
+
 -- Window size based on device
 local windowSize = isMobile and UDim2.new(0,380,0,520) or UDim2.new(0,650,0,450)
 local minWindowSize = isMobile and Vector2.new(320, 400) or Vector2.new(550, 380)
