@@ -141,7 +141,7 @@ local logoContainer = new("ImageLabel",{
     BackgroundColor3=colors.primary,
     BackgroundTransparency=0.2,
     BorderSizePixel=0,
-    Image="https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg",
+    Image="https://github.com/habibihidayat/project-k/raw/main/src/logo.jpg",
     ScaleType=Enum.ScaleType.Fit,
     ZIndex=6
 })
@@ -1270,7 +1270,7 @@ local function createMinimizedIcon()
         BackgroundColor3=colors.primary,
         BackgroundTransparency=0.2,
         BorderSizePixel=0,
-        Image="https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg",
+        Image="https://github.com/habibihidayat/project-k/raw/main/src/logo.jpg",
         ScaleType=Enum.ScaleType.Fit,
         ZIndex=100
     })
