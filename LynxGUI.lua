@@ -33,7 +33,7 @@ local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habib
 local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
 local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoBuyWeather.lua"))()
 
--- GitHub Raw Logo URL
+-- GitHub Raw Logo URL - Dengan format yang bekerja di Roblox
 local LOGO_URL = "https://cdn.jsdelivr.net/gh/habibihidayat/project-k@main/src/logo.jpg"
 
 -- Enhanced Premium Color Palette with Vibrant Colors
@@ -177,19 +177,29 @@ task.spawn(function()
     task.wait(0.5)
     print("⏳ Mencoba load logo dari: " .. LOGO_URL)
     
-    local success, result = pcall(function()
-        logoContainer.Image = LOGO_URL
+    local attempts = 0
+    while attempts < 3 and logoContainer.Image == "" do
+        attempts = attempts + 1
+        print("🔄 Attempt " .. attempts .. "/3")
+        
+        local success = pcall(function()
+            logoContainer.Image = LOGO_URL
+        end)
+        
+        if logoContainer.Image ~= "" then
+            logoText.Visible = false
+            print("✅ Logo berhasil dimuat dari GitHub!")
+            break
+        end
+        
         task.wait(1)
-        return true
-    end)
+    end
     
-    if success and logoContainer.Image ~= "" then
-        logoText.Visible = false
-        print("✅ Logo berhasil dimuat dari GitHub!")
-    else
+    if logoContainer.Image == "" then
         logoText.Visible = true
-        print("⚠️ Logo gagal dimuat, menggunakan fallback text 'L'")
-        print("🔗 URL yang dicoba: " .. LOGO_URL)
+        print("⚠️ Logo gagal dimuat setelah 3 kali coba")
+        print("🔗 URL: " .. LOGO_URL)
+        print("💡 Gunakan fallback text 'L'")
     end
 end)
 
@@ -1304,12 +1314,21 @@ local function createMinimizedIcon()
     })
     
     task.spawn(function()
-        task.wait(0.2)
-        icon.Image = LOGO_URL
-        task.wait(1)
-        if icon.Image ~= "" then
-            logoK.Visible = false
-        else
+        local attempts = 0
+        while attempts < 3 and icon and icon.Image == "" do
+            attempts = attempts + 1
+            pcall(function()
+                icon.Image = LOGO_URL
+            end)
+            task.wait(1)
+            
+            if icon and icon.Image ~= "" then
+                logoK.Visible = false
+                break
+            end
+        end
+        
+        if icon and icon.Image == "" then
             logoK.Visible = true
         end
     end)
