@@ -932,7 +932,7 @@ end
 -- ==== MAIN PAGE WITH CATEGORIES ====
 
 -- 🎣 Auto Fishing Category
-local catAutoFishing = makeCategory(mainPage, "Auto Fishing", "🎣")
+local catAutoFishing = makeCategory(mainPage, "Auto Fishing")
 
 -- Instant Fishing Mode Selector
 local currentInstantMode = "None"
@@ -982,7 +982,7 @@ makeSlider(catAutoFishing, "Cancel Delay", 0.01, 1.5, 0.19, function(v)
 end)
 
 -- Blatant Mode
-local catBlatant = makeCategory(mainPage, "TRUE BLATANT MODE", "🔥")
+local catBlatant = makeCategory(mainPage, "TRUE BLATANT MODE")
 
 makeToggle(catBlatant, "🔥 ENABLE EXTREME BLATANT 🔥", function(on)
     if on then
@@ -1005,7 +1005,7 @@ makeSlider(catBlatant, "Spam Rate (ms)", 0.001, 0.1, 0.001, function(v)
 end)
 
 -- 🛠️ Support Fishing Category
-local catSupport = makeCategory(mainPage, "Support Fishing", "🛠️")
+local catSupport = makeCategory(mainPage, "Support Fishing")
 
 makeToggle(catSupport, "No Fishing Animation", function(on)
     if on then
@@ -1054,7 +1054,7 @@ Players.PlayerRemoving:Connect(refreshPlayerList)
 -- ==== SHOP PAGE WITH CATEGORIES ====
 
 -- 💰 Auto Sell Category
-local catSell = makeCategory(shopPage, "Auto Sell System", "💰")
+local catSell = makeCategory(shopPage, "Auto Sell System")
 
 makeButton(catSell, "Sell All Now", function()
     if AutoSell and AutoSell.SellOnce then
@@ -1063,7 +1063,7 @@ makeButton(catSell, "Sell All Now", function()
 end)
 
 -- ⏰ Auto Sell Timer Category
-local catTimer = makeCategory(shopPage, "Auto Sell Timer", "⏰")
+local catTimer = makeCategory(shopPage, "Auto Sell Timer")
 
 makeSlider(catTimer, "Sell Interval (seconds)", 1, 60, 5, function(value)
     AutoSellTimer.SetInterval(value)
@@ -1082,7 +1082,7 @@ makeButton(catTimer, "Stop Auto Sell", function()
 end)
 
 -- 🌦️ Auto Buy Weather Category
-local catWeather = makeCategory(shopPage, "Auto Buy Weather", "🌦️")
+local catWeather = makeCategory(shopPage, "Auto Buy Weather")
 
 local selectedWeathers = {}
 makeDropdown(catWeather, "Select Weather", "☁️", AutoBuyWeather.AllWeathers, function(weather)
@@ -1117,7 +1117,7 @@ makeToggle(catAFK, "Enable Anti-AFK", function(on)
 end)
 
 -- 🎞️ FPS Settings Category
-local catFPS = makeCategory(settingsPage, "FPS Unlocker", "🎞️")
+local catFPS = makeCategory(settingsPage, "FPS Unlocker")
 
 makeDropdown(catFPS, "Select FPS Limit", "⚙️", {"60 FPS", "90 FPS", "120 FPS", "240 FPS"}, function(selected)
     local fpsValue = tonumber(selected:match("%d+"))
@@ -1127,7 +1127,7 @@ makeDropdown(catFPS, "Select FPS Limit", "⚙️", {"60 FPS", "90 FPS", "120 FPS
 end, "FPSDropdown")
 
 -- ⚙️ General Settings Category
-local catGeneral = makeCategory(settingsPage, "General Settings", "⚙️")
+local catGeneral = makeCategory(settingsPage, "General Settings")
 
 makeToggle(catGeneral, "Auto Save Settings", function(on) 
     print("Auto Save:", on) 
