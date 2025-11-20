@@ -38,22 +38,19 @@ local LOGO_URL = "https://raw.githubusercontent.com/habibihidayat/project-k/refs
 
 -- Enhanced Premium Color Palette with Vibrant Colors
 local colors = {
-    primary = Color3.fromRGB(99, 115, 255),      -- Brighter primary
-    secondary = Color3.fromRGB(138, 161, 255),   -- Brighter secondary
-    accent = Color3.fromRGB(255, 130, 255),      -- Brighter accent
-    success = Color3.fromRGB(77, 201, 149),      -- Brighter success
-    warning = Color3.fromRGB(255, 186, 46),      -- Brighter warning
-    danger = Color3.fromRGB(255, 86, 89),        -- Brighter danger
-    
-    bg1 = Color3.fromRGB(20, 22, 30),            -- Slightly lighter
-    bg2 = Color3.fromRGB(28, 31, 40),            -- Slightly lighter
-    bg3 = Color3.fromRGB(36, 40, 52),            -- Slightly lighter
-    bg4 = Color3.fromRGB(44, 48, 62),            -- Slightly lighter
-    
+    primary = Color3.fromRGB(99, 115, 255),
+    secondary = Color3.fromRGB(138, 161, 255),
+    accent = Color3.fromRGB(255, 130, 255),
+    success = Color3.fromRGB(77, 201, 149),
+    warning = Color3.fromRGB(255, 186, 46),
+    danger = Color3.fromRGB(255, 86, 89),
+    bg1 = Color3.fromRGB(20, 22, 30),
+    bg2 = Color3.fromRGB(28, 31, 40),
+    bg3 = Color3.fromRGB(36, 40, 52),
+    bg4 = Color3.fromRGB(44, 48, 62),
     text = Color3.fromRGB(255, 255, 255),
-    textDim = Color3.fromRGB(180, 187, 205),     -- Brighter
-    textDimmer = Color3.fromRGB(130, 135, 145),  -- Brighter
-    
+    textDim = Color3.fromRGB(180, 187, 205),
+    textDimmer = Color3.fromRGB(130, 135, 145),
     border = Color3.fromRGB(57, 59, 64),
     glow = Color3.fromRGB(99, 115, 255),
 }
@@ -72,30 +69,29 @@ local gui = new("ScreenGui",{
     DisplayOrder=999
 })
 
--- Background overlay - REMOVED DARK BACKGROUND
+-- Background overlay
 local overlay = new("Frame",{
     Parent=gui,
     Size=UDim2.new(1,0,1,0),
-    BackgroundTransparency=1,  -- Fully transparent
+    BackgroundTransparency=1,
     BorderSizePixel=0,
     Visible=false,
     ZIndex=1
 })
 
--- Main Window Container with Enhanced Glass effect
+-- Main Window Container
 local win = new("Frame",{
     Parent=gui,
     Size=windowSize,
     Position=UDim2.new(0.5,-windowSize.X.Offset/2,0.5,-windowSize.Y.Offset/2),
     BackgroundColor3=colors.bg1,
-    BackgroundTransparency=0.25,  -- More transparent
+    BackgroundTransparency=0.25,
     BorderSizePixel=0,
     ClipsDescendants=false,
     ZIndex=3
 })
 new("UICorner",{Parent=win,CornerRadius=UDim.new(0,18)})
 
--- Enhanced Glassmorphism effect with subtle glow
 local glassBlur = new("Frame",{
     Parent=win,
     Size=UDim2.new(1,0,1,0),
@@ -106,7 +102,6 @@ local glassBlur = new("Frame",{
 })
 new("UICorner",{Parent=glassBlur,CornerRadius=UDim.new(0,18)})
 
--- Subtle glow border
 local glowBorder = new("UIStroke",{
     Parent=win,
     Color=colors.primary,
@@ -115,19 +110,18 @@ local glowBorder = new("UIStroke",{
     ApplyStrokeMode=Enum.ApplyStrokeMode.Border
 })
 
--- Sidebar with enhanced transparency
+-- Sidebar
 local sidebar = new("Frame",{
     Parent=win,
     Size=isMobile and UDim2.new(0,75,1,0) or UDim2.new(0,180,1,0),
     BackgroundColor3=colors.bg2,
-    BackgroundTransparency=0.3,  -- More transparent
+    BackgroundTransparency=0.3,
     BorderSizePixel=0,
     ClipsDescendants=true,
     ZIndex=4
 })
 new("UICorner",{Parent=sidebar,CornerRadius=UDim.new(0,18)})
 
--- Sidebar Header with Custom Logo Support
 local sidebarHeader = new("Frame",{
     Parent=sidebar,
     Size=isMobile and UDim2.new(1,0,0,85) or UDim2.new(1,0,0,90),
@@ -136,7 +130,7 @@ local sidebarHeader = new("Frame",{
     ZIndex=5
 })
 
--- Logo Container with enhanced gradient
+-- Logo Container with GitHub Image
 local logoContainer = new("ImageLabel",{
     Parent=sidebarHeader,
     Size=isMobile and UDim2.new(0,42,0,42) or UDim2.new(0,50,0,50),
@@ -159,7 +153,6 @@ new("UIGradient",{
     Rotation=45
 })
 
--- Enhanced glow for logo
 new("UIStroke",{
     Parent=logoContainer,
     Color=colors.primary,
@@ -167,7 +160,7 @@ new("UIStroke",{
     Transparency=0.5
 })
 
--- Fallback text if image doesn't load
+-- Fallback text
 local logoText = new("TextLabel",{
     Parent=logoContainer,
     Text="L",
@@ -180,14 +173,6 @@ local logoText = new("TextLabel",{
     ZIndex=7
 })
 
--- Handle image loading with fallback
-logoContainer:GetPropertyChangedSignal("Image"):Connect(function()
-    if logoContainer.Image == "" or logoContainer.Image == LOGO_URL then
-        logoText.Visible = (logoContainer.Image == "")
-    end
-end)
-
--- Try to load image, show fallback if fails
 task.spawn(function()
     local success = pcall(function()
         logoContainer.Image = LOGO_URL
@@ -202,7 +187,7 @@ end)
 
 local brandName = new("TextLabel",{
     Parent=sidebarHeader,
-    Text=isMobile and "LYNX" or "LYNX",
+    Text="LYNX",
     Size=UDim2.new(1,0,0,18),
     Position=isMobile and UDim2.new(0,0,0,62) or UDim2.new(0,0,0,72),
     Font=Enum.Font.GothamBold,
@@ -246,20 +231,20 @@ new("UIListLayout",{
     SortOrder=Enum.SortOrder.LayoutOrder
 })
 
--- Content Area with enhanced transparency
+-- Content Area
 local contentBg = new("Frame",{
     Parent=win,
     Size=isMobile and UDim2.new(1,-85,1,-15) or UDim2.new(1,-190,1,-15),
     Position=isMobile and UDim2.new(0,80,0,10) or UDim2.new(0,185,0,10),
     BackgroundColor3=colors.bg2,
-    BackgroundTransparency=0.4,  -- More transparent
+    BackgroundTransparency=0.4,
     BorderSizePixel=0,
     ClipsDescendants=true,
     ZIndex=4
 })
 new("UICorner",{Parent=contentBg,CornerRadius=UDim.new(0,16)})
 
--- Top bar with controls - DRAGGABLE AREA
+-- Top bar
 local topBar = new("Frame",{
     Parent=contentBg,
     Size=UDim2.new(1,0,0,45),
@@ -270,7 +255,6 @@ local topBar = new("Frame",{
 })
 new("UICorner",{Parent=topBar,CornerRadius=UDim.new(0,16)})
 
--- Enhanced Drag Handle Indicator
 local dragHandle = new("Frame",{
     Parent=topBar,
     Size=UDim2.new(0,40,0,4),
@@ -347,7 +331,7 @@ end
 local btnMin = createControlBtn("─", colors.warning)
 local btnClose = createControlBtn("×", colors.danger)
 
--- FIXED Resize Handle (Bottom Right Corner) - Only expands right and down
+-- Resize Handle
 local resizeHandle = new("TextButton",{
     Parent=win,
     Size=UDim2.new(0,20,0,20),
@@ -411,7 +395,7 @@ local settingsPage = createPage("Settings")
 local infoPage = createPage("Info")
 mainPage.Visible = true
 
--- Nav Button Function (Enhanced)
+-- Nav Button Function
 local function createNavButton(text, icon, page, order)
     local btn = new("TextButton",{
         Parent=navContainer,
@@ -505,7 +489,7 @@ btnShop.MouseButton1Click:Connect(function() switchPage("Shop", "Shop Features")
 btnSettings.MouseButton1Click:Connect(function() switchPage("Settings", "Settings") end)
 btnInfo.MouseButton1Click:Connect(function() switchPage("Info", "About Lynx") end)
 
--- Modern Category with enhanced colors
+-- Modern Category
 local function makeCategory(parent, title, icon)
     local categoryFrame = new("Frame",{
         Parent=parent,
@@ -650,4 +634,835 @@ local function makeToggle(parent, label, callback)
         Parent=toggleBg,
         Size=UDim2.new(1,0,1,0),
         BackgroundTransparency=1,
-        Text
+        Text="",
+        ZIndex=10
+    })
+    
+    local on = false
+    btn.MouseButton1Click:Connect(function()
+        on = not on
+        TweenService:Create(toggleBg,TweenInfo.new(0.25),{BackgroundColor3=on and colors.primary or colors.bg4}):Play()
+        TweenService:Create(toggleCircle,TweenInfo.new(0.3,Enum.EasingStyle.Back),{
+            Position=on and UDim2.new(1,-23,0.5,-10) or UDim2.new(0,3,0.5,-10),
+            BackgroundColor3=on and colors.text or colors.textDim
+        }):Play()
+        callback(on)
+    end)
+end
+
+-- Modern Slider
+local function makeSlider(parent, label, min, max, def, onChange)
+    local frame = new("Frame",{
+        Parent=parent,
+        Size=UDim2.new(1,0,0,50),
+        BackgroundTransparency=1,
+        ZIndex=7
+    })
+    
+    local lbl = new("TextLabel",{
+        Parent=frame,
+        Text=("%s: %.2f"):format(label,def),
+        Size=UDim2.new(1,0,0,18),
+        BackgroundTransparency=1,
+        TextColor3=colors.text,
+        TextXAlignment=Enum.TextXAlignment.Left,
+        Font=Enum.Font.GothamMedium,
+        TextSize=12,
+        ZIndex=8
+    })
+    
+    local bar = new("Frame",{
+        Parent=frame,
+        Size=UDim2.new(1,0,0,10),
+        Position=UDim2.new(0,0,0,30),
+        BackgroundColor3=colors.bg4,
+        BorderSizePixel=0,
+        ZIndex=8
+    })
+    new("UICorner",{Parent=bar,CornerRadius=UDim.new(1,0)})
+    
+    local fill = new("Frame",{
+        Parent=bar,
+        Size=UDim2.new((def-min)/(max-min),0,1,0),
+        BackgroundColor3=colors.primary,
+        BorderSizePixel=0,
+        ZIndex=9
+    })
+    new("UICorner",{Parent=fill,CornerRadius=UDim.new(1,0)})
+    new("UIGradient",{
+        Parent=fill,
+        Color=ColorSequence.new{
+            ColorSequenceKeypoint.new(0, colors.primary),
+            ColorSequenceKeypoint.new(1, colors.secondary)
+        }
+    })
+    
+    local knob = new("Frame",{
+        Parent=bar,
+        Size=UDim2.new(0,20,0,20),
+        Position=UDim2.new((def-min)/(max-min),-10,0.5,-10),
+        BackgroundColor3=colors.text,
+        BorderSizePixel=0,
+        ZIndex=10
+    })
+    new("UICorner",{Parent=knob,CornerRadius=UDim.new(1,0)})
+    
+    local knobShadow = new("Frame",{
+        Parent=knob,
+        Size=UDim2.new(1,4,1,4),
+        Position=UDim2.new(0,-2,0,-2),
+        BackgroundColor3=colors.primary,
+        BackgroundTransparency=0.7,
+        BorderSizePixel=0,
+        ZIndex=9
+    })
+    new("UICorner",{Parent=knobShadow,CornerRadius=UDim.new(1,0)})
+    
+    local dragging = false
+    local function update(x)
+        local rel = math.clamp((x-bar.AbsolutePosition.X)/math.max(bar.AbsoluteSize.X,1),0,1)
+        local val = min+(max-min)*rel
+        fill.Size = UDim2.new(rel,0,1,0)
+        knob.Position = UDim2.new(rel,-10,0.5,-10)
+        lbl.Text = ("%s: %.2f"):format(label,val)
+        onChange(val)
+    end
+    
+    bar.InputBegan:Connect(function(i)
+        if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then 
+            dragging=true 
+            update(i.Position.X)
+        end 
+    end)
+    
+    UserInputService.InputChanged:Connect(function(i)
+        if dragging and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then 
+            update(i.Position.X)
+        end 
+    end)
+    
+    UserInputService.InputEnded:Connect(function(i)
+        if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dragging=false end 
+    end)
+end
+
+-- Modern Dropdown
+local function makeDropdown(parent, title, icon, items, onSelect, uniqueId)
+    local dropdownFrame = new("Frame",{
+        Parent=parent,
+        Size=UDim2.new(1,0,0,48),
+        BackgroundColor3=colors.bg4,
+        BackgroundTransparency=0.4,
+        BorderSizePixel=0,
+        AutomaticSize=Enum.AutomaticSize.Y,
+        ZIndex=7,
+        Name=uniqueId or "Dropdown"
+    })
+    new("UICorner",{Parent=dropdownFrame,CornerRadius=UDim.new(0,14)})
+    
+    local header = new("TextButton",{
+        Parent=dropdownFrame,
+        Size=UDim2.new(1,-16,0,44),
+        Position=UDim2.new(0,8,0,2),
+        BackgroundTransparency=1,
+        Text="",
+        AutoButtonColor=false,
+        ZIndex=8
+    })
+    
+    local iconLabel = new("TextLabel",{
+        Parent=header,
+        Text=icon,
+        Size=UDim2.new(0,28,1,0),
+        BackgroundTransparency=1,
+        Font=Enum.Font.GothamBold,
+        TextSize=16,
+        TextColor3=colors.primary,
+        TextXAlignment=Enum.TextXAlignment.Left,
+        ZIndex=9
+    })
+    
+    local titleLabel = new("TextLabel",{
+        Parent=header,
+        Text=title,
+        Size=UDim2.new(1,-90,0,16),
+        Position=UDim2.new(0,32,0,4),
+        BackgroundTransparency=1,
+        Font=Enum.Font.GothamBold,
+        TextSize=12,
+        TextColor3=colors.text,
+        TextXAlignment=Enum.TextXAlignment.Left,
+        ZIndex=9
+    })
+    
+    local statusLabel = new("TextLabel",{
+        Parent=header,
+        Text="None Selected",
+        Size=UDim2.new(1,-90,0,12),
+        Position=UDim2.new(0,32,0,24),
+        BackgroundTransparency=1,
+        Font=Enum.Font.Gotham,
+        TextSize=10,
+        TextColor3=colors.textDimmer,
+        TextXAlignment=Enum.TextXAlignment.Left,
+        ZIndex=9
+    })
+    
+    local arrow = new("TextLabel",{
+        Parent=header,
+        Text="▼",
+        Size=UDim2.new(0,24,1,0),
+        Position=UDim2.new(1,-24,0,0),
+        BackgroundTransparency=1,
+        Font=Enum.Font.GothamBold,
+        TextSize=12,
+        TextColor3=colors.primary,
+        ZIndex=9
+    })
+    
+    local listContainer = new("ScrollingFrame",{
+        Parent=dropdownFrame,
+        Size=UDim2.new(1,-16,0,0),
+        Position=UDim2.new(0,8,0,52),
+        BackgroundTransparency=1,
+        Visible=false,
+        AutomaticCanvasSize=Enum.AutomaticSize.Y,
+        CanvasSize=UDim2.new(0,0,0,0),
+        ScrollBarThickness=3,
+        ScrollBarImageColor3=colors.primary,
+        BorderSizePixel=0,
+        ClipsDescendants=true,
+        ZIndex=10
+    })
+    new("UIListLayout",{Parent=listContainer,Padding=UDim.new(0,6)})
+    new("UIPadding",{Parent=listContainer,PaddingBottom=UDim.new(0,10)})
+    
+    local isOpen = false
+    local selectedItem = nil
+    
+    header.MouseButton1Click:Connect(function()
+        isOpen = not isOpen
+        listContainer.Visible = isOpen
+        
+        TweenService:Create(arrow,TweenInfo.new(0.3,Enum.EasingStyle.Back),{Rotation=isOpen and 180 or 0}):Play()
+        TweenService:Create(dropdownFrame,TweenInfo.new(0.2),{
+            BackgroundColor3=isOpen and colors.bg3 or colors.bg4,
+            BackgroundTransparency=isOpen and 0.3 or 0.4
+        }):Play()
+        
+        if isOpen and #items > 6 then
+            listContainer.Size = UDim2.new(1,-16,0,200)
+        else
+            listContainer.Size = UDim2.new(1,-16,0,math.min(#items * 36, 220))
+        end
+    end)
+    
+    for _, itemName in ipairs(items) do
+        local itemBtn = new("TextButton",{
+            Parent=listContainer,
+            Size=UDim2.new(1,0,0,34),
+            BackgroundColor3=colors.bg4,
+            BackgroundTransparency=0.5,
+            BorderSizePixel=0,
+            Text="",
+            AutoButtonColor=false,
+            ZIndex=11
+        })
+        new("UICorner",{Parent=itemBtn,CornerRadius=UDim.new(0,10)})
+        
+        local btnLabel = new("TextLabel",{
+            Parent=itemBtn,
+            Text=itemName,
+            Size=UDim2.new(1,-16,1,0),
+            Position=UDim2.new(0,8,0,0),
+            BackgroundTransparency=1,
+            Font=Enum.Font.GothamMedium,
+            TextSize=11,
+            TextColor3=colors.textDim,
+            TextXAlignment=Enum.TextXAlignment.Left,
+            TextTruncate=Enum.TextTruncate.AtEnd,
+            ZIndex=12
+        })
+        
+        itemBtn.MouseEnter:Connect(function()
+            if selectedItem ~= itemName then
+                TweenService:Create(itemBtn,TweenInfo.new(0.15),{
+                    BackgroundColor3=colors.primary,
+                    BackgroundTransparency=0.2
+                }):Play()
+                TweenService:Create(btnLabel,TweenInfo.new(0.15),{TextColor3=colors.text}):Play()
+            end
+        end)
+        
+        itemBtn.MouseLeave:Connect(function()
+            if selectedItem ~= itemName then
+                TweenService:Create(itemBtn,TweenInfo.new(0.15),{
+                    BackgroundColor3=colors.bg4,
+                    BackgroundTransparency=0.5
+                }):Play()
+                TweenService:Create(btnLabel,TweenInfo.new(0.15),{TextColor3=colors.textDim}):Play()
+            end
+        end)
+        
+        itemBtn.MouseButton1Click:Connect(function()
+            selectedItem = itemName
+            statusLabel.Text = "✓ " .. itemName
+            statusLabel.TextColor3 = colors.success
+            onSelect(itemName)
+            
+            task.wait(0.1)
+            isOpen = false
+            listContainer.Visible = false
+            TweenService:Create(arrow,TweenInfo.new(0.3,Enum.EasingStyle.Back),{Rotation=0}):Play()
+            TweenService:Create(dropdownFrame,TweenInfo.new(0.2),{
+                BackgroundColor3=colors.bg4,
+                BackgroundTransparency=0.4
+            }):Play()
+        end)
+    end
+    
+    return dropdownFrame
+end
+
+-- Modern Button
+local function makeButton(parent, label, callback)
+    local btnFrame = new("Frame",{
+        Parent=parent,
+        Size=UDim2.new(1,0,0,40),
+        BackgroundColor3=colors.primary,
+        BackgroundTransparency=0.1,
+        BorderSizePixel=0,
+        ZIndex=8
+    })
+    new("UICorner",{Parent=btnFrame,CornerRadius=UDim.new(0,12)})
+    new("UIGradient",{
+        Parent=btnFrame,
+        Color=ColorSequence.new{
+            ColorSequenceKeypoint.new(0, colors.primary),
+            ColorSequenceKeypoint.new(1, colors.secondary)
+        },
+        Rotation=45
+    })
+    
+    local button = new("TextButton",{
+        Parent=btnFrame,
+        Size=UDim2.new(1,0,1,0),
+        BackgroundTransparency=1,
+        Text=label,
+        Font=Enum.Font.GothamBold,
+        TextSize=13,
+        TextColor3=colors.text,
+        AutoButtonColor=false,
+        ZIndex=9
+    })
+    
+    button.MouseEnter:Connect(function()
+        TweenService:Create(btnFrame,TweenInfo.new(0.2),{
+            Size=UDim2.new(1,0,0,44),
+            BackgroundTransparency=0
+        }):Play()
+    end)
+    button.MouseLeave:Connect(function()
+        TweenService:Create(btnFrame,TweenInfo.new(0.2),{
+            Size=UDim2.new(1,0,0,40),
+            BackgroundTransparency=0.1
+        }):Play()
+    end)
+    
+    button.MouseButton1Click:Connect(function()
+        TweenService:Create(btnFrame,TweenInfo.new(0.1),{Size=UDim2.new(0.98,0,0,38)}):Play()
+        task.wait(0.1)
+        TweenService:Create(btnFrame,TweenInfo.new(0.1),{Size=UDim2.new(1,0,0,40)}):Play()
+        pcall(callback)
+    end)
+    
+    return btnFrame
+end
+
+-- ==== MAIN PAGE ====
+local catAutoFishing = makeCategory(mainPage, "Auto Fishing", "🎣")
+
+local currentInstantMode = "None"
+local fishingDelayValue = 1.30
+local cancelDelayValue = 0.19
+
+makeDropdown(catAutoFishing, "Instant Fishing Mode", "⚡", {"Fast", "Perfect"}, function(mode)
+    currentInstantMode = mode
+    instant.Stop()
+    instant2.Stop()
+    
+    if mode == "Fast" then
+        instant.Settings.MaxWaitTime = fishingDelayValue
+        instant.Settings.CancelDelay = cancelDelayValue
+        instant.Start()
+    elseif mode == "Perfect" then
+        instant2.Settings.MaxWaitTime = fishingDelayValue
+        instant2.Settings.CancelDelay = cancelDelayValue
+        instant2.Start()
+    end
+end, "InstantFishingMode")
+
+makeToggle(catAutoFishing, "Enable Instant Fishing", function(on)
+    if on then
+        if currentInstantMode == "Fast" then
+            instant.Start()
+        elseif currentInstantMode == "Perfect" then
+            instant2.Start()
+        end
+    else
+        instant.Stop()
+        instant2.Stop()
+    end
+end)
+
+makeSlider(catAutoFishing, "Fishing Delay", 0.01, 5.0, 1.30, function(v)
+    fishingDelayValue = v
+    instant.Settings.MaxWaitTime = v
+    instant2.Settings.MaxWaitTime = v
+end)
+
+makeSlider(catAutoFishing, "Cancel Delay", 0.01, 1.5, 0.19, function(v)
+    cancelDelayValue = v
+    instant.Settings.CancelDelay = v
+    instant2.Settings.CancelDelay = v
+end)
+
+local catBlatant = makeCategory(mainPage, "Blatant Mode", "🔥")
+
+makeToggle(catBlatant, "Enable Extreme Blatant", function(on)
+    if on then
+        BlatantAutoFishing.Start()
+    else
+        BlatantAutoFishing.Stop()
+    end
+end)
+
+makeToggle(catBlatant, "Instant Catch", function(on)
+    BlatantAutoFishing.Settings.InstantCatch = on
+end)
+
+makeToggle(catBlatant, "Auto Complete Everything", function(on)
+    BlatantAutoFishing.Settings.AutoComplete = on
+end)
+
+makeSlider(catBlatant, "Spam Rate (ms)", 0.001, 0.1, 0.001, function(v)
+    BlatantAutoFishing.Settings.SpamRate = v
+end)
+
+local catSupport = makeCategory(mainPage, "Support Features", "🛠️")
+
+makeToggle(catSupport, "No Fishing Animation", function(on)
+    if on then
+        NoFishingAnimation.StartWithDelay()
+    else
+        NoFishingAnimation.Stop()
+    end
+end)
+
+-- ==== TELEPORT PAGE ====
+local locationItems = {}
+for name, _ in pairs(TeleportModule.Locations) do
+    table.insert(locationItems, name)
+end
+table.sort(locationItems)
+
+makeDropdown(teleportPage, "Teleport to Location", "📍", locationItems, function(selectedLocation)
+    TeleportModule.TeleportTo(selectedLocation)
+end, "LocationTeleport")
+
+local playerItems = {}
+for _, player in ipairs(Players:GetPlayers()) do
+    if player ~= localPlayer then
+        table.insert(playerItems, player.Name)
+    end
+end
+table.sort(playerItems)
+
+makeDropdown(teleportPage, "Teleport to Player", "👤", playerItems, function(selectedPlayer)
+    TeleportToPlayer.TeleportTo(selectedPlayer)
+end, "PlayerTeleport")
+
+local function refreshPlayerList()
+    table.clear(playerItems)
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= localPlayer then
+            table.insert(playerItems, player.Name)
+        end
+    end
+    table.sort(playerItems)
+end
+
+Players.PlayerAdded:Connect(refreshPlayerList)
+Players.PlayerRemoving:Connect(refreshPlayerList)
+
+-- ==== SHOP PAGE ====
+local catSell = makeCategory(shopPage, "Auto Sell System", "💰")
+
+makeButton(catSell, "Sell All Now", function()
+    if AutoSell and AutoSell.SellOnce then
+        AutoSell.SellOnce()
+    end
+end)
+
+local catTimer = makeCategory(shopPage, "Auto Sell Timer", "⏰")
+
+makeSlider(catTimer, "Sell Interval (seconds)", 1, 60, 5, function(value)
+    AutoSellTimer.SetInterval(value)
+end)
+
+makeButton(catTimer, "Start Auto Sell", function()
+    if AutoSellTimer then
+        AutoSellTimer.Start(AutoSellTimer.Interval)
+    end
+end)
+
+makeButton(catTimer, "Stop Auto Sell", function()
+    if AutoSellTimer then
+        AutoSellTimer.Stop()
+    end
+end)
+
+local catWeather = makeCategory(shopPage, "Auto Buy Weather", "🌦️")
+
+local selectedWeathers = {}
+makeDropdown(catWeather, "Select Weather", "☁️", AutoBuyWeather.AllWeathers, function(weather)
+    local idx = table.find(selectedWeathers, weather)
+    if idx then
+        table.remove(selectedWeathers, idx)
+    else
+        table.insert(selectedWeathers, weather)
+    end
+    AutoBuyWeather.SetSelected(selectedWeathers)
+end, "WeatherDropdown")
+
+makeToggle(catWeather, "Enable Auto Weather", function(on)
+    if on then
+        AutoBuyWeather.Start()
+    else
+        AutoBuyWeather.Stop()
+    end
+end)
+
+-- ==== SETTINGS PAGE ====
+local catAFK = makeCategory(settingsPage, "Anti-AFK Protection", "🧍‍♂️")
+
+makeToggle(catAFK, "Enable Anti-AFK", function(on)
+    if on then
+        AntiAFK.Start()
+    else
+        AntiAFK.Stop()
+    end
+end)
+
+local catFPS = makeCategory(settingsPage, "FPS Unlocker", "🎞️")
+
+makeDropdown(catFPS, "Select FPS Limit", "⚙️", {"60 FPS", "90 FPS", "120 FPS", "240 FPS"}, function(selected)
+    local fpsValue = tonumber(selected:match("%d+"))
+    if fpsValue and UnlockFPS and UnlockFPS.SetCap then
+        UnlockFPS.SetCap(fpsValue)
+    end
+end, "FPSDropdown")
+
+local catGeneral = makeCategory(settingsPage, "General Settings", "⚙️")
+
+makeToggle(catGeneral, "Auto Save Settings", function(on) 
+    print("Auto Save:", on) 
+end)
+
+makeToggle(catGeneral, "Show Notifications", function(on) 
+    print("Notifications:", on) 
+end)
+
+makeToggle(catGeneral, "Performance Mode", function(on) 
+    print("Performance:", on) 
+end)
+
+-- ==== INFO PAGE ====
+local infoContainer = new("Frame",{
+    Parent=infoPage,
+    Size=UDim2.new(1,0,0,450),
+    BackgroundColor3=colors.bg3,
+    BackgroundTransparency=0.5,
+    BorderSizePixel=0,
+    ZIndex=6
+})
+new("UICorner",{Parent=infoContainer,CornerRadius=UDim.new(0,16)})
+
+local infoText = new("TextLabel",{
+    Parent=infoContainer,
+    Size=UDim2.new(1,-40,1,-40),
+    Position=UDim2.new(0,20,0,20),
+    BackgroundTransparency=1,
+    Text=[[
+✨ LYNX v2.1 ENHANCED
+
+Modern Premium Interface
+Optimized for All Devices
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+🎣 AUTO FISHING
+• Instant Fishing (Fast/Perfect)
+• Unified slider controls
+• Blatant Mode support
+
+🛠️ SUPPORT FEATURES
+• No Fishing Animation
+
+🌍 TELEPORT SYSTEM
+• Location teleport
+• Player teleport
+
+💰 SHOP FEATURES
+• Auto Sell & Timer
+• Auto Buy Weather
+
+⚙️ SETTINGS
+• Anti-AFK Protection
+• FPS Unlocker
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+💡 NEW IN v2.1
+✓ GitHub Logo Integration
+✓ Enhanced vibrant colors
+✓ Improved glass morphism
+✓ Better visual contrast
+
+🎮 CONTROLS
+• Click to expand categories
+• Drag from top bar to move
+• Resize from corner
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+Created with 💎 by Lynx Team
+    ]],
+    Font=Enum.Font.Gotham,
+    TextSize=11,
+    TextColor3=colors.text,
+    TextWrapped=true,
+    TextXAlignment=Enum.TextXAlignment.Left,
+    TextYAlignment=Enum.TextYAlignment.Top,
+    ZIndex=7
+})
+
+-- Minimized Icon
+local minimized = false
+local icon
+local savedIconPos = UDim2.new(0,20,0,120)
+
+local function createMinimizedIcon()
+    if icon then return end
+    local iconSize = isMobile and 55 or 60
+    icon = new("ImageLabel",{
+        Parent=gui,
+        Size=UDim2.new(0,iconSize,0,iconSize),
+        Position=savedIconPos,
+        BackgroundColor3=colors.primary,
+        BackgroundTransparency=0.2,
+        BorderSizePixel=0,
+        Image=LOGO_URL,
+        ScaleType=Enum.ScaleType.Fit,
+        ZIndex=100
+    })
+    new("UICorner",{Parent=icon,CornerRadius=UDim.new(0,15)})
+    new("UIGradient",{
+        Parent=icon,
+        Color=ColorSequence.new{
+            ColorSequenceKeypoint.new(0, colors.primary),
+            ColorSequenceKeypoint.new(0.5, colors.accent),
+            ColorSequenceKeypoint.new(1, colors.secondary)
+        },
+        Rotation=45
+    })
+    new("UIStroke",{
+        Parent=icon,
+        Color=colors.primary,
+        Thickness=2,
+        Transparency=0.5
+    })
+    
+    local logoK = new("TextLabel",{
+        Parent=icon,
+        Text="L",
+        Size=UDim2.new(1,0,1,0),
+        Font=Enum.Font.GothamBold,
+        TextSize=isMobile and 28 or 32,
+        BackgroundTransparency=1,
+        TextColor3=colors.text,
+        Visible=false,
+        ZIndex=101
+    })
+    
+    local dragging,dragStart,startPos,dragMoved = false,nil,nil,false
+    icon.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging,dragMoved,dragStart,startPos = true,false,input.Position,icon.Position
+        end
+    end)
+    
+    icon.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            if math.sqrt(delta.X^2 + delta.Y^2) > 5 then dragMoved = true end
+            local newPos = UDim2.new(startPos.X.Scale,startPos.X.Offset + delta.X,startPos.Y.Scale,startPos.Y.Offset + delta.Y)
+            TweenService:Create(icon,TweenInfo.new(0.05),{Position=newPos}):Play()
+        end
+    end)
+    
+    icon.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            if dragging then
+                dragging = false
+                savedIconPos = icon.Position
+                if not dragMoved then
+                    overlay.Visible,win.Visible = true,true
+                    TweenService:Create(win,TweenInfo.new(0.5,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{
+                        Size=windowSize,
+                        Position=UDim2.new(0.5,-windowSize.X.Offset/2,0.5,-windowSize.Y.Offset/2)
+                    }):Play()
+                    if icon then icon:Destroy() icon = nil end
+                    minimized = false
+                end
+            end
+        end
+    end)
+end
+
+btnMin.MouseButton1Click:Connect(function()
+    if not minimized then
+        local targetPos = UDim2.new(0.5,0,0.5,0)
+        TweenService:Create(win,TweenInfo.new(0.35,Enum.EasingStyle.Back,Enum.EasingDirection.In),{
+            Size=UDim2.new(0,0,0,0),
+            Position=targetPos
+        }):Play()
+        task.wait(0.35)
+        win.Visible,overlay.Visible = false,false
+        createMinimizedIcon()
+        minimized = true
+    end
+end)
+
+btnClose.MouseButton1Click:Connect(function()
+    TweenService:Create(win,TweenInfo.new(0.35,Enum.EasingStyle.Back,Enum.EasingDirection.In),{
+        Size=UDim2.new(0,0,0,0),
+        Position=UDim2.new(0.5,0,0.5,0),
+        Rotation=90
+    }):Play()
+    task.wait(0.35)
+    gui:Destroy()
+end)
+
+-- SMOOTH DRAGGING SYSTEM
+local dragging,dragStart,startPos = false,nil,nil
+local dragTween = nil
+
+topBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging,dragStart,startPos = true,input.Position,win.Position
+        if dragTween then dragTween:Cancel() end
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        local newPos = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+        if dragTween then dragTween:Cancel() end
+        dragTween = TweenService:Create(win,TweenInfo.new(0.05,Enum.EasingStyle.Linear),{Position=newPos})
+        dragTween:Play()
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then 
+        dragging = false 
+    end
+end)
+
+-- FIXED RESIZING SYSTEM
+local resizing = false
+local resizeStart,startSize,startPos = nil,nil,nil
+local resizeTween = nil
+
+resizeHandle.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        resizing,resizeStart,startSize,startPos = true,input.Position,win.Size,win.Position
+        if resizeTween then resizeTween:Cancel() end
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - resizeStart
+        
+        local newWidth = math.clamp(
+            startSize.X.Offset + delta.X,
+            minWindowSize.X,
+            maxWindowSize.X
+        )
+        local newHeight = math.clamp(
+            startSize.Y.Offset + delta.Y,
+            minWindowSize.Y,
+            maxWindowSize.Y
+        )
+        
+        local newSize = UDim2.new(0,newWidth,0,newHeight)
+        
+        if resizeTween then resizeTween:Cancel() end
+        resizeTween = TweenService:Create(win,TweenInfo.new(0.05,Enum.EasingStyle.Linear),{
+            Size=newSize
+        })
+        resizeTween:Play()
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then 
+        resizing = false 
+    end
+end)
+
+-- Opening Animation
+task.spawn(function()
+    win.Size = UDim2.new(0,0,0,0)
+    win.Position = UDim2.new(0.5,-windowSize.X.Offset/2,0.5,-windowSize.Y.Offset/2)
+    win.Rotation = 0
+    overlay.Visible = false
+    
+    task.wait(0.1)
+    
+    TweenService:Create(win,TweenInfo.new(0.6,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{
+        Size=windowSize
+    }):Play()
+end)
+
+-- Hover effect for resize handle
+resizeHandle.MouseEnter:Connect(function()
+    TweenService:Create(resizeHandle,TweenInfo.new(0.2),{
+        BackgroundTransparency=0.2,
+        Size=UDim2.new(0,24,0,24)
+    }):Play()
+end)
+
+resizeHandle.MouseLeave:Connect(function()
+    if not resizing then
+        TweenService:Create(resizeHandle,TweenInfo.new(0.2),{
+            BackgroundTransparency=0.5,
+            Size=UDim2.new(0,20,0,20)
+        }):Play()
+    end
+end)
+
+print("✨ Lynx GUI v2.1 Enhanced loaded!")
+print("🎨 Ultra Premium Glass Edition with GitHub Logo")
+print("📱 Mobile & PC Optimized")
+print("🖱️ Drag from top | Resize from corner")
+print("🎨 Enhanced colors & transparency")
+print("💎 Created by Lynx Team")
