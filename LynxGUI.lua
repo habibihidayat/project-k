@@ -182,6 +182,27 @@ local logoImage = new("ImageLabel",{
 })
 new("UICorner",{Parent=logoImage,CornerRadius=UDim.new(0,14)})
 
+-- 🔥 Load Logo Base64 via Loadstring
+local logoData = ""
+
+pcall(function()
+    logoData = loadstring(game:HttpGet("sandbox:/mnt/data/logo.lua"))()
+end)
+
+task.spawn(function()
+    task.wait(0.4)
+
+    if logoData ~= nil and logoData ~= "" then
+        logoImage.Image = "data:image/png;base64," .. logoData
+        logoText.Visible = false
+        warn("✅ Logo base64 berhasil dimuat melalui loadstring")
+    else
+        logoText.Visible = true
+        warn("⚠️ Logo gagal dimuat (fallback)")
+    end
+end)
+
+
 -- Fallback Text Logo
 local logoText = new("TextLabel",{
     Parent=logoContainer,
