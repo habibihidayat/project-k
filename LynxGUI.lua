@@ -173,7 +173,7 @@ local logoText = new("TextLabel",{
     TextSize=isMobile and 26 or 32,
     BackgroundTransparency=1,
     TextColor3=colors.text,
-    Visible=logoContainer.Image == "https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg",
+    Visible=logoContainer.Image == "",
     ZIndex=7
 })
 
@@ -1299,7 +1299,7 @@ local function createMinimizedIcon()
         TextSize=isMobile and 28 or 32,
         BackgroundTransparency=1,
         TextColor3=colors.text,
-        Visible=icon.Image == "https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg",
+        Visible=icon.Image == "",
         ZIndex=101
     })
     
