@@ -141,7 +141,7 @@ local logoContainer = new("ImageLabel",{
     BackgroundColor3=colors.primary,
     BackgroundTransparency=0.2,
     BorderSizePixel=0,
-    Image="https://imgur.com/a/HRj6CEO",
+    Image="https://i.imgur.com/7cOeI3e.jpeg",
     ScaleType=Enum.ScaleType.Fit,
     ZIndex=6
 })
@@ -1270,7 +1270,7 @@ local function createMinimizedIcon()
         BackgroundColor3=colors.primary,
         BackgroundTransparency=0.2,
         BorderSizePixel=0,
-        Image="https://imgur.com/a/HRj6CEO",
+        Image="https://i.imgur.com/7cOeI3e.jpeg",
         ScaleType=Enum.ScaleType.Fit,
         ZIndex=100
     })
