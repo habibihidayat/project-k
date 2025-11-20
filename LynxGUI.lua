@@ -33,8 +33,13 @@ local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habib
 local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
 local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoBuyWeather.lua"))()
 
--- GitHub Raw Logo URL - Dengan format yang bekerja di Roblox
-local LOGO_URL = "https://cdn.jsdelivr.net/gh/habibihidayat/project-k@main/src/logo.jpg"
+-- Logo URLs - Dari Imgur Anda
+local LOGO_URLS = {
+    "https://i.imgur.com/RexlV7z.png", -- Logo Lynx dari Imgur (Format terbaru)
+    "https://imgur.com/RexlV7z.png", -- Backup URL
+}
+
+local LOGO_URL = LOGO_URLS[1]
 
 -- Enhanced Premium Color Palette with Vibrant Colors
 local colors = {
@@ -130,22 +135,45 @@ local sidebarHeader = new("Frame",{
     ZIndex=5
 })
 
--- Logo Container with GitHub Image
-local logoContainer = new("ImageLabel",{
+-- Logo Container - Simplified Version
+local logoContainer = new("Frame",{
     Parent=sidebarHeader,
     Size=isMobile and UDim2.new(0,42,0,42) or UDim2.new(0,50,0,50),
     Position=isMobile and UDim2.new(0.5,-21,0,15) or UDim2.new(0.5,-25,0,18),
     BackgroundColor3=colors.primary,
-    BackgroundTransparency=0,
+    BackgroundTransparency=0.15,
     BorderSizePixel=0,
-    Image="",
-    ScaleType=Enum.ScaleType.Stretch,
-    ImageTransparency=0,
     ZIndex=6
 })
 new("UICorner",{Parent=logoContainer,CornerRadius=UDim.new(0,14)})
 
--- Ganti fallback text
+-- Gradient background
+new("UIGradient",{
+    Parent=logoContainer,
+    Color=ColorSequence.new{
+        ColorSequenceKeypoint.new(0, colors.primary),
+        ColorSequenceKeypoint.new(0.5, colors.accent),
+        ColorSequenceKeypoint.new(1, colors.secondary)
+    },
+    Rotation=45
+})
+
+-- Logo Image (Akan mencoba load)
+local logoImage = new("ImageLabel",{
+    Parent=logoContainer,
+    Size=UDim2.new(1,0,1,0),
+    BackgroundColor3=colors.primary,
+    BackgroundTransparency=0.3,
+    BorderSizePixel=1,
+    BorderColor3=colors.primary,
+    Image="",
+    ScaleType=Enum.ScaleType.Fit,
+    ImageTransparency=0,
+    ZIndex=7
+})
+new("UICorner",{Parent=logoImage,CornerRadius=UDim.new(0,14)})
+
+-- Fallback Text Logo
 local logoText = new("TextLabel",{
     Parent=logoContainer,
     Text="L",
@@ -155,39 +183,42 @@ local logoText = new("TextLabel",{
     BackgroundTransparency=1,
     TextColor3=colors.text,
     Visible=true,
-    ZIndex=7
+    ZIndex=8
 })
 
 task.spawn(function()
-    task.wait(0.5)
-    print("⏳ Mencoba load logo dari: " .. LOGO_URL)
+    task.wait(0.8)
+    local logoLoaded = false
     
-    local attempts = 0
-    while attempts < 3 and logoContainer.Image == "" do
-        attempts = attempts + 1
-        print("🔄 Attempt " .. attempts .. "/3")
+    for urlIndex, url in ipairs(LOGO_URLS) do
+        if logoLoaded then break end
+        
+        print("⏳ Mencoba URL " .. urlIndex .. "/2: " .. url)
         
         local success = pcall(function()
-            logoContainer.Image = LOGO_URL
-            logoContainer.ImageTransparency = 0
-            logoContainer.BackgroundTransparency = 1
+            logoImage.Image = url
+            logoImage.ImageTransparency = 0
         end)
         
-        if logoContainer.Image ~= "" then
-            logoText.Visible = false
-            print("✅ Logo berhasil dimuat dan ditampilkan!")
-            print("🎨 Image Transparency: " .. logoContainer.ImageTransparency)
-            break
-        end
-        
         task.wait(1)
+        
+        print("📊 Status: Image = " .. tostring(logoImage.Image))
+        print("📊 Transparency: " .. logoImage.ImageTransparency)
+        
+        if logoImage.Image ~= "" and logoImage.Image == url then
+            logoText.Visible = false
+            logoLoaded = true
+            print("✅✅✅ LOGO BERHASIL DIMUAT! ✅✅✅")
+            print("🖼️ URL Imgur: " .. url)
+            break
+        else
+            print("❌ URL " .. urlIndex .. " gagal")
+        end
     end
     
-    if logoContainer.Image == "" then
+    if not logoLoaded then
         logoText.Visible = true
-        print("⚠️ Logo gagal dimuat setelah 3 kali coba")
-        print("🔗 URL: " .. LOGO_URL)
-        print("💡 Menggunakan fallback text 'L'")
+        print("⚠️ Semua URL gagal")
     end
 end)
 
@@ -1261,15 +1292,13 @@ local savedIconPos = UDim2.new(0,20,0,120)
 local function createMinimizedIcon()
     if icon then return end
     local iconSize = isMobile and 55 or 60
-    icon = new("ImageLabel",{
+    icon = new("Frame",{
         Parent=gui,
         Size=UDim2.new(0,iconSize,0,iconSize),
         Position=savedIconPos,
         BackgroundColor3=colors.primary,
-        BackgroundTransparency=0.2,
+        BackgroundTransparency=0.15,
         BorderSizePixel=0,
-        Image="",
-        ScaleType=Enum.ScaleType.Fit,
         ZIndex=100
     })
     new("UICorner",{Parent=icon,CornerRadius=UDim.new(0,15)})
@@ -1282,12 +1311,16 @@ local function createMinimizedIcon()
         },
         Rotation=45
     })
-    new("UIStroke",{
+    
+    local iconImage = new("ImageLabel",{
         Parent=icon,
-        Color=colors.primary,
-        Thickness=2,
-        Transparency=0.5
+        Size=UDim2.new(1,0,1,0),
+        BackgroundTransparency=1,
+        Image="",
+        ScaleType=Enum.ScaleType.Fit,
+        ZIndex=101
     })
+    new("UICorner",{Parent=iconImage,CornerRadius=UDim.new(0,15)})
     
     local logoK = new("TextLabel",{
         Parent=icon,
@@ -1298,26 +1331,20 @@ local function createMinimizedIcon()
         BackgroundTransparency=1,
         TextColor3=colors.text,
         Visible=true,
-        ZIndex=101
+        ZIndex=102
     })
     
     task.spawn(function()
-        local attempts = 0
-        while attempts < 3 and icon and icon.Image == "" do
-            attempts = attempts + 1
+        task.wait(0.3)
+        for _, url in ipairs(LOGO_URLS) do
             pcall(function()
-                icon.Image = LOGO_URL
+                iconImage.Image = url
             end)
-            task.wait(1)
-            
-            if icon and icon.Image ~= "" then
+            task.wait(0.3)
+            if iconImage.Image ~= "" then
                 logoK.Visible = false
                 break
             end
-        end
-        
-        if icon and icon.Image == "" then
-            logoK.Visible = true
         end
     end)
     
