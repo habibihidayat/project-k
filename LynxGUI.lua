@@ -33,10 +33,19 @@ local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habib
 local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
 local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoBuyWeather.lua"))()
 
--- Logo URLs - Format Asset ID yang benar untuk Roblox
+-- Logo URLs - Public CDN untuk semua orang bisa akses
 local LOGO_URLS = {
-    "rbxassetid://71199842701052", -- Format Asset ID yang benar
-    "https://assetdelivery.roblox.com/v1/asset/?id=71199842701052", -- CDN backup
+
+    "https://i.imgur.com/RexlV7z.jpeg",
+    -- jsDelivr CDN (recommended - paling stabil)
+    "https://cdn.jsdelivr.net/gh/habibihidayat/project-k@main/src/logo.jpg",
+    
+    -- GitHub Raw CDN (backup)
+    "https://raw.githack.com/habibihidayat/project-k/main/src/logo.jpg",
+    
+    -- GitHub Direct (last resort)
+    "https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg",
+
 }
 
 local LOGO_URL = LOGO_URLS[1]
