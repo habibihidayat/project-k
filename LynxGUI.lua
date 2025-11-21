@@ -33,26 +33,26 @@ local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habib
 local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
 local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoBuyWeather.lua"))()
 
--- Premium Color Palette Based on Logo (Purple/Pink Theme)
+-- Premium Color Palette Based on Logo (Orange Theme)
 local colors = {
-    primary = Color3.fromRGB(147, 51, 234),      -- Purple from logo
-    secondary = Color3.fromRGB(192, 132, 252),   -- Light purple
-    accent = Color3.fromRGB(236, 72, 153),       -- Pink from logo
+    primary = Color3.fromRGB(255, 140, 0),       -- Orange from logo
+    secondary = Color3.fromRGB(255, 165, 50),    -- Light orange
+    accent = Color3.fromRGB(255, 69, 0),         -- Red-orange from logo
     success = Color3.fromRGB(34, 197, 94),       -- Green
     warning = Color3.fromRGB(251, 191, 36),      -- Amber
     danger = Color3.fromRGB(239, 68, 68),        -- Red
     
-    bg1 = Color3.fromRGB(15, 15, 25),            -- Deep dark
-    bg2 = Color3.fromRGB(20, 20, 35),            -- Dark purple tint
-    bg3 = Color3.fromRGB(30, 25, 45),            -- Purple tint
-    bg4 = Color3.fromRGB(40, 35, 55),            -- Lighter purple
+    bg1 = Color3.fromRGB(15, 15, 15),            -- Deep dark
+    bg2 = Color3.fromRGB(25, 20, 15),            -- Dark orange tint
+    bg3 = Color3.fromRGB(35, 25, 20),            -- Orange tint
+    bg4 = Color3.fromRGB(45, 35, 25),            -- Lighter orange
     
     text = Color3.fromRGB(255, 255, 255),
     textDim = Color3.fromRGB(203, 213, 225),     -- Light gray
     textDimmer = Color3.fromRGB(148, 163, 184),  -- Dimmer gray
     
-    border = Color3.fromRGB(75, 50, 100),
-    glow = Color3.fromRGB(147, 51, 234),
+    border = Color3.fromRGB(100, 60, 30),
+    glow = Color3.fromRGB(255, 140, 0),
 }
 
 -- LANDSCAPE Window Sizing - Horizontal Rectangle for Mobile
@@ -122,10 +122,15 @@ task.spawn(function()
     end
 end)
 
--- Sidebar with enhanced transparency - SMALLER for mobile landscape
+-- Sidebar state for mobile toggle
+local sidebarExpanded = false
+local sidebarCollapsedWidth = 50
+local sidebarExpandedWidth = 160
+
+-- Sidebar with enhanced transparency - COLLAPSIBLE for mobile
 local sidebar = new("Frame",{
     Parent=win,
-    Size=isMobile and UDim2.new(0,50,1,0) or UDim2.new(0,200,1,0),
+    Size=isMobile and UDim2.new(0,sidebarCollapsedWidth,1,0) or UDim2.new(0,200,1,0),
     BackgroundColor3=colors.bg2,
     BackgroundTransparency=0.2,
     BorderSizePixel=0,
@@ -144,8 +149,8 @@ local sidebarGradient = new("Frame",{
 new("UIGradient",{
     Parent=sidebarGradient,
     Color=ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(147, 51, 234)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(236, 72, 153))
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 140, 0)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 69, 0))
     },
     Rotation=180,
     Transparency=NumberSequence.new{
@@ -153,6 +158,31 @@ new("UIGradient",{
         NumberSequenceKeypoint.new(1, 1)
     }
 })
+
+-- Mobile Sidebar Toggle Button
+local sidebarToggle
+if isMobile then
+    sidebarToggle = new("TextButton",{
+        Parent=sidebar,
+        Size=UDim2.new(0,40,0,40),
+        Position=UDim2.new(0.5,-20,0,10),
+        BackgroundColor3=colors.primary,
+        BackgroundTransparency=0.3,
+        BorderSizePixel=0,
+        Text="☰",
+        Font=Enum.Font.GothamBold,
+        TextSize=18,
+        TextColor3=colors.text,
+        ZIndex=100
+    })
+    new("UICorner",{Parent=sidebarToggle,CornerRadius=UDim.new(0,10)})
+    new("UIStroke",{
+        Parent=sidebarToggle,
+        Color=colors.primary,
+        Thickness=1.5,
+        Transparency=0.5
+    })
+end
 
 -- Sidebar Header with Logo - COMPACT
 local sidebarHeader = new("Frame",{
@@ -163,7 +193,7 @@ local sidebarHeader = new("Frame",{
     ZIndex=5
 })
 
--- Logo Container with enhanced styling - SMALLER
+-- Logo Container with enhanced styling - SMALLER (NO FALLBACK TEXT)
 local logoContainer = new("ImageLabel",{
     Parent=sidebarHeader,
     Size=isMobile and UDim2.new(0,28,0,28) or UDim2.new(0,60,0,60),
@@ -173,6 +203,7 @@ local logoContainer = new("ImageLabel",{
     BorderSizePixel=0,
     Image="rbxassetid://135183099972655",
     ScaleType=Enum.ScaleType.Fit,
+    ImageTransparency=0,
     ZIndex=6
 })
 new("UICorner",{Parent=logoContainer,CornerRadius=UDim.new(0,8)})
@@ -185,33 +216,16 @@ new("UIStroke",{
     Transparency=0.3
 })
 
--- Fallback Text - SMALLER
-local logoText = new("TextLabel",{
-    Parent=logoContainer,
-    Text="L",
-    Size=UDim2.new(1,0,1,0),
-    BackgroundTransparency=1,
-    Font=Enum.Font.GothamBold,
-    TextSize=isMobile and 16 or 36,
-    TextColor3=colors.text,
-    Visible=true,
-    ZIndex=7
-})
-
-logoContainer:GetPropertyChangedSignal("Image"):Connect(function()
-    logoText.Visible = (logoContainer.Image == "")
-end)
-
 local brandName = new("TextLabel",{
     Parent=sidebarHeader,
-    Text=isMobile and "" or "LYNX",
+    Text="LYNX",
     Size=UDim2.new(1,0,0,20),
-    Position=isMobile and UDim2.new(0,0,0,72) or UDim2.new(0,0,0,84),
+    Position=isMobile and UDim2.new(0,0,0,42) or UDim2.new(0,0,0,84),
     Font=Enum.Font.GothamBold,
-    TextSize=isMobile and 16 or 19,
+    TextSize=isMobile and 14 or 19,
     BackgroundTransparency=1,
     TextColor3=colors.text,
-    Visible=not isMobile,
+    Visible=isMobile and sidebarExpanded or not isMobile,
     ZIndex=6
 })
 
@@ -226,7 +240,7 @@ new("UIGradient",{
 
 local brandVersion = new("TextLabel",{
     Parent=sidebarHeader,
-    Text="v2.2 Purple",
+    Text="v2.2 Orange",
     Size=UDim2.new(1,0,0,14),
     Position=UDim2.new(0,0,0,104),
     Font=Enum.Font.Gotham,
@@ -257,7 +271,7 @@ new("UIListLayout",{
     SortOrder=Enum.SortOrder.LayoutOrder
 })
 
--- Content Area - ADJUSTED for smaller sidebar
+-- Content Area - ADJUSTED for sidebar toggle
 local contentBg = new("Frame",{
     Parent=win,
     Size=isMobile and UDim2.new(1,-58,1,-12) or UDim2.new(1,-210,1,-15),
@@ -269,6 +283,38 @@ local contentBg = new("Frame",{
     ZIndex=4
 })
 new("UICorner",{Parent=contentBg,CornerRadius=UDim.new(0,14)})
+
+-- Function to toggle sidebar on mobile
+local function toggleSidebar()
+    if not isMobile then return end
+    
+    sidebarExpanded = not sidebarExpanded
+    local targetWidth = sidebarExpanded and sidebarExpandedWidth or sidebarCollapsedWidth
+    
+    TweenService:Create(sidebar,TweenInfo.new(0.3,Enum.EasingStyle.Back),{
+        Size=UDim2.new(0,targetWidth,1,0)
+    }):Play()
+    
+    TweenService:Create(contentBg,TweenInfo.new(0.3,Enum.EasingStyle.Back),{
+        Size=UDim2.new(1,-(targetWidth+8),1,-12),
+        Position=UDim2.new(0,targetWidth+4,0,8)
+    }):Play()
+    
+    -- Toggle brand name visibility
+    brandName.Visible = sidebarExpanded
+    
+    -- Animate toggle button
+    if sidebarToggle then
+        TweenService:Create(sidebarToggle,TweenInfo.new(0.3),{
+            Rotation=sidebarExpanded and 90 or 0
+        }):Play()
+    end
+end
+
+-- Connect toggle button
+if sidebarToggle then
+    sidebarToggle.MouseButton1Click:Connect(toggleSidebar)
+end
 
 -- Top bar with controls - COMPACT on mobile
 local topBar = new("Frame",{
@@ -440,7 +486,7 @@ local settingsPage = createPage("Settings")
 local infoPage = createPage("Info")
 mainPage.Visible = true
 
--- Enhanced Nav Button - ICON ONLY on mobile
+-- Enhanced Nav Button - ICON ONLY when collapsed
 local function createNavButton(text, icon, page, order)
     local btn = new("TextButton",{
         Parent=navContainer,
@@ -493,14 +539,32 @@ local function createNavButton(text, icon, page, order)
         Position=UDim2.new(0,48,0,0),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamSemibold,
-        TextSize=13,
+        TextSize=11,
         TextColor3=page == currentPage and colors.text or colors.textDim,
         TextXAlignment=Enum.TextXAlignment.Left,
-        Visible=not isMobile,
+        Visible=isMobile and sidebarExpanded or not isMobile,
         ZIndex=7
     })
     
     navButtons[page] = {btn=btn, icon=iconLabel, text=textLabel, indicator=indicator}
+    
+    -- Update text visibility on mobile sidebar toggle
+    if isMobile then
+        local function updateTextVisibility()
+            textLabel.Visible = sidebarExpanded
+            iconLabel.Size = sidebarExpanded and UDim2.new(0,32,1,0) or UDim2.new(1,0,1,0)
+            iconLabel.Position = sidebarExpanded and UDim2.new(0,8,0,0) or UDim2.new(0,0,0,0)
+        end
+        
+        -- Store update function for later use
+        btn:SetAttribute("UpdateVisibility", "true")
+        btn.Changed:Connect(function()
+            if btn:GetAttribute("UpdateVisibility") then
+                updateTextVisibility()
+            end
+        end)
+    end
+    
     return btn
 end
 
@@ -518,7 +582,7 @@ local function switchPage(pageName, pageTitle_text)
         TweenService:Create(btnData.icon,TweenInfo.new(0.2),{
             TextColor3=isActive and colors.primary or colors.textDim
         }):Play()
-        if not isMobile then
+        if not isMobile or sidebarExpanded then
             TweenService:Create(btnData.text,TweenInfo.new(0.2),{
                 TextColor3=isActive and colors.text or colors.textDim
             }):Play()
@@ -528,6 +592,12 @@ local function switchPage(pageName, pageTitle_text)
     pages[pageName].Visible = true
     pageTitle.Text = pageTitle_text
     currentPage = pageName
+    
+    -- Auto-collapse sidebar on mobile after selection
+    if isMobile and sidebarExpanded then
+        task.wait(0.3)
+        toggleSidebar()
+    end
 end
 
 local btnMain = createNavButton("Dashboard", "🏠", "Main", 1)
@@ -1297,7 +1367,7 @@ local infoText = new("TextLabel",{
     Position=UDim2.new(0,16,0,16),
     BackgroundTransparency=1,
     Text=[[
-💜 LYNX v2.2 PURPLE EDITION
+🧡 LYNX v2.2 ORANGE EDITION
 
 Premium Interface - Landscape Mobile
 Optimized for Horizontal Rectangle Layout
@@ -1336,7 +1406,9 @@ Optimized for Horizontal Rectangle Layout
 ✓ Horizontal rectangle layout
 ✓ Ultra compact UI
 ✓ Smaller minimize icon
-✓ Purple/Pink theme from logo
+✓ Orange theme from logo
+✓ COLLAPSIBLE SIDEBAR (Mobile)
+✓ Toggle sidebar with button
 ✓ Enhanced animations
 ✓ Improved glassmorphism
 ✓ Gradient borders
@@ -1347,13 +1419,14 @@ Optimized for Horizontal Rectangle Layout
 • Click categories to expand
 • Drag from top bar to move
 • Drag corner to resize
+• (☰) Toggle sidebar (Mobile)
 • (─) Minimize window
 • (×) Close GUI
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
-Created with 💎 by Lynx Team
-Purple Edition 2024
+Created with 🧡 by Lynx Team
+Orange Edition 2024
     ]],
     Font=Enum.Font.Gotham,
     TextSize=isMobile and 8 or 12,
@@ -1581,9 +1654,10 @@ resizeHandle.MouseLeave:Connect(function()
     end
 end)
 
-print("✨ Lynx GUI v2.2 Purple Edition loaded!")
+print("✨ Lynx GUI v2.2 Orange Edition loaded!")
 print("🎨 LANDSCAPE MODE - Horizontal Rectangle")
 print("📱 Mobile Optimized (480x270)")
+print("🧡 COLLAPSIBLE SIDEBAR - Tap ☰ to toggle")
 print("🖱️ Drag from top | Resize from corner")
-print("💜 Purple/Pink Premium Theme")
+print("🧡 Orange Theme from Logo")
 print("💎 Created by Lynx Team")
