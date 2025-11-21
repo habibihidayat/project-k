@@ -141,11 +141,45 @@ local logoContainer = new("ImageLabel",{
     BackgroundColor3=colors.primary,
     BackgroundTransparency=0.2,
     BorderSizePixel=0,
-    Image="https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg",
+    Image="", -- akan diisi oleh loader
     ScaleType=Enum.ScaleType.Fit,
     ZIndex=6
 })
 new("UICorner",{Parent=logoContainer,CornerRadius=UDim.new(0,14)})
+
+-- UNIVERSAL IMAGE LOADING FIX (All executors)
+local function loadImage(url)
+    local ok, result = pcall(function()
+        if getcustomasset then
+            return getcustomasset(url)
+        elseif getsynasset then
+            return getsynasset(url)
+        elseif setrbxasset then
+            return setrbxasset(url)
+        elseif writefile and readfile then
+            local name = "lynx_logo.jpg"
+            writefile(name, game:HttpGet(url))
+            return getcustomasset(name)
+        end
+    end)
+    return ok and result or nil
+end
+
+-- FIXED RAW URL (tanpa blob!)
+local logoURL = "https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg"
+
+task.spawn(function()
+    local loaded = loadImage(logoURL)
+    if loaded then
+        logoContainer.Image = loaded
+    else
+        warn("Logo gagal dimuat:", logoURL)
+    end
+end)
+
+-- Hilangkan gradient karena menutupi gambar
+-- (BIARKAN KOMENTAR ATAU HAPUS)
+--[[
 new("UIGradient",{
     Parent=logoContainer,
     Color=ColorSequence.new{
@@ -155,37 +189,9 @@ new("UIGradient",{
     },
     Rotation=45
 })
+]]
 
--- FIX UNIVERSAL IMAGE LOADING
-local function loadImage(url)
-    local ok, img = pcall(function()
-        if getcustomasset then
-            return getcustomasset(url)
-        elseif getsynasset then
-            return getsynasset(url)
-        elseif setrbxasset then
-            return setrbxasset(url)
-        elseif readfile then
-            -- fallback: download dulu
-            local name = "lynx_logo.png"
-            writefile(name, game:HttpGet(url))
-            return getcustomasset(name)
-        end
-    end)
-    return ok and img or nil
-end
-
-local logoURL = "https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg" -- ganti sesuai link kamu
-local loadedLogo = loadImage(logoURL)
-
-if loadedLogo then
-    logoContainer.Image = loadedLogo
-else
-    warn("Logo gagal dimuat!")
-end
-
-
--- Enhanced glow for logo
+-- Glow
 new("UIStroke",{
     Parent=logoContainer,
     Color=colors.primary,
@@ -193,18 +199,24 @@ new("UIStroke",{
     Transparency=0.5
 })
 
--- Fallback text if no image
+-- Fallback Text
 local logoText = new("TextLabel",{
     Parent=logoContainer,
     Text="L",
     Size=UDim2.new(1,0,1,0),
+    BackgroundTransparency=1,
     Font=Enum.Font.GothamBold,
     TextSize=isMobile and 26 or 32,
-    BackgroundTransparency=1,
     TextColor3=colors.text,
-    Visible=logoContainer.Image == "",
+    Visible=true,
     ZIndex=7
 })
+
+-- Auto-hide fallback when logo loads
+logoContainer:GetPropertyChangedSignal("Image"):Connect(function()
+    logoText.Visible = (logoContainer.Image == "")
+end)
+
 
 logoContainer:GetPropertyChangedSignal("Image"):Connect(function()
     logoText.Visible = (logoContainer.Image == "")
@@ -1299,7 +1311,7 @@ local function createMinimizedIcon()
         BackgroundColor3=colors.primary,
         BackgroundTransparency=0.2,
         BorderSizePixel=0,
-        Image="https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg",
+        Image="https://raw.githubusercontent.com/habibihidayat/project-k/blob/main/src/logo.jpg",
         ScaleType=Enum.ScaleType.Fit,
         ZIndex=100
     })
