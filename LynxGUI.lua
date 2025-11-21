@@ -1,5 +1,5 @@
--- LynxGUI_v2.1.lua - Ultra Premium Enhanced Edition ✨
--- Glass Morphism with Enhanced Colors & Perfect Resize
+-- LynxGUI_v2.2.lua - Ultra Premium Purple Edition 💜
+-- Enhanced Colors, Better Sizing, Mobile Optimized
 
 repeat task.wait() until game:IsLoaded()
 
@@ -33,32 +33,32 @@ local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habib
 local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
 local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoBuyWeather.lua"))()
 
--- Enhanced Premium Color Palette with Vibrant Colors
+-- Premium Color Palette Based on Logo (Purple/Pink Theme)
 local colors = {
-    primary = Color3.fromRGB(99, 115, 255),      -- Brighter primary
-    secondary = Color3.fromRGB(138, 161, 255),   -- Brighter secondary
-    accent = Color3.fromRGB(255, 130, 255),      -- Brighter accent
-    success = Color3.fromRGB(77, 201, 149),      -- Brighter success
-    warning = Color3.fromRGB(255, 186, 46),      -- Brighter warning
-    danger = Color3.fromRGB(255, 86, 89),        -- Brighter danger
+    primary = Color3.fromRGB(147, 51, 234),      -- Purple from logo
+    secondary = Color3.fromRGB(192, 132, 252),   -- Light purple
+    accent = Color3.fromRGB(236, 72, 153),       -- Pink from logo
+    success = Color3.fromRGB(34, 197, 94),       -- Green
+    warning = Color3.fromRGB(251, 191, 36),      -- Amber
+    danger = Color3.fromRGB(239, 68, 68),        -- Red
     
-    bg1 = Color3.fromRGB(20, 22, 30),            -- Slightly lighter
-    bg2 = Color3.fromRGB(28, 31, 40),            -- Slightly lighter
-    bg3 = Color3.fromRGB(36, 40, 52),            -- Slightly lighter
-    bg4 = Color3.fromRGB(44, 48, 62),            -- Slightly lighter
+    bg1 = Color3.fromRGB(15, 15, 25),            -- Deep dark
+    bg2 = Color3.fromRGB(20, 20, 35),            -- Dark purple tint
+    bg3 = Color3.fromRGB(30, 25, 45),            -- Purple tint
+    bg4 = Color3.fromRGB(40, 35, 55),            -- Lighter purple
     
     text = Color3.fromRGB(255, 255, 255),
-    textDim = Color3.fromRGB(180, 187, 205),     -- Brighter
-    textDimmer = Color3.fromRGB(130, 135, 145),  -- Brighter
+    textDim = Color3.fromRGB(203, 213, 225),     -- Light gray
+    textDimmer = Color3.fromRGB(148, 163, 184),  -- Dimmer gray
     
-    border = Color3.fromRGB(57, 59, 64),
-    glow = Color3.fromRGB(99, 115, 255),
+    border = Color3.fromRGB(75, 50, 100),
+    glow = Color3.fromRGB(147, 51, 234),
 }
 
--- Window size based on device
-local windowSize = isMobile and UDim2.new(0,380,0,520) or UDim2.new(0,650,0,450)
-local minWindowSize = isMobile and Vector2.new(320, 400) or Vector2.new(550, 380)
-local maxWindowSize = isMobile and Vector2.new(450, 650) or Vector2.new(900, 600)
+-- IMPROVED Window Sizing - Wider & Better Proportions
+local windowSize = isMobile and UDim2.new(0,420,0,580) or UDim2.new(0,720,0,480)
+local minWindowSize = isMobile and Vector2.new(380, 500) or Vector2.new(650, 420)
+local maxWindowSize = isMobile and Vector2.new(500, 700) or Vector2.new(1000, 650)
 
 local gui = new("ScreenGui",{
     Name="LynxGUI_Modern",
@@ -69,104 +69,120 @@ local gui = new("ScreenGui",{
     DisplayOrder=999
 })
 
--- Background overlay - REMOVED DARK BACKGROUND
-local overlay = new("Frame",{
-    Parent=gui,
-    Size=UDim2.new(1,0,1,0),
-    BackgroundTransparency=1,  -- Fully transparent
-    BorderSizePixel=0,
-    Visible=false,
-    ZIndex=1
-})
-
 -- Main Window Container with Enhanced Glass effect
 local win = new("Frame",{
     Parent=gui,
     Size=windowSize,
     Position=UDim2.new(0.5,-windowSize.X.Offset/2,0.5,-windowSize.Y.Offset/2),
     BackgroundColor3=colors.bg1,
-    BackgroundTransparency=0.25,  -- More transparent
+    BackgroundTransparency=0.15,
     BorderSizePixel=0,
     ClipsDescendants=false,
     ZIndex=3
 })
-new("UICorner",{Parent=win,CornerRadius=UDim.new(0,18)})
+new("UICorner",{Parent=win,CornerRadius=UDim.new(0,20)})
 
--- Enhanced Glassmorphism effect with subtle glow
+-- Enhanced Glassmorphism with purple tint
 local glassBlur = new("Frame",{
     Parent=win,
     Size=UDim2.new(1,0,1,0),
-    BackgroundColor3=Color3.fromRGB(255,255,255),
-    BackgroundTransparency=0.97,
+    BackgroundColor3=colors.primary,
+    BackgroundTransparency=0.95,
     BorderSizePixel=0,
     ZIndex=2
 })
-new("UICorner",{Parent=glassBlur,CornerRadius=UDim.new(0,18)})
+new("UICorner",{Parent=glassBlur,CornerRadius=UDim.new(0,20)})
 
--- Subtle glow border
+-- Premium glow border with gradient
 local glowBorder = new("UIStroke",{
     Parent=win,
     Color=colors.primary,
-    Thickness=1.5,
-    Transparency=0.7,
+    Thickness=2,
+    Transparency=0.5,
     ApplyStrokeMode=Enum.ApplyStrokeMode.Border
 })
 
--- Sidebar with enhanced transparency
-local sidebar = new("Frame",{
-    Parent=win,
-    Size=isMobile and UDim2.new(0,75,1,0) or UDim2.new(0,180,1,0),
-    BackgroundColor3=colors.bg2,
-    BackgroundTransparency=0.3,  -- More transparent
-    BorderSizePixel=0,
-    ClipsDescendants=true,
-    ZIndex=4
-})
-new("UICorner",{Parent=sidebar,CornerRadius=UDim.new(0,18)})
-
--- Sidebar Header with Custom Logo Support
-local sidebarHeader = new("Frame",{
-    Parent=sidebar,
-    Size=isMobile and UDim2.new(1,0,0,85) or UDim2.new(1,0,0,90),
-    BackgroundTransparency=1,
-    ClipsDescendants=true,
-    ZIndex=5
-})
-
--- Logo Container with enhanced gradient
-local logoContainer = new("ImageLabel",{
-    Parent=sidebarHeader,
-    Size=isMobile and UDim2.new(0,42,0,42) or UDim2.new(0,50,0,50),
-    Position=isMobile and UDim2.new(0.5,-21,0,15) or UDim2.new(0.5,-25,0,18),
-    BackgroundColor3=colors.primary,
-    BackgroundTransparency=0.2,
-    BorderSizePixel=0,
-    Image="rbxassetid://135183099972655", -- akan diisi oleh loader
-    ScaleType=Enum.ScaleType.Fit,
-    ZIndex=6
-})
-new("UICorner",{Parent=logoContainer,CornerRadius=UDim.new(0,14)})
-
--- Hilangkan gradient karena menutupi gambar
--- (BIARKAN KOMENTAR ATAU HAPUS)
---[[
-new("UIGradient",{
-    Parent=logoContainer,
+-- Animated gradient for border
+local borderGradient = new("UIGradient",{
+    Parent=glowBorder,
     Color=ColorSequence.new{
         ColorSequenceKeypoint.new(0, colors.primary),
         ColorSequenceKeypoint.new(0.5, colors.accent),
         ColorSequenceKeypoint.new(1, colors.secondary)
     },
-    Rotation=45
+    Rotation=0
 })
-]]
 
--- Glow
+-- Animate border gradient
+task.spawn(function()
+    while wait(0.05) do
+        if borderGradient then
+            borderGradient.Rotation = (borderGradient.Rotation + 2) % 360
+        end
+    end
+end)
+
+-- Sidebar with enhanced transparency
+local sidebar = new("Frame",{
+    Parent=win,
+    Size=isMobile and UDim2.new(0,85,1,0) or UDim2.new(0,200,1,0),
+    BackgroundColor3=colors.bg2,
+    BackgroundTransparency=0.2,
+    BorderSizePixel=0,
+    ClipsDescendants=true,
+    ZIndex=4
+})
+new("UICorner",{Parent=sidebar,CornerRadius=UDim.new(0,20)})
+
+-- Sidebar gradient overlay
+local sidebarGradient = new("Frame",{
+    Parent=sidebar,
+    Size=UDim2.new(1,0,1,0),
+    BackgroundTransparency=1,
+    ZIndex=4
+})
+new("UIGradient",{
+    Parent=sidebarGradient,
+    Color=ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(147, 51, 234)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(236, 72, 153))
+    },
+    Rotation=180,
+    Transparency=NumberSequence.new{
+        NumberSequenceKeypoint.new(0, 0.9),
+        NumberSequenceKeypoint.new(1, 1)
+    }
+})
+
+-- Sidebar Header with Logo
+local sidebarHeader = new("Frame",{
+    Parent=sidebar,
+    Size=isMobile and UDim2.new(1,0,0,95) or UDim2.new(1,0,0,100),
+    BackgroundTransparency=1,
+    ClipsDescendants=true,
+    ZIndex=5
+})
+
+-- Logo Container with enhanced styling
+local logoContainer = new("ImageLabel",{
+    Parent=sidebarHeader,
+    Size=isMobile and UDim2.new(0,50,0,50) or UDim2.new(0,60,0,60),
+    Position=isMobile and UDim2.new(0.5,-25,0,18) or UDim2.new(0.5,-30,0,20),
+    BackgroundColor3=colors.bg3,
+    BackgroundTransparency=0.3,
+    BorderSizePixel=0,
+    Image="rbxassetid://135183099972655",
+    ScaleType=Enum.ScaleType.Fit,
+    ZIndex=6
+})
+new("UICorner",{Parent=logoContainer,CornerRadius=UDim.new(0,16)})
+
+-- Logo glow effect
 new("UIStroke",{
     Parent=logoContainer,
     Color=colors.primary,
-    Thickness=2,
-    Transparency=0.5
+    Thickness=2.5,
+    Transparency=0.3
 })
 
 -- Fallback Text
@@ -176,17 +192,11 @@ local logoText = new("TextLabel",{
     Size=UDim2.new(1,0,1,0),
     BackgroundTransparency=1,
     Font=Enum.Font.GothamBold,
-    TextSize=isMobile and 26 or 32,
+    TextSize=isMobile and 30 or 36,
     TextColor3=colors.text,
     Visible=true,
     ZIndex=7
 })
-
--- Auto-hide fallback when logo loads
-logoContainer:GetPropertyChangedSignal("Image"):Connect(function()
-    logoText.Visible = (logoContainer.Image == "")
-end)
-
 
 logoContainer:GetPropertyChangedSignal("Image"):Connect(function()
     logoText.Visible = (logoContainer.Image == "")
@@ -195,23 +205,32 @@ end)
 local brandName = new("TextLabel",{
     Parent=sidebarHeader,
     Text=isMobile and "LYNX" or "LYNX",
-    Size=UDim2.new(1,0,0,18),
-    Position=isMobile and UDim2.new(0,0,0,62) or UDim2.new(0,0,0,72),
+    Size=UDim2.new(1,0,0,20),
+    Position=isMobile and UDim2.new(0,0,0,72) or UDim2.new(0,0,0,84),
     Font=Enum.Font.GothamBold,
-    TextSize=isMobile and 14 or 17,
+    TextSize=isMobile and 16 or 19,
     BackgroundTransparency=1,
     TextColor3=colors.text,
     Visible=not isMobile,
     ZIndex=6
 })
 
+-- Gradient text effect
+new("UIGradient",{
+    Parent=brandName,
+    Color=ColorSequence.new{
+        ColorSequenceKeypoint.new(0, colors.primary),
+        ColorSequenceKeypoint.new(1, colors.accent)
+    }
+})
+
 local brandVersion = new("TextLabel",{
     Parent=sidebarHeader,
-    Text="v2.1 Enhanced",
-    Size=UDim2.new(1,0,0,12),
-    Position=UDim2.new(0,0,0,88),
+    Text="v2.2 Purple",
+    Size=UDim2.new(1,0,0,14),
+    Position=UDim2.new(0,0,0,104),
     Font=Enum.Font.Gotham,
-    TextSize=9,
+    TextSize=10,
     BackgroundTransparency=1,
     TextColor3=colors.accent,
     Visible=not isMobile,
@@ -221,10 +240,10 @@ local brandVersion = new("TextLabel",{
 -- Navigation Container
 local navContainer = new("ScrollingFrame",{
     Parent=sidebar,
-    Size=isMobile and UDim2.new(1,-8,1,-95) or UDim2.new(1,-16,1,-110),
-    Position=isMobile and UDim2.new(0,4,0,90) or UDim2.new(0,8,0,105),
+    Size=isMobile and UDim2.new(1,-10,1,-105) or UDim2.new(1,-20,1,-120),
+    Position=isMobile and UDim2.new(0,5,0,100) or UDim2.new(0,10,0,115),
     BackgroundTransparency=1,
-    ScrollBarThickness=2,
+    ScrollBarThickness=3,
     ScrollBarImageColor3=colors.primary,
     BorderSizePixel=0,
     CanvasSize=UDim2.new(0,0,0,0),
@@ -234,53 +253,60 @@ local navContainer = new("ScrollingFrame",{
 })
 new("UIListLayout",{
     Parent=navContainer,
-    Padding=UDim.new(0,6),
+    Padding=UDim.new(0,8),
     SortOrder=Enum.SortOrder.LayoutOrder
 })
 
--- Content Area with enhanced transparency
+-- Content Area
 local contentBg = new("Frame",{
     Parent=win,
-    Size=isMobile and UDim2.new(1,-85,1,-15) or UDim2.new(1,-190,1,-15),
-    Position=isMobile and UDim2.new(0,80,0,10) or UDim2.new(0,185,0,10),
+    Size=isMobile and UDim2.new(1,-95,1,-15) or UDim2.new(1,-210,1,-15),
+    Position=isMobile and UDim2.new(0,90,0,10) or UDim2.new(0,205,0,10),
     BackgroundColor3=colors.bg2,
-    BackgroundTransparency=0.4,  -- More transparent
+    BackgroundTransparency=0.3,
     BorderSizePixel=0,
     ClipsDescendants=true,
     ZIndex=4
 })
-new("UICorner",{Parent=contentBg,CornerRadius=UDim.new(0,16)})
+new("UICorner",{Parent=contentBg,CornerRadius=UDim.new(0,18)})
 
--- Top bar with controls - DRAGGABLE AREA
+-- Top bar with controls
 local topBar = new("Frame",{
     Parent=contentBg,
-    Size=UDim2.new(1,0,0,45),
+    Size=UDim2.new(1,0,0,50),
     BackgroundColor3=colors.bg3,
-    BackgroundTransparency=0.5,
+    BackgroundTransparency=0.4,
     BorderSizePixel=0,
     ZIndex=5
 })
-new("UICorner",{Parent=topBar,CornerRadius=UDim.new(0,16)})
+new("UICorner",{Parent=topBar,CornerRadius=UDim.new(0,18)})
 
--- Enhanced Drag Handle Indicator
+-- Enhanced Drag Handle
 local dragHandle = new("Frame",{
     Parent=topBar,
-    Size=UDim2.new(0,40,0,4),
-    Position=UDim2.new(0.5,-20,0,8),
+    Size=UDim2.new(0,45,0,5),
+    Position=UDim2.new(0.5,-22.5,0,10),
     BackgroundColor3=colors.primary,
-    BackgroundTransparency=0.5,
+    BackgroundTransparency=0.4,
     BorderSizePixel=0,
     ZIndex=6
 })
 new("UICorner",{Parent=dragHandle,CornerRadius=UDim.new(1,0)})
+new("UIGradient",{
+    Parent=dragHandle,
+    Color=ColorSequence.new{
+        ColorSequenceKeypoint.new(0, colors.primary),
+        ColorSequenceKeypoint.new(1, colors.accent)
+    }
+})
 
 local pageTitle = new("TextLabel",{
     Parent=topBar,
     Text="Main Dashboard",
-    Size=UDim2.new(1,-90,1,0),
-    Position=UDim2.new(0,15,0,0),
+    Size=UDim2.new(1,-100,1,0),
+    Position=UDim2.new(0,18,0,0),
     Font=Enum.Font.GothamBold,
-    TextSize=isMobile and 13 or 16,
+    TextSize=isMobile and 14 or 17,
     BackgroundTransparency=1,
     TextColor3=colors.text,
     TextXAlignment=Enum.TextXAlignment.Left,
@@ -290,48 +316,57 @@ local pageTitle = new("TextLabel",{
 -- Control buttons
 local controlsFrame = new("Frame",{
     Parent=topBar,
-    Size=UDim2.new(0,70,0,28),
-    Position=UDim2.new(1,-75,0.5,-14),
+    Size=UDim2.new(0,75,0,32),
+    Position=UDim2.new(1,-80,0.5,-16),
     BackgroundTransparency=1,
     ZIndex=6
 })
 new("UIListLayout",{
     Parent=controlsFrame,
     FillDirection=Enum.FillDirection.Horizontal,
-    Padding=UDim.new(0,6)
+    Padding=UDim.new(0,7)
 })
 
 local function createControlBtn(icon, color)
     local btn = new("TextButton",{
         Parent=controlsFrame,
-        Size=UDim2.new(0,28,0,28),
+        Size=UDim2.new(0,32,0,32),
         BackgroundColor3=colors.bg4,
-        BackgroundTransparency=0.4,
+        BackgroundTransparency=0.3,
         BorderSizePixel=0,
         Text=icon,
         Font=Enum.Font.GothamBold,
-        TextSize=icon == "×" and 20 or 16,
+        TextSize=icon == "×" and 22 or 18,
         TextColor3=colors.textDim,
         AutoButtonColor=false,
         ZIndex=7
     })
-    new("UICorner",{Parent=btn,CornerRadius=UDim.new(0,8)})
+    new("UICorner",{Parent=btn,CornerRadius=UDim.new(0,10)})
+    
+    local stroke = new("UIStroke",{
+        Parent=btn,
+        Color=color,
+        Thickness=0,
+        Transparency=0.5
+    })
     
     btn.MouseEnter:Connect(function()
-        TweenService:Create(btn,TweenInfo.new(0.15),{
+        TweenService:Create(btn,TweenInfo.new(0.2),{
             BackgroundColor3=color,
             BackgroundTransparency=0.1,
             TextColor3=colors.text,
-            Size=UDim2.new(0,30,0,30)
+            Size=UDim2.new(0,35,0,35)
         }):Play()
+        TweenService:Create(stroke,TweenInfo.new(0.2),{Thickness=2}):Play()
     end)
     btn.MouseLeave:Connect(function()
-        TweenService:Create(btn,TweenInfo.new(0.15),{
+        TweenService:Create(btn,TweenInfo.new(0.2),{
             BackgroundColor3=colors.bg4,
-            BackgroundTransparency=0.4,
+            BackgroundTransparency=0.3,
             TextColor3=colors.textDim,
-            Size=UDim2.new(0,28,0,28)
+            Size=UDim2.new(0,32,0,32)
         }):Play()
+        TweenService:Create(stroke,TweenInfo.new(0.2),{Thickness=0}):Play()
     end)
     return btn
 end
@@ -339,27 +374,27 @@ end
 local btnMin = createControlBtn("─", colors.warning)
 local btnClose = createControlBtn("×", colors.danger)
 
--- FIXED Resize Handle (Bottom Right Corner) - Only expands right and down
+-- Resize Handle
 local resizeHandle = new("TextButton",{
     Parent=win,
-    Size=UDim2.new(0,20,0,20),
-    Position=UDim2.new(1,-20,1,-20),
+    Size=UDim2.new(0,24,0,24),
+    Position=UDim2.new(1,-24,1,-24),
     BackgroundColor3=colors.primary,
-    BackgroundTransparency=0.5,
+    BackgroundTransparency=0.4,
     BorderSizePixel=0,
     Text="⋰",
     Font=Enum.Font.GothamBold,
-    TextSize=12,
+    TextSize=14,
     TextColor3=colors.text,
     AutoButtonColor=false,
     ZIndex=100
 })
-new("UICorner",{Parent=resizeHandle,CornerRadius=UDim.new(0,6)})
+new("UICorner",{Parent=resizeHandle,CornerRadius=UDim.new(0,8)})
 new("UIStroke",{
     Parent=resizeHandle,
     Color=colors.primary,
-    Thickness=1,
-    Transparency=0.6
+    Thickness=2,
+    Transparency=0.4
 })
 
 -- Pages
@@ -370,10 +405,10 @@ local navButtons = {}
 local function createPage(name)
     local page = new("ScrollingFrame",{
         Parent=contentBg,
-        Size=UDim2.new(1,-16,1,-60),
-        Position=UDim2.new(0,8,0,52),
+        Size=UDim2.new(1,-20,1,-65),
+        Position=UDim2.new(0,10,0,57),
         BackgroundTransparency=1,
-        ScrollBarThickness=3,
+        ScrollBarThickness=4,
         ScrollBarImageColor3=colors.primary,
         BorderSizePixel=0,
         CanvasSize=UDim2.new(0,0,0,0),
@@ -384,13 +419,13 @@ local function createPage(name)
     })
     new("UIListLayout",{
         Parent=page,
-        Padding=UDim.new(0,10),
+        Padding=UDim.new(0,12),
         SortOrder=Enum.SortOrder.LayoutOrder
     })
     new("UIPadding",{
         Parent=page,
-        PaddingTop=UDim.new(0,8),
-        PaddingBottom=UDim.new(0,8)
+        PaddingTop=UDim.new(0,10),
+        PaddingBottom=UDim.new(0,10)
     })
     pages[name] = page
     return page
@@ -403,40 +438,48 @@ local settingsPage = createPage("Settings")
 local infoPage = createPage("Info")
 mainPage.Visible = true
 
--- Nav Button Function (Enhanced)
+-- Enhanced Nav Button
 local function createNavButton(text, icon, page, order)
     local btn = new("TextButton",{
         Parent=navContainer,
-        Size=isMobile and UDim2.new(1,0,0,50) or UDim2.new(1,0,0,42),
+        Size=isMobile and UDim2.new(1,0,0,56) or UDim2.new(1,0,0,48),
         BackgroundColor3=page == currentPage and colors.bg3 or Color3.fromRGB(0,0,0),
-        BackgroundTransparency=page == currentPage and 0.4 or 1,
+        BackgroundTransparency=page == currentPage and 0.3 or 1,
         BorderSizePixel=0,
         Text="",
         AutoButtonColor=false,
         LayoutOrder=order,
         ZIndex=6
     })
-    new("UICorner",{Parent=btn,CornerRadius=UDim.new(0,11)})
+    new("UICorner",{Parent=btn,CornerRadius=UDim.new(0,12)})
     
     local indicator = new("Frame",{
         Parent=btn,
-        Size=UDim2.new(0,3,0,20),
-        Position=UDim2.new(0,0,0.5,-10),
+        Size=UDim2.new(0,4,0,24),
+        Position=UDim2.new(0,0,0.5,-12),
         BackgroundColor3=colors.primary,
         BorderSizePixel=0,
         Visible=page == currentPage,
         ZIndex=7
     })
     new("UICorner",{Parent=indicator,CornerRadius=UDim.new(1,0)})
+    new("UIGradient",{
+        Parent=indicator,
+        Color=ColorSequence.new{
+            ColorSequenceKeypoint.new(0, colors.primary),
+            ColorSequenceKeypoint.new(1, colors.accent)
+        },
+        Rotation=90
+    })
     
     local iconLabel = new("TextLabel",{
         Parent=btn,
         Text=icon,
-        Size=isMobile and UDim2.new(1,0,1,0) or UDim2.new(0,28,1,0),
-        Position=isMobile and UDim2.new(0,0,0,0) or UDim2.new(0,12,0,0),
+        Size=isMobile and UDim2.new(1,0,1,0) or UDim2.new(0,32,1,0),
+        Position=isMobile and UDim2.new(0,0,0,0) or UDim2.new(0,16,0,0),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamBold,
-        TextSize=isMobile and 20 or 17,
+        TextSize=isMobile and 22 or 19,
         TextColor3=page == currentPage and colors.primary or colors.textDim,
         ZIndex=7
     })
@@ -444,11 +487,11 @@ local function createNavButton(text, icon, page, order)
     local textLabel = new("TextLabel",{
         Parent=btn,
         Text=text,
-        Size=UDim2.new(1,-45,1,0),
-        Position=UDim2.new(0,42,0,0),
+        Size=UDim2.new(1,-52,1,0),
+        Position=UDim2.new(0,48,0,0),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamSemibold,
-        TextSize=12,
+        TextSize=13,
         TextColor3=page == currentPage and colors.text or colors.textDim,
         TextXAlignment=Enum.TextXAlignment.Left,
         Visible=not isMobile,
@@ -465,16 +508,16 @@ local function switchPage(pageName, pageTitle_text)
     
     for name, btnData in pairs(navButtons) do
         local isActive = name == pageName
-        TweenService:Create(btnData.btn,TweenInfo.new(0.15),{
+        TweenService:Create(btnData.btn,TweenInfo.new(0.2),{
             BackgroundColor3=isActive and colors.bg3 or Color3.fromRGB(0,0,0),
-            BackgroundTransparency=isActive and 0.4 or 1
+            BackgroundTransparency=isActive and 0.3 or 1
         }):Play()
         btnData.indicator.Visible = isActive
-        TweenService:Create(btnData.icon,TweenInfo.new(0.15),{
+        TweenService:Create(btnData.icon,TweenInfo.new(0.2),{
             TextColor3=isActive and colors.primary or colors.textDim
         }):Play()
         if not isMobile then
-            TweenService:Create(btnData.text,TweenInfo.new(0.15),{
+            TweenService:Create(btnData.text,TweenInfo.new(0.2),{
                 TextColor3=isActive and colors.text or colors.textDim
             }):Play()
         end
@@ -497,41 +540,56 @@ btnShop.MouseButton1Click:Connect(function() switchPage("Shop", "Shop Features")
 btnSettings.MouseButton1Click:Connect(function() switchPage("Settings", "Settings") end)
 btnInfo.MouseButton1Click:Connect(function() switchPage("Info", "About Lynx") end)
 
--- Modern Category with enhanced colors
+-- Modern Category
 local function makeCategory(parent, title, icon)
     local categoryFrame = new("Frame",{
         Parent=parent,
-        Size=UDim2.new(1,0,0,48),
+        Size=UDim2.new(1,0,0,52),
         BackgroundColor3=colors.bg3,
-        BackgroundTransparency=0.5,
+        BackgroundTransparency=0.4,
         BorderSizePixel=0,
         AutomaticSize=Enum.AutomaticSize.Y,
         ClipsDescendants=false,
         ZIndex=6
     })
-    new("UICorner",{Parent=categoryFrame,CornerRadius=UDim.new(0,14)})
+    new("UICorner",{Parent=categoryFrame,CornerRadius=UDim.new(0,16)})
+    
+    local categoryStroke = new("UIStroke",{
+        Parent=categoryFrame,
+        Color=colors.primary,
+        Thickness=0,
+        Transparency=0.7
+    })
     
     local header = new("TextButton",{
         Parent=categoryFrame,
-        Size=UDim2.new(1,0,0,48),
+        Size=UDim2.new(1,0,0,52),
         BackgroundTransparency=1,
         Text="",
         AutoButtonColor=false,
         ClipsDescendants=true,
         ZIndex=7
     })
-    new("UICorner",{Parent=header,CornerRadius=UDim.new(0,14)})
+    new("UICorner",{Parent=header,CornerRadius=UDim.new(0,16)})
     
     local iconContainer = new("Frame",{
         Parent=header,
-        Size=UDim2.new(0,34,0,34),
-        Position=UDim2.new(0,10,0.5,-17),
+        Size=UDim2.new(0,38,0,38),
+        Position=UDim2.new(0,12,0.5,-19),
         BackgroundColor3=colors.primary,
-        BackgroundTransparency=0.85,
+        BackgroundTransparency=0.8,
         BorderSizePixel=0,
         ZIndex=8
     })
-    new("UICorner",{Parent=iconContainer,CornerRadius=UDim.new(0,9)})
+    new("UICorner",{Parent=iconContainer,CornerRadius=UDim.new(0,10)})
+    new("UIGradient",{
+        Parent=iconContainer,
+        Color=ColorSequence.new{
+            ColorSequenceKeypoint.new(0, colors.primary),
+            ColorSequenceKeypoint.new(1, colors.accent)
+        },
+        Rotation=45
+    })
     
     local iconLabel = new("TextLabel",{
         Parent=iconContainer,
@@ -539,19 +597,19 @@ local function makeCategory(parent, title, icon)
         Size=UDim2.new(1,0,1,0),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamBold,
-        TextSize=isMobile and 15 or 17,
-        TextColor3=colors.primary,
+        TextSize=isMobile and 16 or 19,
+        TextColor3=colors.text,
         ZIndex=9
     })
     
     local titleLabel = new("TextLabel",{
         Parent=header,
         Text=title,
-        Size=UDim2.new(1,-120,1,0),
-        Position=UDim2.new(0,50,0,0),
+        Size=UDim2.new(1,-130,1,0),
+        Position=UDim2.new(0,56,0,0),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamBold,
-        TextSize=isMobile and 12 or 14,
+        TextSize=isMobile and 13 or 15,
         TextColor3=colors.text,
         TextXAlignment=Enum.TextXAlignment.Left,
         ZIndex=8
@@ -560,37 +618,38 @@ local function makeCategory(parent, title, icon)
     local arrow = new("TextLabel",{
         Parent=header,
         Text="▼",
-        Size=UDim2.new(0,18,1,0),
-        Position=UDim2.new(1,-30,0,0),
+        Size=UDim2.new(0,20,1,0),
+        Position=UDim2.new(1,-34,0,0),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamBold,
-        TextSize=13,
+        TextSize=14,
         TextColor3=colors.primary,
         ZIndex=8
     })
     
     local contentContainer = new("Frame",{
         Parent=categoryFrame,
-        Size=UDim2.new(1,-20,0,0),
-        Position=UDim2.new(0,10,0,54),
+        Size=UDim2.new(1,-24,0,0),
+        Position=UDim2.new(0,12,0,58),
         BackgroundTransparency=1,
         Visible=false,
         AutomaticSize=Enum.AutomaticSize.Y,
         ClipsDescendants=true,
         ZIndex=7
     })
-    new("UIListLayout",{Parent=contentContainer,Padding=UDim.new(0,8)})
-    new("UIPadding",{Parent=contentContainer,PaddingBottom=UDim.new(0,10)})
+    new("UIListLayout",{Parent=contentContainer,Padding=UDim.new(0,10)})
+    new("UIPadding",{Parent=contentContainer,PaddingBottom=UDim.new(0,12)})
     
     local isOpen = false
     header.MouseButton1Click:Connect(function()
         isOpen = not isOpen
         contentContainer.Visible = isOpen
-        TweenService:Create(arrow,TweenInfo.new(0.25,Enum.EasingStyle.Back),{Rotation=isOpen and 180 or 0}):Play()
-        TweenService:Create(categoryFrame,TweenInfo.new(0.2),{
+        TweenService:Create(arrow,TweenInfo.new(0.3,Enum.EasingStyle.Back),{Rotation=isOpen and 180 or 0}):Play()
+        TweenService:Create(categoryFrame,TweenInfo.new(0.25),{
             BackgroundColor3=isOpen and colors.bg4 or colors.bg3,
-            BackgroundTransparency=isOpen and 0.3 or 0.5
+            BackgroundTransparency=isOpen and 0.2 or 0.4
         }):Play()
+        TweenService:Create(categoryStroke,TweenInfo.new(0.25),{Thickness=isOpen and 1.5 or 0}):Play()
     end)
     
     return contentContainer
@@ -600,7 +659,7 @@ end
 local function makeToggle(parent, label, callback)
     local frame = new("Frame",{
         Parent=parent,
-        Size=UDim2.new(1,0,0,36),
+        Size=UDim2.new(1,0,0,40),
         BackgroundTransparency=1,
         ZIndex=7
     })
@@ -608,20 +667,20 @@ local function makeToggle(parent, label, callback)
     local labelText = new("TextLabel",{
         Parent=frame,
         Text=label,
-        Size=UDim2.new(0.65,0,1,0),
+        Size=UDim2.new(0.62,0,1,0),
         TextXAlignment=Enum.TextXAlignment.Left,
         BackgroundTransparency=1,
         TextColor3=colors.text,
         Font=Enum.Font.GothamMedium,
-        TextSize=12,
+        TextSize=isMobile and 11 or 13,
         TextWrapped=true,
         ZIndex=8
     })
     
     local toggleBg = new("Frame",{
         Parent=frame,
-        Size=UDim2.new(0,48,0,26),
-        Position=UDim2.new(1,-50,0.5,-13),
+        Size=UDim2.new(0,52,0,28),
+        Position=UDim2.new(1,-54,0.5,-14),
         BackgroundColor3=colors.bg4,
         BorderSizePixel=0,
         ZIndex=8
@@ -630,8 +689,8 @@ local function makeToggle(parent, label, callback)
     
     local toggleCircle = new("Frame",{
         Parent=toggleBg,
-        Size=UDim2.new(0,20,0,20),
-        Position=UDim2.new(0,3,0.5,-10),
+        Size=UDim2.new(0,22,0,22),
+        Position=UDim2.new(0,3,0.5,-11),
         BackgroundColor3=colors.textDim,
         BorderSizePixel=0,
         ZIndex=9
@@ -651,7 +710,7 @@ local function makeToggle(parent, label, callback)
         on = not on
         TweenService:Create(toggleBg,TweenInfo.new(0.25),{BackgroundColor3=on and colors.primary or colors.bg4}):Play()
         TweenService:Create(toggleCircle,TweenInfo.new(0.3,Enum.EasingStyle.Back),{
-            Position=on and UDim2.new(1,-23,0.5,-10) or UDim2.new(0,3,0.5,-10),
+            Position=on and UDim2.new(1,-25,0.5,-11) or UDim2.new(0,3,0.5,-11),
             BackgroundColor3=on and colors.text or colors.textDim
         }):Play()
         callback(on)
@@ -662,7 +721,7 @@ end
 local function makeSlider(parent, label, min, max, def, onChange)
     local frame = new("Frame",{
         Parent=parent,
-        Size=UDim2.new(1,0,0,50),
+        Size=UDim2.new(1,0,0,55),
         BackgroundTransparency=1,
         ZIndex=7
     })
@@ -670,19 +729,19 @@ local function makeSlider(parent, label, min, max, def, onChange)
     local lbl = new("TextLabel",{
         Parent=frame,
         Text=("%s: %.2f"):format(label,def),
-        Size=UDim2.new(1,0,0,18),
+        Size=UDim2.new(1,0,0,20),
         BackgroundTransparency=1,
         TextColor3=colors.text,
         TextXAlignment=Enum.TextXAlignment.Left,
         Font=Enum.Font.GothamMedium,
-        TextSize=12,
+        TextSize=isMobile and 11 or 13,
         ZIndex=8
     })
     
     local bar = new("Frame",{
         Parent=frame,
-        Size=UDim2.new(1,0,0,10),
-        Position=UDim2.new(0,0,0,30),
+        Size=UDim2.new(1,0,0,12),
+        Position=UDim2.new(0,0,0,32),
         BackgroundColor3=colors.bg4,
         BorderSizePixel=0,
         ZIndex=8
@@ -701,14 +760,14 @@ local function makeSlider(parent, label, min, max, def, onChange)
         Parent=fill,
         Color=ColorSequence.new{
             ColorSequenceKeypoint.new(0, colors.primary),
-            ColorSequenceKeypoint.new(1, colors.secondary)
+            ColorSequenceKeypoint.new(1, colors.accent)
         }
     })
     
     local knob = new("Frame",{
         Parent=bar,
-        Size=UDim2.new(0,20,0,20),
-        Position=UDim2.new((def-min)/(max-min),-10,0.5,-10),
+        Size=UDim2.new(0,22,0,22),
+        Position=UDim2.new((def-min)/(max-min),-11,0.5,-11),
         BackgroundColor3=colors.text,
         BorderSizePixel=0,
         ZIndex=10
@@ -717,10 +776,10 @@ local function makeSlider(parent, label, min, max, def, onChange)
     
     local knobShadow = new("Frame",{
         Parent=knob,
-        Size=UDim2.new(1,4,1,4),
-        Position=UDim2.new(0,-2,0,-2),
+        Size=UDim2.new(1,6,1,6),
+        Position=UDim2.new(0,-3,0,-3),
         BackgroundColor3=colors.primary,
-        BackgroundTransparency=0.7,
+        BackgroundTransparency=0.6,
         BorderSizePixel=0,
         ZIndex=9
     })
@@ -731,7 +790,7 @@ local function makeSlider(parent, label, min, max, def, onChange)
         local rel = math.clamp((x-bar.AbsolutePosition.X)/math.max(bar.AbsoluteSize.X,1),0,1)
         local val = min+(max-min)*rel
         fill.Size = UDim2.new(rel,0,1,0)
-        knob.Position = UDim2.new(rel,-10,0.5,-10)
+        knob.Position = UDim2.new(rel,-11,0.5,-11)
         lbl.Text = ("%s: %.2f"):format(label,val)
         onChange(val)
     end
@@ -758,20 +817,27 @@ end
 local function makeDropdown(parent, title, icon, items, onSelect, uniqueId)
     local dropdownFrame = new("Frame",{
         Parent=parent,
-        Size=UDim2.new(1,0,0,48),
+        Size=UDim2.new(1,0,0,52),
         BackgroundColor3=colors.bg4,
-        BackgroundTransparency=0.4,
+        BackgroundTransparency=0.3,
         BorderSizePixel=0,
         AutomaticSize=Enum.AutomaticSize.Y,
         ZIndex=7,
         Name=uniqueId or "Dropdown"
     })
-    new("UICorner",{Parent=dropdownFrame,CornerRadius=UDim.new(0,14)})
+    new("UICorner",{Parent=dropdownFrame,CornerRadius=UDim.new(0,16)})
+    
+    local dropStroke = new("UIStroke",{
+        Parent=dropdownFrame,
+        Color=colors.primary,
+        Thickness=0,
+        Transparency=0.7
+    })
     
     local header = new("TextButton",{
         Parent=dropdownFrame,
-        Size=UDim2.new(1,-16,0,44),
-        Position=UDim2.new(0,8,0,2),
+        Size=UDim2.new(1,-20,0,48),
+        Position=UDim2.new(0,10,0,2),
         BackgroundTransparency=1,
         Text="",
         AutoButtonColor=false,
@@ -781,10 +847,10 @@ local function makeDropdown(parent, title, icon, items, onSelect, uniqueId)
     local iconLabel = new("TextLabel",{
         Parent=header,
         Text=icon,
-        Size=UDim2.new(0,28,1,0),
+        Size=UDim2.new(0,32,1,0),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamBold,
-        TextSize=16,
+        TextSize=isMobile and 16 or 18,
         TextColor3=colors.primary,
         TextXAlignment=Enum.TextXAlignment.Left,
         ZIndex=9
@@ -793,11 +859,11 @@ local function makeDropdown(parent, title, icon, items, onSelect, uniqueId)
     local titleLabel = new("TextLabel",{
         Parent=header,
         Text=title,
-        Size=UDim2.new(1,-90,0,16),
-        Position=UDim2.new(0,32,0,4),
+        Size=UDim2.new(1,-100,0,18),
+        Position=UDim2.new(0,36,0,6),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamBold,
-        TextSize=12,
+        TextSize=isMobile and 11 or 13,
         TextColor3=colors.text,
         TextXAlignment=Enum.TextXAlignment.Left,
         ZIndex=9
@@ -806,11 +872,11 @@ local function makeDropdown(parent, title, icon, items, onSelect, uniqueId)
     local statusLabel = new("TextLabel",{
         Parent=header,
         Text="None Selected",
-        Size=UDim2.new(1,-90,0,12),
-        Position=UDim2.new(0,32,0,24),
+        Size=UDim2.new(1,-100,0,14),
+        Position=UDim2.new(0,36,0,26),
         BackgroundTransparency=1,
         Font=Enum.Font.Gotham,
-        TextSize=10,
+        TextSize=isMobile and 9 or 10,
         TextColor3=colors.textDimmer,
         TextXAlignment=Enum.TextXAlignment.Left,
         ZIndex=9
@@ -819,31 +885,31 @@ local function makeDropdown(parent, title, icon, items, onSelect, uniqueId)
     local arrow = new("TextLabel",{
         Parent=header,
         Text="▼",
-        Size=UDim2.new(0,24,1,0),
-        Position=UDim2.new(1,-24,0,0),
+        Size=UDim2.new(0,28,1,0),
+        Position=UDim2.new(1,-28,0,0),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamBold,
-        TextSize=12,
+        TextSize=13,
         TextColor3=colors.primary,
         ZIndex=9
     })
     
     local listContainer = new("ScrollingFrame",{
         Parent=dropdownFrame,
-        Size=UDim2.new(1,-16,0,0),
-        Position=UDim2.new(0,8,0,52),
+        Size=UDim2.new(1,-20,0,0),
+        Position=UDim2.new(0,10,0,56),
         BackgroundTransparency=1,
         Visible=false,
         AutomaticCanvasSize=Enum.AutomaticSize.Y,
         CanvasSize=UDim2.new(0,0,0,0),
-        ScrollBarThickness=3,
+        ScrollBarThickness=4,
         ScrollBarImageColor3=colors.primary,
         BorderSizePixel=0,
         ClipsDescendants=true,
         ZIndex=10
     })
-    new("UIListLayout",{Parent=listContainer,Padding=UDim.new(0,6)})
-    new("UIPadding",{Parent=listContainer,PaddingBottom=UDim.new(0,10)})
+    new("UIListLayout",{Parent=listContainer,Padding=UDim.new(0,7)})
+    new("UIPadding",{Parent=listContainer,PaddingBottom=UDim.new(0,12)})
     
     local isOpen = false
     local selectedItem = nil
@@ -853,39 +919,47 @@ local function makeDropdown(parent, title, icon, items, onSelect, uniqueId)
         listContainer.Visible = isOpen
         
         TweenService:Create(arrow,TweenInfo.new(0.3,Enum.EasingStyle.Back),{Rotation=isOpen and 180 or 0}):Play()
-        TweenService:Create(dropdownFrame,TweenInfo.new(0.2),{
+        TweenService:Create(dropdownFrame,TweenInfo.new(0.25),{
             BackgroundColor3=isOpen and colors.bg3 or colors.bg4,
-            BackgroundTransparency=isOpen and 0.3 or 0.4
+            BackgroundTransparency=isOpen and 0.2 or 0.3
         }):Play()
+        TweenService:Create(dropStroke,TweenInfo.new(0.25),{Thickness=isOpen and 1.5 or 0}):Play()
         
         if isOpen and #items > 6 then
-            listContainer.Size = UDim2.new(1,-16,0,200)
+            listContainer.Size = UDim2.new(1,-20,0,220)
         else
-            listContainer.Size = UDim2.new(1,-16,0,math.min(#items * 36, 220))
+            listContainer.Size = UDim2.new(1,-20,0,math.min(#items * 40, 240))
         end
     end)
     
     for _, itemName in ipairs(items) do
         local itemBtn = new("TextButton",{
             Parent=listContainer,
-            Size=UDim2.new(1,0,0,34),
+            Size=UDim2.new(1,0,0,38),
             BackgroundColor3=colors.bg4,
-            BackgroundTransparency=0.5,
+            BackgroundTransparency=0.4,
             BorderSizePixel=0,
             Text="",
             AutoButtonColor=false,
             ZIndex=11
         })
-        new("UICorner",{Parent=itemBtn,CornerRadius=UDim.new(0,10)})
+        new("UICorner",{Parent=itemBtn,CornerRadius=UDim.new(0,11)})
+        
+        local itemStroke = new("UIStroke",{
+            Parent=itemBtn,
+            Color=colors.primary,
+            Thickness=0,
+            Transparency=0.7
+        })
         
         local btnLabel = new("TextLabel",{
             Parent=itemBtn,
             Text=itemName,
-            Size=UDim2.new(1,-16,1,0),
-            Position=UDim2.new(0,8,0,0),
+            Size=UDim2.new(1,-20,1,0),
+            Position=UDim2.new(0,10,0,0),
             BackgroundTransparency=1,
             Font=Enum.Font.GothamMedium,
-            TextSize=11,
+            TextSize=isMobile and 10 or 12,
             TextColor3=colors.textDim,
             TextXAlignment=Enum.TextXAlignment.Left,
             TextTruncate=Enum.TextTruncate.AtEnd,
@@ -894,21 +968,23 @@ local function makeDropdown(parent, title, icon, items, onSelect, uniqueId)
         
         itemBtn.MouseEnter:Connect(function()
             if selectedItem ~= itemName then
-                TweenService:Create(itemBtn,TweenInfo.new(0.15),{
+                TweenService:Create(itemBtn,TweenInfo.new(0.2),{
                     BackgroundColor3=colors.primary,
-                    BackgroundTransparency=0.2
+                    BackgroundTransparency=0.15
                 }):Play()
-                TweenService:Create(btnLabel,TweenInfo.new(0.15),{TextColor3=colors.text}):Play()
+                TweenService:Create(btnLabel,TweenInfo.new(0.2),{TextColor3=colors.text}):Play()
+                TweenService:Create(itemStroke,TweenInfo.new(0.2),{Thickness=1.5}):Play()
             end
         end)
         
         itemBtn.MouseLeave:Connect(function()
             if selectedItem ~= itemName then
-                TweenService:Create(itemBtn,TweenInfo.new(0.15),{
+                TweenService:Create(itemBtn,TweenInfo.new(0.2),{
                     BackgroundColor3=colors.bg4,
-                    BackgroundTransparency=0.5
+                    BackgroundTransparency=0.4
                 }):Play()
-                TweenService:Create(btnLabel,TweenInfo.new(0.15),{TextColor3=colors.textDim}):Play()
+                TweenService:Create(btnLabel,TweenInfo.new(0.2),{TextColor3=colors.textDim}):Play()
+                TweenService:Create(itemStroke,TweenInfo.new(0.2),{Thickness=0}):Play()
             end
         end)
         
@@ -922,10 +998,11 @@ local function makeDropdown(parent, title, icon, items, onSelect, uniqueId)
             isOpen = false
             listContainer.Visible = false
             TweenService:Create(arrow,TweenInfo.new(0.3,Enum.EasingStyle.Back),{Rotation=0}):Play()
-            TweenService:Create(dropdownFrame,TweenInfo.new(0.2),{
+            TweenService:Create(dropdownFrame,TweenInfo.new(0.25),{
                 BackgroundColor3=colors.bg4,
-                BackgroundTransparency=0.4
+                BackgroundTransparency=0.3
             }):Play()
+            TweenService:Create(dropStroke,TweenInfo.new(0.25),{Thickness=0}):Play()
         end)
     end
     
@@ -936,20 +1013,27 @@ end
 local function makeButton(parent, label, callback)
     local btnFrame = new("Frame",{
         Parent=parent,
-        Size=UDim2.new(1,0,0,40),
+        Size=UDim2.new(1,0,0,44),
         BackgroundColor3=colors.primary,
         BackgroundTransparency=0.1,
         BorderSizePixel=0,
         ZIndex=8
     })
-    new("UICorner",{Parent=btnFrame,CornerRadius=UDim.new(0,12)})
+    new("UICorner",{Parent=btnFrame,CornerRadius=UDim.new(0,13)})
     new("UIGradient",{
         Parent=btnFrame,
         Color=ColorSequence.new{
             ColorSequenceKeypoint.new(0, colors.primary),
-            ColorSequenceKeypoint.new(1, colors.secondary)
+            ColorSequenceKeypoint.new(1, colors.accent)
         },
         Rotation=45
+    })
+    
+    local btnStroke = new("UIStroke",{
+        Parent=btnFrame,
+        Color=colors.primary,
+        Thickness=0,
+        Transparency=0.5
     })
     
     local button = new("TextButton",{
@@ -958,7 +1042,7 @@ local function makeButton(parent, label, callback)
         BackgroundTransparency=1,
         Text=label,
         Font=Enum.Font.GothamBold,
-        TextSize=13,
+        TextSize=isMobile and 12 or 14,
         TextColor3=colors.text,
         AutoButtonColor=false,
         ZIndex=9
@@ -966,21 +1050,23 @@ local function makeButton(parent, label, callback)
     
     button.MouseEnter:Connect(function()
         TweenService:Create(btnFrame,TweenInfo.new(0.2),{
-            Size=UDim2.new(1,0,0,44),
+            Size=UDim2.new(1,0,0,48),
             BackgroundTransparency=0
         }):Play()
+        TweenService:Create(btnStroke,TweenInfo.new(0.2),{Thickness=2}):Play()
     end)
     button.MouseLeave:Connect(function()
         TweenService:Create(btnFrame,TweenInfo.new(0.2),{
-            Size=UDim2.new(1,0,0,40),
+            Size=UDim2.new(1,0,0,44),
             BackgroundTransparency=0.1
         }):Play()
+        TweenService:Create(btnStroke,TweenInfo.new(0.2),{Thickness=0}):Play()
     end)
     
     button.MouseButton1Click:Connect(function()
-        TweenService:Create(btnFrame,TweenInfo.new(0.1),{Size=UDim2.new(0.98,0,0,38)}):Play()
+        TweenService:Create(btnFrame,TweenInfo.new(0.1),{Size=UDim2.new(0.98,0,0,42)}):Play()
         task.wait(0.1)
-        TweenService:Create(btnFrame,TweenInfo.new(0.1),{Size=UDim2.new(1,0,0,40)}):Play()
+        TweenService:Create(btnFrame,TweenInfo.new(0.1),{Size=UDim2.new(1,0,0,44)}):Play()
         pcall(callback)
     end)
     
@@ -1188,13 +1274,19 @@ end)
 -- ==== INFO PAGE ====
 local infoContainer = new("Frame",{
     Parent=infoPage,
-    Size=UDim2.new(1,0,0,450),
+    Size=UDim2.new(1,0,0,500),
     BackgroundColor3=colors.bg3,
-    BackgroundTransparency=0.5,
+    BackgroundTransparency=0.3,
     BorderSizePixel=0,
     ZIndex=6
 })
-new("UICorner",{Parent=infoContainer,CornerRadius=UDim.new(0,16)})
+new("UICorner",{Parent=infoContainer,CornerRadius=UDim.new(0,18)})
+new("UIStroke",{
+    Parent=infoContainer,
+    Color=colors.primary,
+    Thickness=1.5,
+    Transparency=0.6
+})
 
 local infoText = new("TextLabel",{
     Parent=infoContainer,
@@ -1202,10 +1294,10 @@ local infoText = new("TextLabel",{
     Position=UDim2.new(0,20,0,20),
     BackgroundTransparency=1,
     Text=[[
-✨ LYNX v2.1 ENHANCED
+💜 LYNX v2.2 PURPLE EDITION
 
-Modern Premium Interface
-Optimized for All Devices
+Premium Interface with Enhanced Colors
+Optimized for Mobile & Desktop
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1236,14 +1328,15 @@ Optimized for All Devices
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
-💡 NEW IN v2.1
-✓ Enhanced vibrant colors
-✓ Increased transparency
-✓ No dark background overlay
-✓ FIXED resize (right/down only)
-✓ Improved glass morphism
-✓ Better visual contrast
-✓ Smoother animations
+💡 NEW IN v2.2
+✓ Purple/Pink theme from logo
+✓ Wider window layout
+✓ Better mobile sizing
+✓ Enhanced animations
+✓ Improved glassmorphism
+✓ Gradient borders
+✓ Better visual hierarchy
+✓ Smoother interactions
 
 🎮 CONTROLS
 • Click categories to expand
@@ -1255,10 +1348,10 @@ Optimized for All Devices
 ━━━━━━━━━━━━━━━━━━━━━━
 
 Created with 💎 by Lynx Team
-Premium Enhanced Edition 2024
+Purple Edition 2024
     ]],
     Font=Enum.Font.Gotham,
-    TextSize=11,
+    TextSize=isMobile and 10 or 12,
     TextColor3=colors.text,
     TextWrapped=true,
     TextXAlignment=Enum.TextXAlignment.Left,
@@ -1273,19 +1366,19 @@ local savedIconPos = UDim2.new(0,20,0,120)
 
 local function createMinimizedIcon()
     if icon then return end
-    local iconSize = isMobile and 55 or 60
+    local iconSize = isMobile and 60 or 65
     icon = new("ImageLabel",{
         Parent=gui,
         Size=UDim2.new(0,iconSize,0,iconSize),
         Position=savedIconPos,
         BackgroundColor3=colors.primary,
-        BackgroundTransparency=0.2,
+        BackgroundTransparency=0.15,
         BorderSizePixel=0,
         Image="rbxassetid://135183099972655",
         ScaleType=Enum.ScaleType.Fit,
         ZIndex=100
     })
-    new("UICorner",{Parent=icon,CornerRadius=UDim.new(0,15)})
+    new("UICorner",{Parent=icon,CornerRadius=UDim.new(0,18)})
     new("UIGradient",{
         Parent=icon,
         Color=ColorSequence.new{
@@ -1298,8 +1391,8 @@ local function createMinimizedIcon()
     new("UIStroke",{
         Parent=icon,
         Color=colors.primary,
-        Thickness=2,
-        Transparency=0.5
+        Thickness=2.5,
+        Transparency=0.4
     })
     
     local logoK = new("TextLabel",{
@@ -1307,7 +1400,7 @@ local function createMinimizedIcon()
         Text="L",
         Size=UDim2.new(1,0,1,0),
         Font=Enum.Font.GothamBold,
-        TextSize=isMobile and 28 or 32,
+        TextSize=isMobile and 32 or 36,
         BackgroundTransparency=1,
         TextColor3=colors.text,
         Visible=icon.Image == "",
@@ -1339,7 +1432,7 @@ local function createMinimizedIcon()
                 dragging = false
                 savedIconPos = icon.Position
                 if not dragMoved then
-                    overlay.Visible,win.Visible = true,true
+                    win.Visible = true
                     TweenService:Create(win,TweenInfo.new(0.5,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{
                         Size=windowSize,
                         Position=UDim2.new(0.5,-windowSize.X.Offset/2,0.5,-windowSize.Y.Offset/2)
@@ -1360,7 +1453,7 @@ btnMin.MouseButton1Click:Connect(function()
             Position=targetPos
         }):Play()
         task.wait(0.35)
-        win.Visible,overlay.Visible = false,false
+        win.Visible = false
         createMinimizedIcon()
         minimized = true
     end
@@ -1408,14 +1501,14 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- FIXED RESIZING SYSTEM (Only expands RIGHT and DOWN)
+-- RESIZING SYSTEM (Expands RIGHT and DOWN)
 local resizing = false
-local resizeStart,startSize,startPos = nil,nil,nil
+local resizeStart,startSize = nil,nil
 local resizeTween = nil
 
 resizeHandle.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        resizing,resizeStart,startSize,startPos = true,input.Position,win.Size,win.Position
+        resizing,resizeStart,startSize = true,input.Position,win.Size
         if resizeTween then resizeTween:Cancel() end
     end
 end)
@@ -1424,7 +1517,6 @@ UserInputService.InputChanged:Connect(function(input)
     if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - resizeStart
         
-        -- Calculate new size (only expand right and down)
         local newWidth = math.clamp(
             startSize.X.Offset + delta.X,
             minWindowSize.X,
@@ -1436,10 +1528,8 @@ UserInputService.InputChanged:Connect(function(input)
             maxWindowSize.Y
         )
         
-        -- Keep the window position fixed (only expand from top-left corner)
         local newSize = UDim2.new(0,newWidth,0,newHeight)
         
-        -- Super smooth resize without repositioning
         if resizeTween then resizeTween:Cancel() end
         resizeTween = TweenService:Create(win,TweenInfo.new(0.05,Enum.EasingStyle.Linear),{
             Size=newSize
@@ -1454,12 +1544,11 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Opening Animation (No dark background)
+-- Opening Animation
 task.spawn(function()
     win.Size = UDim2.new(0,0,0,0)
     win.Position = UDim2.new(0.5,-windowSize.X.Offset/2,0.5,-windowSize.Y.Offset/2)
     win.Rotation = 0
-    overlay.Visible = false  -- No overlay needed
     
     task.wait(0.1)
     
@@ -1472,22 +1561,22 @@ end)
 resizeHandle.MouseEnter:Connect(function()
     TweenService:Create(resizeHandle,TweenInfo.new(0.2),{
         BackgroundTransparency=0.2,
-        Size=UDim2.new(0,24,0,24)
+        Size=UDim2.new(0,28,0,28)
     }):Play()
 end)
 
 resizeHandle.MouseLeave:Connect(function()
     if not resizing then
         TweenService:Create(resizeHandle,TweenInfo.new(0.2),{
-            BackgroundTransparency=0.5,
-            Size=UDim2.new(0,20,0,20)
+            BackgroundTransparency=0.4,
+            Size=UDim2.new(0,24,0,24)
         }):Play()
     end
 end)
 
-print("✨ Lynx GUI v2.1 Enhanced loaded!")
-print("🎨 Ultra Premium Glass Edition")
-print("📱 Mobile & PC Optimized")
-print("🖱️ Drag from top | Resize from corner (right/down only)")
-print("🎨 Enhanced colors & transparency")
+print("✨ Lynx GUI v2.2 Purple Edition loaded!")
+print("🎨 Enhanced with logo-matching colors")
+print("📱 Improved Mobile & PC Layout")
+print("🖱️ Drag from top | Resize from corner")
+print("💜 Purple/Pink Premium Theme")
 print("💎 Created by Lynx Team")
