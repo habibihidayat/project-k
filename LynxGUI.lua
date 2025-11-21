@@ -126,7 +126,7 @@ end)
 -- Sidebar state for mobile toggle
 local sidebarExpanded = false
 local sidebarCollapsedWidth = 50
-local sidebarExpandedWidth = 170  -- Slightly wider to prevent text cutoff
+local sidebarExpandedWidth = 180  -- Lebih lebar untuk mencegah cutoff teks
 
 -- Sidebar with DARKER transparency - COLLAPSIBLE for mobile
 local sidebar = new("Frame",{
@@ -227,7 +227,7 @@ local brandName = new("TextLabel",{
     TextSize=isMobile and 14 or 19,
     BackgroundTransparency=1,
     TextColor3=colors.text,
-    Visible=isMobile and sidebarExpanded or not isMobile,
+    Visible=not isMobile, -- Selalu visible di desktop, di mobile hanya saat expanded
     TextXAlignment=Enum.TextXAlignment.Center,  -- Center text to prevent cutoff
     ZIndex=6
 })
@@ -513,7 +513,7 @@ local settingsPage = createPage("Settings")
 local infoPage = createPage("Info")
 mainPage.Visible = true
 
--- Enhanced Nav Button - IMPROVED TEXT HANDLING
+-- Enhanced Nav Button - IMPROVED TEXT HANDLING dan FIXED CLICK ISSUE
 local function createNavButton(text, icon, page, order)
     local btn = new("TextButton",{
         Parent=navContainer,
@@ -570,14 +570,15 @@ local function createNavButton(text, icon, page, order)
         TextColor3=page == currentPage and colors.text or colors.textDim,
         TextXAlignment=Enum.TextXAlignment.Left,
         TextTruncate=Enum.TextTruncate.AtEnd,  -- Prevent text overflow
-        Visible=isMobile and sidebarExpanded or not isMobile,
+        Visible=not isMobile, -- Di mobile, teks hanya muncul saat sidebar expanded
         ZIndex=7
     })
     
     navButtons[page] = {btn=btn, icon=iconLabel, text=textLabel, indicator=indicator}
     
-    btn.MouseButton1Click:Connect(function() 
-        switchPage(page, text .. " - Lynx") 
+    -- FIX: Connect click event properly
+    btn.MouseButton1Click:Connect(function()
+        switchPage(page, text)
     end)
     
     return btn
@@ -585,8 +586,13 @@ end
 
 local function switchPage(pageName, pageTitle_text)
     if currentPage == pageName then return end
-    for _, page in pairs(pages) do page.Visible = false end
     
+    -- Hide all pages first
+    for _, page in pairs(pages) do 
+        page.Visible = false 
+    end
+    
+    -- Update nav buttons appearance
     for name, btnData in pairs(navButtons) do
         local isActive = name == pageName
         TweenService:Create(btnData.btn,TweenInfo.new(0.2),{
@@ -597,13 +603,14 @@ local function switchPage(pageName, pageTitle_text)
         TweenService:Create(btnData.icon,TweenInfo.new(0.2),{
             TextColor3=isActive and colors.primary or colors.textDim
         }):Play()
-        if not isMobile or sidebarExpanded then
+        if btnData.text then
             TweenService:Create(btnData.text,TweenInfo.new(0.2),{
                 TextColor3=isActive and colors.text or colors.textDim
             }):Play()
         end
     end
     
+    -- Show the selected page
     pages[pageName].Visible = true
     pageTitle.Text = pageTitle_text
     currentPage = pageName
@@ -615,6 +622,7 @@ local function switchPage(pageName, pageTitle_text)
     end
 end
 
+-- FIX: Create nav buttons dengan function yang benar
 local btnMain = createNavButton("Dashboard", "🏠", "Main", 1)
 local btnTeleport = createNavButton("Teleport", "🌍", "Teleport", 2)
 local btnShop = createNavButton("Shop", "🛒", "Shop", 3)
@@ -1669,5 +1677,5 @@ print("🎨 DARKER THEME - Enhanced visual experience")
 print("📱 Mobile Optimized (480x270) - No text cutoff")
 print("🧡 SIDEBAR TOGGLE - Tap arrow (▶/◀) at bottom")
 print("🖱️ Drag from top | Resize from corner")
-print("🎯 Fixed sidebar text display issues")
+print("🎯 Fixed sidebar navigation issues")
 print("💎 Created by Lynx Team")
