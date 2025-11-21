@@ -33,38 +33,24 @@ local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habib
 local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
 local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoBuyWeather.lua"))()
 
--- Logo URLs - Public CDN untuk semua orang bisa akses
-local LOGO_URLS = {
-
-    "https://i.imgur.com/RexlV7z.jpeg",
-    -- jsDelivr CDN (recommended - paling stabil)
-    "https://cdn.jsdelivr.net/gh/habibihidayat/project-k@main/src/logo.jpg",
-    
-    -- GitHub Raw CDN (backup)
-    "https://raw.githack.com/habibihidayat/project-k/main/src/logo.jpg",
-    
-    -- GitHub Direct (last resort)
-    "https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg",
-
-}
-
-local LOGO_URL = LOGO_URLS[1]
-
 -- Enhanced Premium Color Palette with Vibrant Colors
 local colors = {
-    primary = Color3.fromRGB(99, 115, 255),
-    secondary = Color3.fromRGB(138, 161, 255),
-    accent = Color3.fromRGB(255, 130, 255),
-    success = Color3.fromRGB(77, 201, 149),
-    warning = Color3.fromRGB(255, 186, 46),
-    danger = Color3.fromRGB(255, 86, 89),
-    bg1 = Color3.fromRGB(20, 22, 30),
-    bg2 = Color3.fromRGB(28, 31, 40),
-    bg3 = Color3.fromRGB(36, 40, 52),
-    bg4 = Color3.fromRGB(44, 48, 62),
+    primary = Color3.fromRGB(99, 115, 255),      -- Brighter primary
+    secondary = Color3.fromRGB(138, 161, 255),   -- Brighter secondary
+    accent = Color3.fromRGB(255, 130, 255),      -- Brighter accent
+    success = Color3.fromRGB(77, 201, 149),      -- Brighter success
+    warning = Color3.fromRGB(255, 186, 46),      -- Brighter warning
+    danger = Color3.fromRGB(255, 86, 89),        -- Brighter danger
+    
+    bg1 = Color3.fromRGB(20, 22, 30),            -- Slightly lighter
+    bg2 = Color3.fromRGB(28, 31, 40),            -- Slightly lighter
+    bg3 = Color3.fromRGB(36, 40, 52),            -- Slightly lighter
+    bg4 = Color3.fromRGB(44, 48, 62),            -- Slightly lighter
+    
     text = Color3.fromRGB(255, 255, 255),
-    textDim = Color3.fromRGB(180, 187, 205),
-    textDimmer = Color3.fromRGB(130, 135, 145),
+    textDim = Color3.fromRGB(180, 187, 205),     -- Brighter
+    textDimmer = Color3.fromRGB(130, 135, 145),  -- Brighter
+    
     border = Color3.fromRGB(57, 59, 64),
     glow = Color3.fromRGB(99, 115, 255),
 }
@@ -83,29 +69,30 @@ local gui = new("ScreenGui",{
     DisplayOrder=999
 })
 
--- Background overlay
+-- Background overlay - REMOVED DARK BACKGROUND
 local overlay = new("Frame",{
     Parent=gui,
     Size=UDim2.new(1,0,1,0),
-    BackgroundTransparency=1,
+    BackgroundTransparency=1,  -- Fully transparent
     BorderSizePixel=0,
     Visible=false,
     ZIndex=1
 })
 
--- Main Window Container
+-- Main Window Container with Enhanced Glass effect
 local win = new("Frame",{
     Parent=gui,
     Size=windowSize,
     Position=UDim2.new(0.5,-windowSize.X.Offset/2,0.5,-windowSize.Y.Offset/2),
     BackgroundColor3=colors.bg1,
-    BackgroundTransparency=0.25,
+    BackgroundTransparency=0.25,  -- More transparent
     BorderSizePixel=0,
     ClipsDescendants=false,
     ZIndex=3
 })
 new("UICorner",{Parent=win,CornerRadius=UDim.new(0,18)})
 
+-- Enhanced Glassmorphism effect with subtle glow
 local glassBlur = new("Frame",{
     Parent=win,
     Size=UDim2.new(1,0,1,0),
@@ -116,6 +103,7 @@ local glassBlur = new("Frame",{
 })
 new("UICorner",{Parent=glassBlur,CornerRadius=UDim.new(0,18)})
 
+-- Subtle glow border
 local glowBorder = new("UIStroke",{
     Parent=win,
     Color=colors.primary,
@@ -124,18 +112,19 @@ local glowBorder = new("UIStroke",{
     ApplyStrokeMode=Enum.ApplyStrokeMode.Border
 })
 
--- Sidebar
+-- Sidebar with enhanced transparency
 local sidebar = new("Frame",{
     Parent=win,
     Size=isMobile and UDim2.new(0,75,1,0) or UDim2.new(0,180,1,0),
     BackgroundColor3=colors.bg2,
-    BackgroundTransparency=0.3,
+    BackgroundTransparency=0.3,  -- More transparent
     BorderSizePixel=0,
     ClipsDescendants=true,
     ZIndex=4
 })
 new("UICorner",{Parent=sidebar,CornerRadius=UDim.new(0,18)})
 
+-- Sidebar Header with Custom Logo Support
 local sidebarHeader = new("Frame",{
     Parent=sidebar,
     Size=isMobile and UDim2.new(1,0,0,85) or UDim2.new(1,0,0,90),
@@ -144,19 +133,19 @@ local sidebarHeader = new("Frame",{
     ZIndex=5
 })
 
--- Logo Container - Simplified Version
-local logoContainer = new("Frame",{
+-- Logo Container with enhanced gradient
+local logoContainer = new("ImageLabel",{
     Parent=sidebarHeader,
     Size=isMobile and UDim2.new(0,42,0,42) or UDim2.new(0,50,0,50),
     Position=isMobile and UDim2.new(0.5,-21,0,15) or UDim2.new(0.5,-25,0,18),
     BackgroundColor3=colors.primary,
-    BackgroundTransparency=0.15,
+    BackgroundTransparency=0.2,
     BorderSizePixel=0,
+    Image="https://raw.githubusercontent.com/habibihidayat/project-k/blob/main/src/logo.jpg",
+    ScaleType=Enum.ScaleType.Fit,
     ZIndex=6
 })
 new("UICorner",{Parent=logoContainer,CornerRadius=UDim.new(0,14)})
-
--- Gradient background
 new("UIGradient",{
     Parent=logoContainer,
     Color=ColorSequence.new{
@@ -167,43 +156,44 @@ new("UIGradient",{
     Rotation=45
 })
 
--- Logo Image (Akan mencoba load)
-local logoImage = new("ImageLabel",{
+-- FIX UNIVERSAL IMAGE LOADING
+local function loadImage(url)
+    local ok, img = pcall(function()
+        if getcustomasset then
+            return getcustomasset(url)
+        elseif getsynasset then
+            return getsynasset(url)
+        elseif setrbxasset then
+            return setrbxasset(url)
+        elseif readfile then
+            -- fallback: download dulu
+            local name = "lynx_logo.png"
+            writefile(name, game:HttpGet(url))
+            return getcustomasset(name)
+        end
+    end)
+    return ok and img or nil
+end
+
+local logoURL = "https://raw.githubusercontent.com/habibihidayat/project-k/blob/main/src/logo.jpg" -- ganti sesuai link kamu
+local loadedLogo = loadImage(logoURL)
+
+if loadedLogo then
+    logoContainer.Image = loadedLogo
+else
+    warn("Logo gagal dimuat!")
+end
+
+
+-- Enhanced glow for logo
+new("UIStroke",{
     Parent=logoContainer,
-    Size=UDim2.new(1,0,1,0),
-    BackgroundColor3=colors.primary,
-    BackgroundTransparency=0.3,
-    BorderSizePixel=1,
-    BorderColor3=colors.primary,
-    Image="",
-    ScaleType=Enum.ScaleType.Fit,
-    ImageTransparency=0,
-    ZIndex=7
+    Color=colors.primary,
+    Thickness=2,
+    Transparency=0.5
 })
-new("UICorner",{Parent=logoImage,CornerRadius=UDim.new(0,14)})
 
--- 🔥 Load Logo Base64 via Loadstring
-local logoData = ""
-
-pcall(function()
-    logoData = loadstring(game:HttpGet("sandbox:/mnt/data/logo.lua"))()
-end)
-
-task.spawn(function()
-    task.wait(0.4)
-
-    if logoData ~= nil and logoData ~= "" then
-        logoImage.Image = "data:image/png;base64," .. logoData
-        logoText.Visible = false
-        warn("✅ Logo base64 berhasil dimuat melalui loadstring")
-    else
-        logoText.Visible = true
-        warn("⚠️ Logo gagal dimuat (fallback)")
-    end
-end)
-
-
--- Fallback Text Logo
+-- Fallback text if no image
 local logoText = new("TextLabel",{
     Parent=logoContainer,
     Text="L",
@@ -212,49 +202,17 @@ local logoText = new("TextLabel",{
     TextSize=isMobile and 26 or 32,
     BackgroundTransparency=1,
     TextColor3=colors.text,
-    Visible=true,
-    ZIndex=8
+    Visible=logoContainer.Image == "",
+    ZIndex=7
 })
 
-task.spawn(function()
-    task.wait(0.8)
-    local logoLoaded = false
-    
-    for urlIndex, url in ipairs(LOGO_URLS) do
-        if logoLoaded then break end
-        
-        print("⏳ Mencoba URL " .. urlIndex .. "/2: " .. url)
-        
-        local success = pcall(function()
-            logoImage.Image = url
-            logoImage.ImageTransparency = 0
-        end)
-        
-        task.wait(1)
-        
-        print("📊 Status: Image = " .. tostring(logoImage.Image))
-        print("📊 Transparency: " .. logoImage.ImageTransparency)
-        
-        if logoImage.Image ~= "" and logoImage.Image == url then
-            logoText.Visible = false
-            logoLoaded = true
-            print("✅✅✅ LOGO BERHASIL DIMUAT! ✅✅✅")
-            print("🖼️ URL Imgur: " .. url)
-            break
-        else
-            print("❌ URL " .. urlIndex .. " gagal")
-        end
-    end
-    
-    if not logoLoaded then
-        logoText.Visible = true
-        print("⚠️ Semua URL gagal")
-    end
+logoContainer:GetPropertyChangedSignal("Image"):Connect(function()
+    logoText.Visible = (logoContainer.Image == "")
 end)
 
 local brandName = new("TextLabel",{
     Parent=sidebarHeader,
-    Text="LYNX",
+    Text=isMobile and "LYNX" or "LYNX",
     Size=UDim2.new(1,0,0,18),
     Position=isMobile and UDim2.new(0,0,0,62) or UDim2.new(0,0,0,72),
     Font=Enum.Font.GothamBold,
@@ -298,20 +256,20 @@ new("UIListLayout",{
     SortOrder=Enum.SortOrder.LayoutOrder
 })
 
--- Content Area
+-- Content Area with enhanced transparency
 local contentBg = new("Frame",{
     Parent=win,
     Size=isMobile and UDim2.new(1,-85,1,-15) or UDim2.new(1,-190,1,-15),
     Position=isMobile and UDim2.new(0,80,0,10) or UDim2.new(0,185,0,10),
     BackgroundColor3=colors.bg2,
-    BackgroundTransparency=0.4,
+    BackgroundTransparency=0.4,  -- More transparent
     BorderSizePixel=0,
     ClipsDescendants=true,
     ZIndex=4
 })
 new("UICorner",{Parent=contentBg,CornerRadius=UDim.new(0,16)})
 
--- Top bar
+-- Top bar with controls - DRAGGABLE AREA
 local topBar = new("Frame",{
     Parent=contentBg,
     Size=UDim2.new(1,0,0,45),
@@ -322,6 +280,7 @@ local topBar = new("Frame",{
 })
 new("UICorner",{Parent=topBar,CornerRadius=UDim.new(0,16)})
 
+-- Enhanced Drag Handle Indicator
 local dragHandle = new("Frame",{
     Parent=topBar,
     Size=UDim2.new(0,40,0,4),
@@ -398,7 +357,7 @@ end
 local btnMin = createControlBtn("─", colors.warning)
 local btnClose = createControlBtn("×", colors.danger)
 
--- Resize Handle
+-- FIXED Resize Handle (Bottom Right Corner) - Only expands right and down
 local resizeHandle = new("TextButton",{
     Parent=win,
     Size=UDim2.new(0,20,0,20),
@@ -462,7 +421,7 @@ local settingsPage = createPage("Settings")
 local infoPage = createPage("Info")
 mainPage.Visible = true
 
--- Nav Button Function
+-- Nav Button Function (Enhanced)
 local function createNavButton(text, icon, page, order)
     local btn = new("TextButton",{
         Parent=navContainer,
@@ -556,7 +515,7 @@ btnShop.MouseButton1Click:Connect(function() switchPage("Shop", "Shop Features")
 btnSettings.MouseButton1Click:Connect(function() switchPage("Settings", "Settings") end)
 btnInfo.MouseButton1Click:Connect(function() switchPage("Info", "About Lynx") end)
 
--- Modern Category
+-- Modern Category with enhanced colors
 local function makeCategory(parent, title, icon)
     local categoryFrame = new("Frame",{
         Parent=parent,
@@ -1272,38 +1231,49 @@ Optimized for All Devices
 • Instant Fishing (Fast/Perfect)
 • Unified slider controls
 • Blatant Mode support
+• Advanced automation
 
 🛠️ SUPPORT FEATURES
 • No Fishing Animation
+• Performance optimizations
 
 🌍 TELEPORT SYSTEM
 • Location teleport
 • Player teleport
+• Smart dropdown selection
 
 💰 SHOP FEATURES
-• Auto Sell & Timer
+• Auto Sell (instant & timer)
 • Auto Buy Weather
+• Smart category organization
 
 ⚙️ SETTINGS
 • Anti-AFK Protection
-• FPS Unlocker
+• FPS Unlocker (60-240 FPS)
+• General preferences
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
 💡 NEW IN v2.1
-✓ GitHub Logo Integration
 ✓ Enhanced vibrant colors
+✓ Increased transparency
+✓ No dark background overlay
+✓ FIXED resize (right/down only)
 ✓ Improved glass morphism
 ✓ Better visual contrast
+✓ Smoother animations
 
 🎮 CONTROLS
-• Click to expand categories
+• Click categories to expand
 • Drag from top bar to move
-• Resize from corner
+• Drag corner to resize
+• (─) Minimize window
+• (×) Close GUI
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
 Created with 💎 by Lynx Team
+Premium Enhanced Edition 2024
     ]],
     Font=Enum.Font.Gotham,
     TextSize=11,
@@ -1322,13 +1292,15 @@ local savedIconPos = UDim2.new(0,20,0,120)
 local function createMinimizedIcon()
     if icon then return end
     local iconSize = isMobile and 55 or 60
-    icon = new("Frame",{
+    icon = new("ImageLabel",{
         Parent=gui,
         Size=UDim2.new(0,iconSize,0,iconSize),
         Position=savedIconPos,
         BackgroundColor3=colors.primary,
-        BackgroundTransparency=0.15,
+        BackgroundTransparency=0.2,
         BorderSizePixel=0,
+        Image="https://raw.githubusercontent.com/habibihidayat/project-k/blob/main/src/logo.jpg",
+        ScaleType=Enum.ScaleType.Fit,
         ZIndex=100
     })
     new("UICorner",{Parent=icon,CornerRadius=UDim.new(0,15)})
@@ -1341,16 +1313,12 @@ local function createMinimizedIcon()
         },
         Rotation=45
     })
-    
-    local iconImage = new("ImageLabel",{
+    new("UIStroke",{
         Parent=icon,
-        Size=UDim2.new(1,0,1,0),
-        BackgroundTransparency=1,
-        Image="",
-        ScaleType=Enum.ScaleType.Fit,
-        ZIndex=101
+        Color=colors.primary,
+        Thickness=2,
+        Transparency=0.5
     })
-    new("UICorner",{Parent=iconImage,CornerRadius=UDim.new(0,15)})
     
     local logoK = new("TextLabel",{
         Parent=icon,
@@ -1360,23 +1328,12 @@ local function createMinimizedIcon()
         TextSize=isMobile and 28 or 32,
         BackgroundTransparency=1,
         TextColor3=colors.text,
-        Visible=true,
-        ZIndex=102
+        Visible=icon.Image == "",
+        ZIndex=101
     })
     
-    task.spawn(function()
-        task.wait(0.3)
-        for _, url in ipairs(LOGO_URLS) do
-            pcall(function()
-                iconImage.Image = url
-            end)
-            task.wait(0.3)
-            if iconImage.Image ~= "" then
-                logoK.Visible = false
-                break
-            end
-        end
-    end)
+    icon.Image = logoContainer.Image
+    logoK.Visible = (icon.Image == "")
     
     local dragging,dragStart,startPos,dragMoved = false,nil,nil,false
     icon.InputBegan:Connect(function(input)
@@ -1469,7 +1426,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- FIXED RESIZING SYSTEM
+-- FIXED RESIZING SYSTEM (Only expands RIGHT and DOWN)
 local resizing = false
 local resizeStart,startSize,startPos = nil,nil,nil
 local resizeTween = nil
@@ -1485,6 +1442,7 @@ UserInputService.InputChanged:Connect(function(input)
     if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - resizeStart
         
+        -- Calculate new size (only expand right and down)
         local newWidth = math.clamp(
             startSize.X.Offset + delta.X,
             minWindowSize.X,
@@ -1496,8 +1454,10 @@ UserInputService.InputChanged:Connect(function(input)
             maxWindowSize.Y
         )
         
+        -- Keep the window position fixed (only expand from top-left corner)
         local newSize = UDim2.new(0,newWidth,0,newHeight)
         
+        -- Super smooth resize without repositioning
         if resizeTween then resizeTween:Cancel() end
         resizeTween = TweenService:Create(win,TweenInfo.new(0.05,Enum.EasingStyle.Linear),{
             Size=newSize
@@ -1512,12 +1472,12 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Opening Animation
+-- Opening Animation (No dark background)
 task.spawn(function()
     win.Size = UDim2.new(0,0,0,0)
     win.Position = UDim2.new(0.5,-windowSize.X.Offset/2,0.5,-windowSize.Y.Offset/2)
     win.Rotation = 0
-    overlay.Visible = false
+    overlay.Visible = false  -- No overlay needed
     
     task.wait(0.1)
     
@@ -1544,8 +1504,8 @@ resizeHandle.MouseLeave:Connect(function()
 end)
 
 print("✨ Lynx GUI v2.1 Enhanced loaded!")
-print("🎨 Ultra Premium Glass Edition with GitHub Logo")
+print("🎨 Ultra Premium Glass Edition")
 print("📱 Mobile & PC Optimized")
-print("🖱️ Drag from top | Resize from corner")
+print("🖱️ Drag from top | Resize from corner (right/down only)")
 print("🎨 Enhanced colors & transparency")
 print("💎 Created by Lynx Team")
