@@ -159,28 +159,28 @@ new("UIGradient",{
     }
 })
 
--- Mobile Sidebar Toggle Button
+-- Mobile Sidebar Toggle Button - REPOSITIONED BELOW LOGO
 local sidebarToggle
 if isMobile then
     sidebarToggle = new("TextButton",{
         Parent=sidebar,
-        Size=UDim2.new(0,40,0,40),
-        Position=UDim2.new(0.5,-20,0,10),
-        BackgroundColor3=colors.primary,
-        BackgroundTransparency=0.3,
+        Size=UDim2.new(1,-10,0,35),
+        Position=UDim2.new(0,5,0,63),  -- Below logo and brand name
+        BackgroundColor3=colors.bg3,
+        BackgroundTransparency=0.4,
         BorderSizePixel=0,
         Text="☰",
         Font=Enum.Font.GothamBold,
-        TextSize=18,
-        TextColor3=colors.text,
+        TextSize=16,
+        TextColor3=Color3.fromRGB(200, 120, 50),  -- Muted orange
         ZIndex=100
     })
-    new("UICorner",{Parent=sidebarToggle,CornerRadius=UDim.new(0,10)})
+    new("UICorner",{Parent=sidebarToggle,CornerRadius=UDim.new(0,8)})
     new("UIStroke",{
         Parent=sidebarToggle,
-        Color=colors.primary,
-        Thickness=1.5,
-        Transparency=0.5
+        Color=Color3.fromRGB(180, 100, 40),  -- Darker orange
+        Thickness=1,
+        Transparency=0.7
     })
 end
 
@@ -208,12 +208,12 @@ local logoContainer = new("ImageLabel",{
 })
 new("UICorner",{Parent=logoContainer,CornerRadius=UDim.new(0,8)})
 
--- Logo glow effect - THINNER
+-- Logo glow effect - SOFTER and DIMMER
 new("UIStroke",{
     Parent=logoContainer,
-    Color=colors.primary,
-    Thickness=isMobile and 1 or 2.5,
-    Transparency=0.3
+    Color=Color3.fromRGB(180, 100, 40),  -- Darker, muted orange
+    Thickness=isMobile and 0.8 or 2,
+    Transparency=0.6
 })
 
 local brandName = new("TextLabel",{
@@ -251,11 +251,11 @@ local brandVersion = new("TextLabel",{
     ZIndex=6
 })
 
--- Navigation Container - ADJUSTED for landscape
+-- Navigation Container - ADJUSTED for landscape (below toggle button)
 local navContainer = new("ScrollingFrame",{
     Parent=sidebar,
-    Size=isMobile and UDim2.new(1,-4,1,-60) or UDim2.new(1,-20,1,-120),
-    Position=isMobile and UDim2.new(0,2,0,58) or UDim2.new(0,10,0,115),
+    Size=isMobile and UDim2.new(1,-4,1,-105) or UDim2.new(1,-20,1,-120),
+    Position=isMobile and UDim2.new(0,2,0,103) or UDim2.new(0,10,0,115),
     BackgroundTransparency=1,
     ScrollBarThickness=2,
     ScrollBarImageColor3=colors.primary,
