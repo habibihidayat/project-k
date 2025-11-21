@@ -141,41 +141,11 @@ local logoContainer = new("ImageLabel",{
     BackgroundColor3=colors.primary,
     BackgroundTransparency=0.2,
     BorderSizePixel=0,
-    Image="", -- akan diisi oleh loader
+    Image="rbxassetid://135183099972655", -- akan diisi oleh loader
     ScaleType=Enum.ScaleType.Fit,
     ZIndex=6
 })
 new("UICorner",{Parent=logoContainer,CornerRadius=UDim.new(0,14)})
-
--- UNIVERSAL IMAGE LOADING FIX (All executors)
-local function loadImage(url)
-    local ok, result = pcall(function()
-        if getcustomasset then
-            return getcustomasset(url)
-        elseif getsynasset then
-            return getsynasset(url)
-        elseif setrbxasset then
-            return setrbxasset(url)
-        elseif writefile and readfile then
-            local name = "lynx_logo.jpg"
-            writefile(name, game:HttpGet(url))
-            return getcustomasset(name)
-        end
-    end)
-    return ok and result or nil
-end
-
--- FIXED RAW URL (tanpa blob!)
-local logoURL = "https://i.imgur.com/shnNZuT.png"
-
-task.spawn(function()
-    local loaded = loadImage(logoURL)
-    if loaded then
-        logoContainer.Image = loaded
-    else
-        warn("Logo gagal dimuat:", logoURL)
-    end
-end)
 
 -- Hilangkan gradient karena menutupi gambar
 -- (BIARKAN KOMENTAR ATAU HAPUS)
@@ -1311,7 +1281,7 @@ local function createMinimizedIcon()
         BackgroundColor3=colors.primary,
         BackgroundTransparency=0.2,
         BorderSizePixel=0,
-        Image="https://raw.githubusercontent.com/habibihidayat/project-k/blob/main/src/logo.jpg",
+        Image="rbxassetid://135183099972655",
         ScaleType=Enum.ScaleType.Fit,
         ZIndex=100
     })
