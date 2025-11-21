@@ -55,10 +55,10 @@ local colors = {
     glow = Color3.fromRGB(147, 51, 234),
 }
 
--- IMPROVED Window Sizing - Wider & Better Proportions
-local windowSize = isMobile and UDim2.new(0,420,0,580) or UDim2.new(0,720,0,480)
-local minWindowSize = isMobile and Vector2.new(380, 500) or Vector2.new(650, 420)
-local maxWindowSize = isMobile and Vector2.new(500, 700) or Vector2.new(1000, 650)
+-- IMPROVED Window Sizing - FIXED for Mobile (Landscape/Wider)
+local windowSize = isMobile and UDim2.new(0,360,0,460) or UDim2.new(0,720,0,480)
+local minWindowSize = isMobile and Vector2.new(320, 400) or Vector2.new(650, 420)
+local maxWindowSize = isMobile and Vector2.new(450, 550) or Vector2.new(1000, 650)
 
 local gui = new("ScreenGui",{
     Name="LynxGUI_Modern",
@@ -122,10 +122,10 @@ task.spawn(function()
     end
 end)
 
--- Sidebar with enhanced transparency
+-- Sidebar with enhanced transparency - SMALLER for mobile
 local sidebar = new("Frame",{
     Parent=win,
-    Size=isMobile and UDim2.new(0,85,1,0) or UDim2.new(0,200,1,0),
+    Size=isMobile and UDim2.new(0,70,1,0) or UDim2.new(0,200,1,0),
     BackgroundColor3=colors.bg2,
     BackgroundTransparency=0.2,
     BorderSizePixel=0,
@@ -154,20 +154,20 @@ new("UIGradient",{
     }
 })
 
--- Sidebar Header with Logo
+-- Sidebar Header with Logo - SMALLER
 local sidebarHeader = new("Frame",{
     Parent=sidebar,
-    Size=isMobile and UDim2.new(1,0,0,95) or UDim2.new(1,0,0,100),
+    Size=isMobile and UDim2.new(1,0,0,80) or UDim2.new(1,0,0,100),
     BackgroundTransparency=1,
     ClipsDescendants=true,
     ZIndex=5
 })
 
--- Logo Container with enhanced styling
+-- Logo Container with enhanced styling - SMALLER
 local logoContainer = new("ImageLabel",{
     Parent=sidebarHeader,
-    Size=isMobile and UDim2.new(0,50,0,50) or UDim2.new(0,60,0,60),
-    Position=isMobile and UDim2.new(0.5,-25,0,18) or UDim2.new(0.5,-30,0,20),
+    Size=isMobile and UDim2.new(0,40,0,40) or UDim2.new(0,60,0,60),
+    Position=isMobile and UDim2.new(0.5,-20,0,15) or UDim2.new(0.5,-30,0,20),
     BackgroundColor3=colors.bg3,
     BackgroundTransparency=0.3,
     BorderSizePixel=0,
@@ -175,24 +175,24 @@ local logoContainer = new("ImageLabel",{
     ScaleType=Enum.ScaleType.Fit,
     ZIndex=6
 })
-new("UICorner",{Parent=logoContainer,CornerRadius=UDim.new(0,16)})
+new("UICorner",{Parent=logoContainer,CornerRadius=UDim.new(0,12)})
 
--- Logo glow effect
+-- Logo glow effect - THINNER
 new("UIStroke",{
     Parent=logoContainer,
     Color=colors.primary,
-    Thickness=2.5,
+    Thickness=isMobile and 1.5 or 2.5,
     Transparency=0.3
 })
 
--- Fallback Text
+-- Fallback Text - SMALLER
 local logoText = new("TextLabel",{
     Parent=logoContainer,
     Text="L",
     Size=UDim2.new(1,0,1,0),
     BackgroundTransparency=1,
     Font=Enum.Font.GothamBold,
-    TextSize=isMobile and 30 or 36,
+    TextSize=isMobile and 24 or 36,
     TextColor3=colors.text,
     Visible=true,
     ZIndex=7
@@ -237,13 +237,13 @@ local brandVersion = new("TextLabel",{
     ZIndex=6
 })
 
--- Navigation Container
+-- Navigation Container - ADJUSTED
 local navContainer = new("ScrollingFrame",{
     Parent=sidebar,
-    Size=isMobile and UDim2.new(1,-10,1,-105) or UDim2.new(1,-20,1,-120),
-    Position=isMobile and UDim2.new(0,5,0,100) or UDim2.new(0,10,0,115),
+    Size=isMobile and UDim2.new(1,-6,1,-85) or UDim2.new(1,-20,1,-120),
+    Position=isMobile and UDim2.new(0,3,0,82) or UDim2.new(0,10,0,115),
     BackgroundTransparency=1,
-    ScrollBarThickness=3,
+    ScrollBarThickness=2,
     ScrollBarImageColor3=colors.primary,
     BorderSizePixel=0,
     CanvasSize=UDim2.new(0,0,0,0),
@@ -253,15 +253,15 @@ local navContainer = new("ScrollingFrame",{
 })
 new("UIListLayout",{
     Parent=navContainer,
-    Padding=UDim.new(0,8),
+    Padding=UDim.new(0,isMobile and 6 or 8),
     SortOrder=Enum.SortOrder.LayoutOrder
 })
 
--- Content Area
+-- Content Area - ADJUSTED for smaller sidebar
 local contentBg = new("Frame",{
     Parent=win,
-    Size=isMobile and UDim2.new(1,-95,1,-15) or UDim2.new(1,-210,1,-15),
-    Position=isMobile and UDim2.new(0,90,0,10) or UDim2.new(0,205,0,10),
+    Size=isMobile and UDim2.new(1,-78,1,-15) or UDim2.new(1,-210,1,-15),
+    Position=isMobile and UDim2.new(0,73,0,10) or UDim2.new(0,205,0,10),
     BackgroundColor3=colors.bg2,
     BackgroundTransparency=0.3,
     BorderSizePixel=0,
@@ -270,10 +270,10 @@ local contentBg = new("Frame",{
 })
 new("UICorner",{Parent=contentBg,CornerRadius=UDim.new(0,18)})
 
--- Top bar with controls
+-- Top bar with controls - SMALLER on mobile
 local topBar = new("Frame",{
     Parent=contentBg,
-    Size=UDim2.new(1,0,0,50),
+    Size=UDim2.new(1,0,0,isMobile and 45 or 50),
     BackgroundColor3=colors.bg3,
     BackgroundTransparency=0.4,
     BorderSizePixel=0,
@@ -281,11 +281,11 @@ local topBar = new("Frame",{
 })
 new("UICorner",{Parent=topBar,CornerRadius=UDim.new(0,18)})
 
--- Enhanced Drag Handle
+-- Enhanced Drag Handle - SMALLER
 local dragHandle = new("Frame",{
     Parent=topBar,
-    Size=UDim2.new(0,45,0,5),
-    Position=UDim2.new(0.5,-22.5,0,10),
+    Size=isMobile and UDim2.new(0,35,0,4) or UDim2.new(0,45,0,5),
+    Position=isMobile and UDim2.new(0.5,-17.5,0,8) or UDim2.new(0.5,-22.5,0,10),
     BackgroundColor3=colors.primary,
     BackgroundTransparency=0.4,
     BorderSizePixel=0,
@@ -303,45 +303,46 @@ new("UIGradient",{
 local pageTitle = new("TextLabel",{
     Parent=topBar,
     Text="Main Dashboard",
-    Size=UDim2.new(1,-100,1,0),
-    Position=UDim2.new(0,18,0,0),
+    Size=UDim2.new(1,-85,1,0),
+    Position=UDim2.new(0,isMobile and 12 or 18,0,0),
     Font=Enum.Font.GothamBold,
-    TextSize=isMobile and 14 or 17,
+    TextSize=isMobile and 12 or 17,
     BackgroundTransparency=1,
     TextColor3=colors.text,
     TextXAlignment=Enum.TextXAlignment.Left,
     ZIndex=6
 })
 
--- Control buttons
+-- Control buttons - SMALLER on mobile
 local controlsFrame = new("Frame",{
     Parent=topBar,
-    Size=UDim2.new(0,75,0,32),
-    Position=UDim2.new(1,-80,0.5,-16),
+    Size=isMobile and UDim2.new(0,62,0,28) or UDim2.new(0,75,0,32),
+    Position=isMobile and UDim2.new(1,-66,0.5,-14) or UDim2.new(1,-80,0.5,-16),
     BackgroundTransparency=1,
     ZIndex=6
 })
 new("UIListLayout",{
     Parent=controlsFrame,
     FillDirection=Enum.FillDirection.Horizontal,
-    Padding=UDim.new(0,7)
+    Padding=UDim.new(0,isMobile and 5 or 7)
 })
 
 local function createControlBtn(icon, color)
+    local btnSize = isMobile and 28 or 32
     local btn = new("TextButton",{
         Parent=controlsFrame,
-        Size=UDim2.new(0,32,0,32),
+        Size=UDim2.new(0,btnSize,0,btnSize),
         BackgroundColor3=colors.bg4,
         BackgroundTransparency=0.3,
         BorderSizePixel=0,
         Text=icon,
         Font=Enum.Font.GothamBold,
-        TextSize=icon == "×" and 22 or 18,
+        TextSize=(icon == "×" and (isMobile and 18 or 22)) or (isMobile and 14 or 18),
         TextColor3=colors.textDim,
         AutoButtonColor=false,
         ZIndex=7
     })
-    new("UICorner",{Parent=btn,CornerRadius=UDim.new(0,10)})
+    new("UICorner",{Parent=btn,CornerRadius=UDim.new(0,isMobile and 8 or 10)})
     
     local stroke = new("UIStroke",{
         Parent=btn,
@@ -351,11 +352,12 @@ local function createControlBtn(icon, color)
     })
     
     btn.MouseEnter:Connect(function()
+        local hoverSize = isMobile and 30 or 35
         TweenService:Create(btn,TweenInfo.new(0.2),{
             BackgroundColor3=color,
             BackgroundTransparency=0.1,
             TextColor3=colors.text,
-            Size=UDim2.new(0,35,0,35)
+            Size=UDim2.new(0,hoverSize,0,hoverSize)
         }):Play()
         TweenService:Create(stroke,TweenInfo.new(0.2),{Thickness=2}):Play()
     end)
@@ -364,7 +366,7 @@ local function createControlBtn(icon, color)
             BackgroundColor3=colors.bg4,
             BackgroundTransparency=0.3,
             TextColor3=colors.textDim,
-            Size=UDim2.new(0,32,0,32)
+            Size=UDim2.new(0,btnSize,0,btnSize)
         }):Play()
         TweenService:Create(stroke,TweenInfo.new(0.2),{Thickness=0}):Play()
     end)
@@ -374,26 +376,26 @@ end
 local btnMin = createControlBtn("─", colors.warning)
 local btnClose = createControlBtn("×", colors.danger)
 
--- Resize Handle
+-- Resize Handle - SMALLER on mobile
 local resizeHandle = new("TextButton",{
     Parent=win,
-    Size=UDim2.new(0,24,0,24),
-    Position=UDim2.new(1,-24,1,-24),
+    Size=isMobile and UDim2.new(0,20,0,20) or UDim2.new(0,24,0,24),
+    Position=isMobile and UDim2.new(1,-20,1,-20) or UDim2.new(1,-24,1,-24),
     BackgroundColor3=colors.primary,
     BackgroundTransparency=0.4,
     BorderSizePixel=0,
     Text="⋰",
     Font=Enum.Font.GothamBold,
-    TextSize=14,
+    TextSize=isMobile and 11 or 14,
     TextColor3=colors.text,
     AutoButtonColor=false,
     ZIndex=100
 })
-new("UICorner",{Parent=resizeHandle,CornerRadius=UDim.new(0,8)})
+new("UICorner",{Parent=resizeHandle,CornerRadius=UDim.new(0,isMobile and 6 or 8)})
 new("UIStroke",{
     Parent=resizeHandle,
     Color=colors.primary,
-    Thickness=2,
+    Thickness=isMobile and 1.5 or 2,
     Transparency=0.4
 })
 
@@ -405,10 +407,10 @@ local navButtons = {}
 local function createPage(name)
     local page = new("ScrollingFrame",{
         Parent=contentBg,
-        Size=UDim2.new(1,-20,1,-65),
-        Position=UDim2.new(0,10,0,57),
+        Size=UDim2.new(1,-16,1,-(isMobile and 53 or 65)),
+        Position=UDim2.new(0,8,0,isMobile and 48 or 57),
         BackgroundTransparency=1,
-        ScrollBarThickness=4,
+        ScrollBarThickness=isMobile and 3 or 4,
         ScrollBarImageColor3=colors.primary,
         BorderSizePixel=0,
         CanvasSize=UDim2.new(0,0,0,0),
@@ -419,13 +421,13 @@ local function createPage(name)
     })
     new("UIListLayout",{
         Parent=page,
-        Padding=UDim.new(0,12),
+        Padding=UDim.new(0,isMobile and 10 or 12),
         SortOrder=Enum.SortOrder.LayoutOrder
     })
     new("UIPadding",{
         Parent=page,
-        PaddingTop=UDim.new(0,10),
-        PaddingBottom=UDim.new(0,10)
+        PaddingTop=UDim.new(0,isMobile and 6 or 10),
+        PaddingBottom=UDim.new(0,isMobile and 6 or 10)
     })
     pages[name] = page
     return page
@@ -438,11 +440,11 @@ local settingsPage = createPage("Settings")
 local infoPage = createPage("Info")
 mainPage.Visible = true
 
--- Enhanced Nav Button
+-- Enhanced Nav Button - SMALLER on mobile
 local function createNavButton(text, icon, page, order)
     local btn = new("TextButton",{
         Parent=navContainer,
-        Size=isMobile and UDim2.new(1,0,0,56) or UDim2.new(1,0,0,48),
+        Size=isMobile and UDim2.new(1,0,0,48) or UDim2.new(1,0,0,48),
         BackgroundColor3=page == currentPage and colors.bg3 or Color3.fromRGB(0,0,0),
         BackgroundTransparency=page == currentPage and 0.3 or 1,
         BorderSizePixel=0,
@@ -451,12 +453,12 @@ local function createNavButton(text, icon, page, order)
         LayoutOrder=order,
         ZIndex=6
     })
-    new("UICorner",{Parent=btn,CornerRadius=UDim.new(0,12)})
+    new("UICorner",{Parent=btn,CornerRadius=UDim.new(0,isMobile and 10 or 12)})
     
     local indicator = new("Frame",{
         Parent=btn,
-        Size=UDim2.new(0,4,0,24),
-        Position=UDim2.new(0,0,0.5,-12),
+        Size=isMobile and UDim2.new(0,3,0,20) or UDim2.new(0,4,0,24),
+        Position=UDim2.new(0,0,0.5,isMobile and -10 or -12),
         BackgroundColor3=colors.primary,
         BorderSizePixel=0,
         Visible=page == currentPage,
@@ -479,7 +481,7 @@ local function createNavButton(text, icon, page, order)
         Position=isMobile and UDim2.new(0,0,0,0) or UDim2.new(0,16,0,0),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamBold,
-        TextSize=isMobile and 22 or 19,
+        TextSize=isMobile and 18 or 19,
         TextColor3=page == currentPage and colors.primary or colors.textDim,
         ZIndex=7
     })
@@ -1557,26 +1559,28 @@ task.spawn(function()
     }):Play()
 end)
 
--- Hover effect for resize handle
+-- Hover effect for resize handle - ADJUSTED
 resizeHandle.MouseEnter:Connect(function()
+    local hoverSize = isMobile and 23 or 28
     TweenService:Create(resizeHandle,TweenInfo.new(0.2),{
         BackgroundTransparency=0.2,
-        Size=UDim2.new(0,28,0,28)
+        Size=UDim2.new(0,hoverSize,0,hoverSize)
     }):Play()
 end)
 
 resizeHandle.MouseLeave:Connect(function()
     if not resizing then
+        local normalSize = isMobile and 20 or 24
         TweenService:Create(resizeHandle,TweenInfo.new(0.2),{
             BackgroundTransparency=0.4,
-            Size=UDim2.new(0,24,0,24)
+            Size=UDim2.new(0,normalSize,0,normalSize)
         }):Play()
     end
 end)
 
 print("✨ Lynx GUI v2.2 Purple Edition loaded!")
 print("🎨 Enhanced with logo-matching colors")
-print("📱 Improved Mobile & PC Layout")
+print("📱 FIXED Mobile Layout (360x460)")
 print("🖱️ Drag from top | Resize from corner")
 print("💜 Purple/Pink Premium Theme")
 print("💎 Created by Lynx Team")
