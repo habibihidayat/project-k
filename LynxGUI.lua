@@ -166,7 +166,7 @@ local function loadImage(url)
 end
 
 -- FIXED RAW URL (tanpa blob!)
-local logoURL = "https://raw.githubusercontent.com/habibihidayat/project-k/main/src/logo.jpg"
+local logoURL = "https://i.imgur.com/shnNZuT.png"
 
 task.spawn(function()
     local loaded = loadImage(logoURL)
