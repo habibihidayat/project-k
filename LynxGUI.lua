@@ -93,22 +93,22 @@ local glassBlur = new("Frame",{
 })
 new("UICorner",{Parent=glassBlur,CornerRadius=UDim.new(0,16)})
 
--- Premium glow border with gradient
+-- Premium glow border with gradient - SOFTER COLORS
 local glowBorder = new("UIStroke",{
     Parent=win,
-    Color=colors.primary,
+    Color=Color3.fromRGB(180, 100, 40),  -- Muted orange
     Thickness=1.5,
-    Transparency=0.5,
+    Transparency=0.7,  -- More transparent
     ApplyStrokeMode=Enum.ApplyStrokeMode.Border
 })
 
--- Animated gradient for border
+-- Animated gradient for border - SOFTER
 local borderGradient = new("UIGradient",{
     Parent=glowBorder,
     Color=ColorSequence.new{
-        ColorSequenceKeypoint.new(0, colors.primary),
-        ColorSequenceKeypoint.new(0.5, colors.accent),
-        ColorSequenceKeypoint.new(1, colors.secondary)
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 120, 50)),   -- Soft orange
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 100, 40)), -- Medium orange
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 90, 30))     -- Dark orange
     },
     Rotation=0
 })
@@ -149,31 +149,32 @@ local sidebarGradient = new("Frame",{
 new("UIGradient",{
     Parent=sidebarGradient,
     Color=ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 140, 0)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 69, 0))
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 120, 50)),  -- Muted orange
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 90, 30))    -- Dark orange
     },
     Rotation=180,
     Transparency=NumberSequence.new{
-        NumberSequenceKeypoint.new(0, 0.9),
+        NumberSequenceKeypoint.new(0, 0.92),  -- More transparent
         NumberSequenceKeypoint.new(1, 1)
     }
 })
 
--- Mobile Sidebar Toggle Button - REPOSITIONED BELOW LOGO
+-- Mobile Sidebar Toggle Button - POSITIONED AT BOTTOM SIDE OF SIDEBAR
 local sidebarToggle
 if isMobile then
     sidebarToggle = new("TextButton",{
-        Parent=sidebar,
-        Size=UDim2.new(1,-10,0,35),
-        Position=UDim2.new(0,5,0,63),  -- Below logo and brand name
+        Parent=win,  -- Changed to win instead of sidebar
+        Size=UDim2.new(0,28,0,45),
+        Position=UDim2.new(0,sidebarCollapsedWidth-2,1,-55),  -- Bottom right side of sidebar
         BackgroundColor3=colors.bg3,
-        BackgroundTransparency=0.4,
+        BackgroundTransparency=0.3,
         BorderSizePixel=0,
-        Text="☰",
+        Text="▶",  -- Arrow icon
         Font=Enum.Font.GothamBold,
-        TextSize=16,
+        TextSize=14,
         TextColor3=Color3.fromRGB(200, 120, 50),  -- Muted orange
-        ZIndex=100
+        ZIndex=101,
+        ClipsDescendants=false
     })
     new("UICorner",{Parent=sidebarToggle,CornerRadius=UDim.new(0,8)})
     new("UIStroke",{
@@ -251,11 +252,11 @@ local brandVersion = new("TextLabel",{
     ZIndex=6
 })
 
--- Navigation Container - ADJUSTED for landscape (below toggle button)
+-- Navigation Container - ADJUSTED for landscape (no toggle button blocking)
 local navContainer = new("ScrollingFrame",{
     Parent=sidebar,
-    Size=isMobile and UDim2.new(1,-4,1,-105) or UDim2.new(1,-20,1,-120),
-    Position=isMobile and UDim2.new(0,2,0,103) or UDim2.new(0,10,0,115),
+    Size=isMobile and UDim2.new(1,-4,1,-60) or UDim2.new(1,-20,1,-120),
+    Position=isMobile and UDim2.new(0,2,0,58) or UDim2.new(0,10,0,115),
     BackgroundTransparency=1,
     ScrollBarThickness=2,
     ScrollBarImageColor3=colors.primary,
@@ -300,14 +301,26 @@ local function toggleSidebar()
         Position=UDim2.new(0,targetWidth+4,0,8)
     }):Play()
     
+    -- Move toggle button with sidebar
+    if sidebarToggle then
+        TweenService:Create(sidebarToggle,TweenInfo.new(0.3,Enum.EasingStyle.Back),{
+            Position=UDim2.new(0,targetWidth-2,1,-55)
+        }):Play()
+        
+        -- Change arrow direction
+        sidebarToggle.Text = sidebarExpanded and "◀" or "▶"
+    end
+    
     -- Toggle brand name visibility
     brandName.Visible = sidebarExpanded
     
-    -- Animate toggle button
-    if sidebarToggle then
-        TweenService:Create(sidebarToggle,TweenInfo.new(0.3),{
-            Rotation=sidebarExpanded and 90 or 0
-        }):Play()
+    -- Update all nav button text visibility
+    for _, btnData in pairs(navButtons) do
+        if btnData.text then
+            btnData.text.Visible = sidebarExpanded
+            btnData.icon.Size = sidebarExpanded and UDim2.new(0,32,1,0) or UDim2.new(1,0,1,0)
+            btnData.icon.Position = sidebarExpanded and UDim2.new(0,8,0,0) or UDim2.new(0,0,0,0)
+        end
     end
 end
 
@@ -1419,7 +1432,7 @@ Optimized for Horizontal Rectangle Layout
 • Click categories to expand
 • Drag from top bar to move
 • Drag corner to resize
-• (☰) Toggle sidebar (Mobile)
+• (▶/◀) Toggle sidebar (Mobile)
 • (─) Minimize window
 • (×) Close GUI
 
@@ -1468,9 +1481,9 @@ local function createMinimizedIcon()
     })
     new("UIStroke",{
         Parent=icon,
-        Color=colors.primary,
-        Thickness=isMobile and 1.5 or 2.5,
-        Transparency=0.4
+        Color=Color3.fromRGB(180, 100, 40),  -- Muted orange
+        Thickness=isMobile and 1.2 or 2.5,
+        Transparency=0.6
     })
     
     local logoK = new("TextLabel",{
@@ -1657,7 +1670,7 @@ end)
 print("✨ Lynx GUI v2.2 Orange Edition loaded!")
 print("🎨 LANDSCAPE MODE - Horizontal Rectangle")
 print("📱 Mobile Optimized (480x270)")
-print("🧡 COLLAPSIBLE SIDEBAR - Tap ☰ to toggle")
+print("🧡 SIDEBAR TOGGLE - Tap arrow (▶/◀) at bottom")
 print("🖱️ Drag from top | Resize from corner")
 print("🧡 Orange Theme from Logo")
 print("💎 Created by Lynx Team")
