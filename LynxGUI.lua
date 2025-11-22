@@ -1210,7 +1210,7 @@ end)
 local catBlatant = makeCategory(mainPage, "Blatant Mode", "🔥")
 
 makeToggle(catBlatant, "Enable Blatant", function(on)
-    if on then instant2x.Start() else instant2x.Stop() end
+    if on then Instant2x.Start() else Instant2x.Stop() end
 end)
 
 makeSlider(catBlatant, "Fishing Delay", 0.01, 5.0, 1.30, function(on)
