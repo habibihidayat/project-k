@@ -23,7 +23,7 @@ end
 -- Load modules
 local instant = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant.lua"))()
 local instant2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant2.lua"))()
-local Instant2X = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant2Xspeed.lua"))()
+local Instant2x = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant2Xspeed.lua"))()
 local NoFishingAnimation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/NoFishingAnimation.lua"))()
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
 local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/TeleportToPlayer.lua"))()
@@ -1210,15 +1210,15 @@ end)
 local catBlatant = makeCategory(mainPage, "Blatant Mode", "🔥")
 
 makeToggle(catBlatant, "Enable Blatant", function(on)
-    if on then instant2X.Start() else instant2X.Stop() end
+    if on then instant2x.Start() else instant2x.Stop() end
 end)
 
 makeSlider(catBlatant, "Fishing Delay", 0.01, 5.0, 1.30, function(on)
-    Instant2X.Settings.FishingDelay = v
+    Instant2x.Settings.FishingDelay = v
 end)
 
 makeSlider(catBlatant, "Cancel Delay", 0.01, 1.5, 0.30, function(on)
-    Instant2X.Settings.CancelDelay = v
+    Instant2x.Settings.CancelDelay = v
 end)
 
 
