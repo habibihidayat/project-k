@@ -58,10 +58,10 @@ function fishing.Cast()
     if not fishing.Running or fishing.WaitingHook then return end
     fishing.CurrentCycle = fishing.CurrentCycle + 1
     pcall(function()
-        RF_ChargeFishingRod:InvokeServer({[22] = tick()})
+        RF_ChargeFishingRod:InvokeServer({[10] = tick()})
         log("⚡ Lempar pancing.")
         task.wait(0.07)
-        RF_RequestMinigame:InvokeServer(9, 0, tick())
+        RF_RequestMinigame:InvokeServer(10, 0, tick())
         log("🎯 Menunggu hook...")
         fishing.WaitingHook = true
         task.delay(1.1, function()
@@ -94,3 +94,4 @@ function fishing.Stop()
 end
 
 return fishing
+
