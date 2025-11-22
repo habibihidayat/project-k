@@ -23,7 +23,7 @@ end
 -- Load modules
 local instant = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant.lua"))()
 local instant2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant2.lua"))()
-local BlatantAutoFishing = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/BlatantAutoFishing.lua"))()
+local Instant2X = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/BlatantAutoFishing.lua"))()
 local NoFishingAnimation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/NoFishingAnimation.lua"))()
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
 local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/TeleportToPlayer.lua"))()
@@ -1209,25 +1209,19 @@ end)
 
 local catBlatant = makeCategory(mainPage, "Blatant Mode", "🔥")
 
-makeToggle(catBlatant, "Enable Extreme Blatant", function(on)
-    if on then
-        BlatantAutoFishing.Start()
-    else
-        BlatantAutoFishing.Stop()
-    end
+makeToggle(catBlatant, "Enable Blatant", function(on)
+    if on then instant2x.Start() else instant2x.Stop() end
 end)
 
-makeToggle(catBlatant, "Instant Catch", function(on)
-    BlatantAutoFishing.Settings.InstantCatch = on
+makeSlider(catBlatant, "Fishing Delay", 0.01, 5.0, 1.30, function(on)
+    Instant2X.Settings.FishingDelay = v
 end)
 
-makeToggle(catBlatant, "Auto Complete Everything", function(on)
-    BlatantAutoFishing.Settings.AutoComplete = on
+makeSlider(catBlatant, "Cancel Delay", 0.01, 1.5, 0.19, function(on)
+    Instant2X.Settings.CancelDelay = v
 end)
 
-makeSlider(catBlatant, "Spam Rate (ms)", 0.001, 0.1, 0.001, function(v)
-    BlatantAutoFishing.Settings.SpamRate = v
-end)
+
 
 local catSupport = makeCategory(mainPage, "Support Features", "🛠️")
 
