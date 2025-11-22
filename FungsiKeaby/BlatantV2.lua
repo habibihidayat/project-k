@@ -116,8 +116,4 @@ function fishing.Stop()
     log("🛑 STOPPED | Total: " .. fishing.TotalFish .. " fish")
 end
 
--- Auto-start (hapus ini jika tidak mau auto-start)
-task.wait(1)
-fishing.Start()
-
 return fishing
