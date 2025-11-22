@@ -1210,8 +1210,8 @@ end)
 
 local catBlatant = makeCategory(mainPage, "Blatant Mode", "🔥")
 makeToggle(catBlatant,"Blatant Features",function(on) if on then instant2x.Start() else instant2x.Stop() end end)
-makeSlider(pnl2,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
-makeSlider(pnl2,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
+makeSlider(catBlatant,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
+makeSlider(catBlatant,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
 
 local catSupport = makeCategory(mainPage, "Support Features", "🛠️")
 
