@@ -1207,21 +1207,45 @@ makeSlider(catAutoFishing, "Cancel Delay", 0.01, 1.5, 0.19, function(v)
     instant2.Settings.CancelDelay = v
 end)
 
+-- Tambahkan di kategori Auto Fishing
+makeToggle(catAutoFishing, "Enable Ultra Speed Fishing", function(on)
+    if on then
+        Instant2Xspeed.Start()
+    else
+        Instant2Xspeed.Stop()
+    end
+end)
+
+makeSlider(catAutoFishing, "Fishing Delay", 0.01, 3.0, 0.3, function(v)
+    Instant2Xspeed.SetFishingDelay(v)
+end)
+
+makeSlider(catAutoFishing, "Cancel Delay", 0.01, 1.5, 0.05, function(v)
+    Instant2Xspeed.SetCancelDelay(v)
+end)
+
+
 local catBlatant = makeCategory(mainPage, "Blatant Mode", "🔥")
 
-makeToggle(catBlatant, "Enable Blatant", function(on)
-    if on then instant2x.Start() else instant2x.Stop() end
+makeToggle(catBlatant, "Enable Extreme Blatant", function(on)
+    if on then
+        BlatantAutoFishing.Start()
+    else
+        BlatantAutoFishing.Stop()
+    end
 end)
 
-makeSlider(catBlatant, "Fishing Delay", 0.01, 5.0, 1.30, function(on)
-    instant2x.Settings.FishingDelay = v
+makeToggle(catBlatant, "Instant Catch", function(on)
+    BlatantAutoFishing.Settings.InstantCatch = on
 end)
 
-makeSlider(catBlatant, "Cancel Delay", 0.01, 1.5, 0.19, function(on)
-    instant2x.Settings.CancelDelay = v
+makeToggle(catBlatant, "Auto Complete Everything", function(on)
+    BlatantAutoFishing.Settings.AutoComplete = on
 end)
 
-
+makeSlider(catBlatant, "Spam Rate (ms)", 0.001, 0.1, 0.001, function(v)
+    BlatantAutoFishing.Settings.SpamRate = v
+end)
 
 local catSupport = makeCategory(mainPage, "Support Features", "🛠️")
 
