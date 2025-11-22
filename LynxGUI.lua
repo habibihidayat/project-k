@@ -24,6 +24,7 @@ end
 local instant = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant.lua"))()
 local instant2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant2.lua"))()
 local instant2x = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant2Xspeed.lua"))()
+local blatantv2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/BlatantV2.lua"))()
 local NoFishingAnimation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/NoFishingAnimation.lua"))()
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
 local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/TeleportToPlayer.lua"))()
@@ -1212,6 +1213,14 @@ local catBlatant = makeCategory(mainPage, "Blatant Mode", "🔥")
 makeToggle(catBlatant,"Blatant Features",function(on) if on then instant2x.Start() else instant2x.Stop() end end)
 makeSlider(catBlatant,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
 makeSlider(catBlatant,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
+
+local catBlatant = makeCategory(mainPage, "Blatant V2", "🔥")
+makeToggle(catBlatant,"Blatant Features",function(on) if on then blatantv2.Start() else blatantv2.Stop() end end)
+makeSlider(catBlatant,"Fishing Delay",0,5.0,0.05,function(v) blatantv2.Settings.FishingDelay=v end)
+makeSlider(catBlatant,"Cancel Delay",0.01,1.5,0.01,function(v) blatantv2.Settings.CancelDelay=v end)
+makeSlider(catBlatant,"Hook Wait Time",0,5.0,0.15,function(v) blatantv2.Settings.HookWaitTime=v end)
+makeSlider(catBlatant,"Cast Delay",0,5.0,0.03,function(v) blatantv2.Settings.CastDelay=v end)
+makeSlider(catBlatant,"Timeout Delay",0,5.0,0.8,function(v) blatantv2.Settings.TimeoutDelay=v end)
 
 local catSupport = makeCategory(mainPage, "Support Features", "🛠️")
 
