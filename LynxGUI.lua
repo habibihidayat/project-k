@@ -203,7 +203,7 @@ local logoContainer = new("ImageLabel",{
     BackgroundColor3=colors.bg3,
     BackgroundTransparency=0.3,
     BorderSizePixel=0,
-    Image="rbxassetid://135183099972655",
+    Image="rbxassetid://111416780887356",
     ScaleType=Enum.ScaleType.Fit,
     ImageTransparency=0,
     ZIndex=6
@@ -1458,7 +1458,7 @@ local function createMinimizedIcon()
         BackgroundColor3=colors.primary,
         BackgroundTransparency=0.15,
         BorderSizePixel=0,
-        Image="rbxassetid://135183099972655",
+        Image="rbxassetid://111416780887356",
         ScaleType=Enum.ScaleType.Fit,
         ZIndex=100
     })
