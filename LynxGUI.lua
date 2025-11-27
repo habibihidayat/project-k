@@ -23,7 +23,7 @@ end
 -- Load modules
 local instant = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant.lua"))()
 local instant2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant2.lua"))()
-local instant2x = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant2Xspeed.lua"))()
+local blatantv1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/BlatantV1.lua"))()
 local blatantv2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/BlatantV2.lua"))()
 local NoFishingAnimation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/NoFishingAnimation.lua"))()
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
@@ -1209,10 +1209,35 @@ makeSlider(catAutoFishing, "Cancel Delay", 0.01, 1.5, 0.19, function(v)
 end)
 
 
-local catBlatant = makeCategory(mainPage, "Blatant Mode", "🔥")
-makeToggle(catBlatant,"Blatant Features",function(on) if on then instant2x.Start() else instant2x.Stop() end end)
-makeSlider(catBlatant,"Fishing Delay",0,5.0,0.3,function(v) instant2x.Settings.FishingDelay=v end)
-makeSlider(catBlatant,"Cancel Delay",0.01,1.5,0.19,function(v) instant2x.Settings.CancelDelay=v end)
+local catBlatant = makeCategory(mainPage, "Blatant V1", "💀")
+
+makeToggle(catBlatant, "Blatant Mode", function(on) 
+    if on then 
+        blatantv1.Start() 
+    else 
+        blatantv1.Stop() 
+    end 
+end)
+
+makeInput(catBlatant, "Complete Delay", "0.05", function(text)
+    local value = tonumber(text)
+    if value then
+        blatantv1.Settings.CompleteDelay = value
+        print("✅ Complete Delay set to: " .. value)
+    else
+        print("❌ Invalid number!")
+    end
+end)
+
+makeInput(catBlatant, "Cancel Delay", "0.1", function(text)
+    local value = tonumber(text)
+    if value then
+        blatantv1.Settings.CancelDelay = value
+        print("✅ Cancel Delay set to: " .. value)
+    else
+        print("❌ Invalid number!")
+    end
+end)
 
 local catBlatant = makeCategory(mainPage, "Blatant V2", "🔥")
 makeToggle(catBlatant,"Blatant Features",function(on) if on then blatantv2.Start() else blatantv2.Stop() end end)
