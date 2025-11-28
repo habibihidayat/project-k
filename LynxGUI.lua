@@ -1,6 +1,6 @@
--- LynxGUI_v2.2.lua - Compact Minimalist Black Edition
--- MOBILE OPTIMIZED (Same for PC)
+-- LynxGUI_v2.3.lua - Galaxy Edition
 -- BAGIAN 1: Setup, Core Functions, Window Structure
+-- FREE NOT FOR SALE
 
 repeat task.wait() until game:IsLoaded()
 
@@ -35,35 +35,37 @@ local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habib
 local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
 local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoBuyWeather.lua"))()
 
--- Compact Minimalist Color Palette - Black Theme
+-- Galaxy Color Palette
 local colors = {
-    primary = Color3.fromRGB(255, 140, 0),       -- Orange accent
-    secondary = Color3.fromRGB(255, 165, 50),    -- Light orange
-    accent = Color3.fromRGB(255, 100, 20),       -- Bright orange
-    success = Color3.fromRGB(34, 197, 94),       -- Green
-    warning = Color3.fromRGB(251, 191, 36),      -- Amber
-    danger = Color3.fromRGB(239, 68, 68),        -- Red
+    primary = Color3.fromRGB(138, 43, 226),       -- Purple
+    secondary = Color3.fromRGB(147, 112, 219),    -- Medium purple
+    accent = Color3.fromRGB(186, 85, 211),        -- Orchid
+    galaxy1 = Color3.fromRGB(123, 104, 238),      -- Medium slate blue
+    galaxy2 = Color3.fromRGB(72, 61, 139),        -- Dark slate blue
+    success = Color3.fromRGB(34, 197, 94),        -- Green
+    warning = Color3.fromRGB(251, 191, 36),       -- Amber
+    danger = Color3.fromRGB(239, 68, 68),         -- Red
     
-    bg1 = Color3.fromRGB(10, 10, 10),            -- Deep black
-    bg2 = Color3.fromRGB(18, 18, 18),            -- Dark gray
-    bg3 = Color3.fromRGB(25, 25, 25),            -- Medium gray
-    bg4 = Color3.fromRGB(35, 35, 35),            -- Light gray
+    bg1 = Color3.fromRGB(10, 10, 10),             -- Deep black
+    bg2 = Color3.fromRGB(18, 18, 18),             -- Dark gray
+    bg3 = Color3.fromRGB(25, 25, 25),             -- Medium gray
+    bg4 = Color3.fromRGB(35, 35, 35),             -- Light gray
     
     text = Color3.fromRGB(255, 255, 255),
     textDim = Color3.fromRGB(180, 180, 180),
     textDimmer = Color3.fromRGB(120, 120, 120),
     
     border = Color3.fromRGB(50, 50, 50),
-    glow = Color3.fromRGB(255, 140, 0),
+    glow = Color3.fromRGB(138, 43, 226),
 }
 
--- Compact Window Size (Same for Mobile & PC)
+-- Compact Window Size
 local windowSize = UDim2.new(0, 420, 0, 280)
 local minWindowSize = Vector2.new(380, 250)
 local maxWindowSize = Vector2.new(550, 400)
 
 local gui = new("ScreenGui",{
-    Name="LynxGUI_Compact",
+    Name="LynxGUI_Galaxy",
     Parent=localPlayer.PlayerGui,
     IgnoreGuiInset=true,
     ResetOnSpawn=false,
@@ -71,7 +73,7 @@ local gui = new("ScreenGui",{
     DisplayOrder=999
 })
 
--- Main Window Container - Black Transparent
+-- Main Window Container
 local win = new("Frame",{
     Parent=gui,
     Size=windowSize,
@@ -82,9 +84,7 @@ local win = new("Frame",{
     ClipsDescendants=false,
     ZIndex=3
 })
-new("UICorner",{Parent=win, CornerRadius=UDim.new(0, 8)}) -- Slightly rounded
-
--- Subtle border
+new("UICorner",{Parent=win, CornerRadius=UDim.new(0, 8)})
 new("UIStroke",{
     Parent=win,
     Color=colors.border,
@@ -94,31 +94,31 @@ new("UIStroke",{
 })
 
 -- Sidebar state
-local sidebarExpanded = false
+local sidebarExpanded = true  -- Start expanded to show names
 local sidebarCollapsedWidth = 45
 local sidebarExpandedWidth = 140
 
--- Compact Sidebar - Collapsible
+-- Sidebar
 local sidebar = new("Frame",{
     Parent=win,
-    Size=UDim2.new(0, sidebarCollapsedWidth, 1, 0),
+    Size=UDim2.new(0, sidebarExpandedWidth, 1, 0),
     BackgroundColor3=colors.bg2,
     BackgroundTransparency=0.3,
     BorderSizePixel=0,
-    ClipsDescendants=true,
+    ClipsDescendants=false,
     ZIndex=4
 })
 new("UICorner",{Parent=sidebar, CornerRadius=UDim.new(0, 8)})
 
--- Sidebar Toggle Button
+-- Sidebar Toggle Button (Outside sidebar, fixed position)
 local sidebarToggle = new("TextButton",{
     Parent=win,
     Size=UDim2.new(0, 24, 0, 40),
-    Position=UDim2.new(0, sidebarCollapsedWidth - 2, 1, -50),
+    Position=UDim2.new(0, sidebarExpandedWidth - 2, 1, -50),
     BackgroundColor3=colors.bg3,
     BackgroundTransparency=0.3,
     BorderSizePixel=0,
-    Text="▶",
+    Text="◀",
     Font=Enum.Font.GothamBold,
     TextSize=12,
     TextColor3=colors.primary,
@@ -133,33 +133,74 @@ new("UIStroke",{
     Transparency=0.6
 })
 
--- Sidebar Header (NO LOGO inside window)
-local sidebarHeader = new("Frame",{
-    Parent=sidebar,
-    Size=UDim2.new(1, 0, 0, 50),
-    BackgroundTransparency=1,
-    ClipsDescendants=true,
+-- Script Header (FIXED - Outside sidebar, won't hide)
+local scriptHeader = new("Frame",{
+    Parent=win,
+    Size=UDim2.new(0, 420, 0, 50),
+    Position=UDim2.new(0, 0, 0, -55),
+    BackgroundColor3=colors.bg2,
+    BackgroundTransparency=0.3,
+    BorderSizePixel=0,
     ZIndex=5
 })
+new("UICorner",{Parent=scriptHeader, CornerRadius=UDim.new(0, 8)})
 
-local brandName = new("TextLabel",{
-    Parent=sidebarHeader,
-    Text="LYNX",
-    Size=UDim2.new(1, 0, 1, 0),
-    Position=UDim2.new(0, 0, 0, 0),
-    Font=Enum.Font.GothamBold,
-    TextSize=16,
+-- Title with gradient effect
+local titleLabel = new("TextLabel",{
+    Parent=scriptHeader,
+    Text="LynX",
+    Size=UDim2.new(0, 100, 1, -10),
+    Position=UDim2.new(0, 15, 0, 5),
     BackgroundTransparency=1,
+    Font=Enum.Font.GothamBold,
+    TextSize=18,
     TextColor3=colors.primary,
-    Visible=sidebarExpanded,
+    TextXAlignment=Enum.TextXAlignment.Left,
     ZIndex=6
+})
+
+-- Separator
+local separator = new("Frame",{
+    Parent=scriptHeader,
+    Size=UDim2.new(0, 2, 0, 30),
+    Position=UDim2.new(0, 115, 0.5, -15),
+    BackgroundColor3=colors.primary,
+    BackgroundTransparency=0.5,
+    BorderSizePixel=0,
+    ZIndex=6
+})
+new("UICorner",{Parent=separator, CornerRadius=UDim.new(1, 0)})
+
+local subtitleLabel = new("TextLabel",{
+    Parent=scriptHeader,
+    Text="Free Not For Sale",
+    Size=UDim2.new(0, 200, 1, -10),
+    Position=UDim2.new(0, 125, 0, 5),
+    BackgroundTransparency=1,
+    Font=Enum.Font.GothamMedium,
+    TextSize=10,
+    TextColor3=colors.textDim,
+    TextXAlignment=Enum.TextXAlignment.Left,
+    ZIndex=6
+})
+
+-- Galaxy glow effect
+local glowEffect = new("ImageLabel",{
+    Parent=scriptHeader,
+    Size=UDim2.new(1, 40, 1, 40),
+    Position=UDim2.new(0, -20, 0, -20),
+    BackgroundTransparency=1,
+    Image="rbxasset://textures/ui/GuiImagePlaceholder.png",
+    ImageColor3=colors.primary,
+    ImageTransparency=0.9,
+    ZIndex=4
 })
 
 -- Navigation Container
 local navContainer = new("ScrollingFrame",{
     Parent=sidebar,
-    Size=UDim2.new(1, -4, 1, -55),
-    Position=UDim2.new(0, 2, 0, 52),
+    Size=UDim2.new(1, -4, 1, -10),
+    Position=UDim2.new(0, 2, 0, 5),
     BackgroundTransparency=1,
     ScrollBarThickness=2,
     ScrollBarImageColor3=colors.primary,
@@ -178,8 +219,8 @@ new("UIListLayout",{
 -- Content Area
 local contentBg = new("Frame",{
     Parent=win,
-    Size=UDim2.new(1, -52, 1, -10),
-    Position=UDim2.new(0, 48, 0, 6),
+    Size=UDim2.new(1, -(sidebarExpandedWidth + 7), 1, -10),
+    Position=UDim2.new(0, sidebarExpandedWidth + 3, 0, 6),
     BackgroundColor3=colors.bg2,
     BackgroundTransparency=0.4,
     BorderSizePixel=0,
@@ -208,13 +249,11 @@ local function toggleSidebar()
         }):Play()
         sidebarToggle.Text = sidebarExpanded and "◀" or "▶"
     end
-    
-    brandName.Visible = sidebarExpanded
 end
 
 sidebarToggle.MouseButton1Click:Connect(toggleSidebar)
 
--- Compact Top Bar
+-- Top Bar
 local topBar = new("Frame",{
     Parent=contentBg,
     Size=UDim2.new(1, 0, 0, 32),
@@ -225,7 +264,7 @@ local topBar = new("Frame",{
 })
 new("UICorner",{Parent=topBar, CornerRadius=UDim.new(0, 8)})
 
--- Subtle Drag Handle
+-- Drag Handle
 local dragHandle = new("Frame",{
     Parent=topBar,
     Size=UDim2.new(0, 30, 0, 3),
@@ -250,61 +289,47 @@ local pageTitle = new("TextLabel",{
     ZIndex=6
 })
 
--- Control buttons (ONLY MINIMIZE)
+-- Control button (MINIMIZE ONLY - Better design)
 local controlsFrame = new("Frame",{
     Parent=topBar,
-    Size=UDim2.new(0, 24, 0, 24),
-    Position=UDim2.new(1, -28, 0.5, -12),
+    Size=UDim2.new(0, 28, 0, 28),
+    Position=UDim2.new(1, -32, 0.5, -14),
     BackgroundTransparency=1,
     ZIndex=6
 })
 
-local function createControlBtn(icon, color)
-    local btn = new("TextButton",{
-        Parent=controlsFrame,
-        Size=UDim2.new(0, 24, 0, 24),
+local btnMin = new("TextButton",{
+    Parent=controlsFrame,
+    Size=UDim2.new(1, 0, 1, 0),
+    BackgroundColor3=colors.bg4,
+    BackgroundTransparency=0.4,
+    BorderSizePixel=0,
+    Text="─",
+    Font=Enum.Font.GothamBold,
+    TextSize=16,
+    TextColor3=colors.textDim,
+    AutoButtonColor=false,
+    ZIndex=7
+})
+new("UICorner",{Parent=btnMin, CornerRadius=UDim.new(0, 6)})
+
+btnMin.MouseEnter:Connect(function()
+    TweenService:Create(btnMin, TweenInfo.new(0.2), {
+        BackgroundColor3=colors.galaxy1,
+        BackgroundTransparency=0.2,
+        TextColor3=colors.text
+    }):Play()
+end)
+
+btnMin.MouseLeave:Connect(function()
+    TweenService:Create(btnMin, TweenInfo.new(0.2), {
         BackgroundColor3=colors.bg4,
         BackgroundTransparency=0.4,
-        BorderSizePixel=0,
-        Text=icon,
-        Font=Enum.Font.GothamBold,
-        TextSize=14,
-        TextColor3=colors.textDim,
-        AutoButtonColor=false,
-        ZIndex=7
-    })
-    new("UICorner",{Parent=btn, CornerRadius=UDim.new(0, 6)})
-    
-    local stroke = new("UIStroke",{
-        Parent=btn,
-        Color=color,
-        Thickness=0,
-        Transparency=0.6
-    })
-    
-    btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.2), {
-            BackgroundColor3=color,
-            BackgroundTransparency=0.2,
-            TextColor3=colors.text
-        }):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.2), {Thickness=1.5}):Play()
-    end)
-    
-    btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.2), {
-            BackgroundColor3=colors.bg4,
-            BackgroundTransparency=0.4,
-            TextColor3=colors.textDim
-        }):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.2), {Thickness=0}):Play()
-    end)
-    return btn
-end
+        TextColor3=colors.textDim
+    }):Play()
+end)
 
-local btnMin = createControlBtn("─", colors.warning)
-
--- Compact Resize Handle
+-- Resize Handle
 local resizeHandle = new("TextButton",{
     Parent=win,
     Size=UDim2.new(0, 16, 0, 16),
@@ -362,10 +387,10 @@ local settingsPage = createPage("Settings")
 local infoPage = createPage("Info")
 mainPage.Visible = true
 
--- LynxGUI_v2.2.lua - Compact Minimalist Black Edition
--- BAGIAN 2: Navigation, UI Components (Toggle, Input, Dropdown, Button, Category)
+-- LynxGUI_v2.3.lua - Galaxy Edition
+-- BAGIAN 2: Navigation, UI Components (Toggle, Input Horizontal, Dropdown, Button, Category)
 
--- Compact Nav Button - Icon only when collapsed
+-- Nav Button - Always show text
 local function createNavButton(text, icon, page, order)
     local btn = new("TextButton",{
         Parent=navContainer,
@@ -394,8 +419,8 @@ local function createNavButton(text, icon, page, order)
     local iconLabel = new("TextLabel",{
         Parent=btn,
         Text=icon,
-        Size=sidebarExpanded and UDim2.new(0, 28, 1, 0) or UDim2.new(1, 0, 1, 0),
-        Position=sidebarExpanded and UDim2.new(0, 8, 0, 0) or UDim2.new(0, 0, 0, 0),
+        Size=UDim2.new(0, 28, 1, 0),
+        Position=UDim2.new(0, 8, 0, 0),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamBold,
         TextSize=14,
@@ -446,11 +471,6 @@ local function switchPage(pageName, pageTitle_text)
     pages[pageName].Visible = true
     pageTitle.Text = pageTitle_text
     currentPage = pageName
-    
-    if sidebarExpanded then
-        task.wait(0.3)
-        toggleSidebar()
-    end
 end
 
 local btnMain = createNavButton("Dashboard", "🏠", "Main", 1)
@@ -465,9 +485,25 @@ btnShop.MouseButton1Click:Connect(function() switchPage("Shop", "Shop Features")
 btnSettings.MouseButton1Click:Connect(function() switchPage("Settings", "Settings") end)
 btnInfo.MouseButton1Click:Connect(function() switchPage("Info", "About Lynx") end)
 
+-- Update nav buttons visibility on sidebar toggle
+local originalToggle = toggleSidebar
+toggleSidebar = function()
+    originalToggle()
+    for _, data in pairs(navButtons) do
+        data.text.Visible = sidebarExpanded
+        if not sidebarExpanded then
+            data.icon.Size = UDim2.new(1, 0, 1, 0)
+            data.icon.Position = UDim2.new(0, 0, 0, 0)
+        else
+            data.icon.Size = UDim2.new(0, 28, 1, 0)
+            data.icon.Position = UDim2.new(0, 8, 0, 0)
+        end
+    end
+end
+
 -- ==== UI COMPONENTS ====
 
--- Compact Category
+-- Category
 local function makeCategory(parent, title, icon)
     local categoryFrame = new("Frame",{
         Parent=parent,
@@ -562,7 +598,7 @@ local function makeCategory(parent, title, icon)
     return contentContainer
 end
 
--- Compact Toggle
+-- Toggle
 local function makeToggle(parent, label, callback)
     local frame = new("Frame",{
         Parent=parent,
@@ -624,11 +660,11 @@ local function makeToggle(parent, label, callback)
     end)
 end
 
--- Compact Input for Delay (FIX: makeInput function)
+-- Input HORIZONTAL (Label left, Input right)
 local function makeInput(parent, label, defaultValue, callback)
     local frame = new("Frame",{
         Parent=parent,
-        Size=UDim2.new(1, 0, 0, 50),
+        Size=UDim2.new(1, 0, 0, 32),
         BackgroundTransparency=1,
         ZIndex=7
     })
@@ -636,7 +672,7 @@ local function makeInput(parent, label, defaultValue, callback)
     local lbl = new("TextLabel",{
         Parent=frame,
         Text=label,
-        Size=UDim2.new(1, 0, 0, 16),
+        Size=UDim2.new(0.55, 0, 1, 0),
         BackgroundTransparency=1,
         TextColor3=colors.text,
         TextXAlignment=Enum.TextXAlignment.Left,
@@ -647,8 +683,8 @@ local function makeInput(parent, label, defaultValue, callback)
     
     local inputBg = new("Frame",{
         Parent=frame,
-        Size=UDim2.new(1, 0, 0, 28),
-        Position=UDim2.new(0, 0, 0, 20),
+        Size=UDim2.new(0.4, 0, 0, 28),
+        Position=UDim2.new(0.58, 0, 0.5, -14),
         BackgroundColor3=colors.bg4,
         BackgroundTransparency=0.3,
         BorderSizePixel=0,
@@ -665,21 +701,20 @@ local function makeInput(parent, label, defaultValue, callback)
     
     local inputBox = new("TextBox",{
         Parent=inputBg,
-        Size=UDim2.new(1, -16, 1, 0),
-        Position=UDim2.new(0, 8, 0, 0),
+        Size=UDim2.new(1, -12, 1, 0),
+        Position=UDim2.new(0, 6, 0, 0),
         BackgroundTransparency=1,
         Text=tostring(defaultValue),
-        PlaceholderText="Enter value...",
+        PlaceholderText="0.00",
         Font=Enum.Font.Gotham,
         TextSize=9,
         TextColor3=colors.text,
         PlaceholderColor3=colors.textDimmer,
-        TextXAlignment=Enum.TextXAlignment.Left,
+        TextXAlignment=Enum.TextXAlignment.Center,
         ClearTextOnFocus=false,
         ZIndex=9
     })
     
-    -- Focus effects
     inputBox.Focused:Connect(function()
         TweenService:Create(inputStroke, TweenInfo.new(0.2), {
             Color=colors.primary,
@@ -704,7 +739,7 @@ local function makeInput(parent, label, defaultValue, callback)
     end)
 end
 
--- Compact Dropdown
+-- Dropdown
 local function makeDropdown(parent, title, icon, items, onSelect, uniqueId)
     local dropdownFrame = new("Frame",{
         Parent=parent,
@@ -896,7 +931,7 @@ local function makeDropdown(parent, title, icon, items, onSelect, uniqueId)
     return dropdownFrame
 end
 
--- Compact Button
+-- Button
 local function makeButton(parent, label, callback)
     local btnFrame = new("Frame",{
         Parent=parent,
@@ -953,7 +988,7 @@ local function makeButton(parent, label, callback)
     return btnFrame
 end
 
--- LynxGUI_v2.2.lua - Compact Minimalist Black Edition
+-- LynxGUI_v2.3.lua - Galaxy Edition
 -- BAGIAN 3 (FINAL): Features, Pages Content, Minimize System, Animations
 
 -- ==== MAIN PAGE ====
@@ -992,13 +1027,13 @@ makeToggle(catAutoFishing, "Enable Instant Fishing", function(on)
     end
 end)
 
-makeInput(catAutoFishing, "Fishing Delay", "1.30", function(v)
+makeInput(catAutoFishing, "Fishing Delay", 1.30, function(v)
     fishingDelayValue = v
     instant.Settings.MaxWaitTime = v
     instant2.Settings.MaxWaitTime = v
 end)
 
-makeInput(catAutoFishing, "Cancel Delay", "0.19", function(v)
+makeInput(catAutoFishing, "Cancel Delay", 0.19, function(v)
     cancelDelayValue = v
     instant.Settings.CancelDelay = v
     instant2.Settings.CancelDelay = v
@@ -1015,12 +1050,12 @@ makeToggle(catBlatantV1, "Blatant Mode", function(on)
     end 
 end)
 
-makeInput(catBlatantV1, "Complete Delay", "0.05", function(v)
+makeInput(catBlatantV1, "Complete Delay", 0.05, function(v)
     blatantv1.Settings.CompleteDelay = v
     print("✅ Complete Delay set to: " .. v)
 end)
 
-makeInput(catBlatantV1, "Cancel Delay", "0.1", function(v)
+makeInput(catBlatantV1, "Cancel Delay", 0.1, function(v)
     blatantv1.Settings.CancelDelay = v
     print("✅ Cancel Delay set to: " .. v)
 end)
@@ -1036,23 +1071,23 @@ makeToggle(catBlatantV2, "Blatant Features", function(on)
     end 
 end)
 
-makeInput(catBlatantV2, "Fishing Delay", "0.05", function(v) 
+makeInput(catBlatantV2, "Fishing Delay", 0.05, function(v) 
     blatantv2.Settings.FishingDelay = v 
 end)
 
-makeInput(catBlatantV2, "Cancel Delay", "0.01", function(v) 
+makeInput(catBlatantV2, "Cancel Delay", 0.01, function(v) 
     blatantv2.Settings.CancelDelay = v 
 end)
 
-makeInput(catBlatantV2, "Hook Wait Time", "0.15", function(v) 
+makeInput(catBlatantV2, "Hook Wait Time", 0.15, function(v) 
     blatantv2.Settings.HookWaitTime = v 
 end)
 
-makeInput(catBlatantV2, "Cast Delay", "0.03", function(v) 
+makeInput(catBlatantV2, "Cast Delay", 0.03, function(v) 
     blatantv2.Settings.CastDelay = v 
 end)
 
-makeInput(catBlatantV2, "Timeout Delay", "0.8", function(v) 
+makeInput(catBlatantV2, "Timeout Delay", 0.8, function(v) 
     blatantv2.Settings.TimeoutDelay = v 
 end)
 
@@ -1114,7 +1149,7 @@ end)
 
 local catTimer = makeCategory(shopPage, "Auto Sell Timer", "⏰")
 
-makeInput(catTimer, "Sell Interval (seconds)", "5", function(value)
+makeInput(catTimer, "Sell Interval (seconds)", 5, function(value)
     AutoSellTimer.SetInterval(value)
 end)
 
@@ -1208,14 +1243,14 @@ local infoText = new("TextLabel",{
     Position=UDim2.new(0, 12, 0, 12),
     BackgroundTransparency=1,
     Text=[[
-🧡 LYNX v2.2 COMPACT EDITION
+💜 LynX v2.3 GALAXY EDITION
 
-Minimalist Black Design
+Free Not For Sale
 ━━━━━━━━━━━━━━━━━━━━━━
 
 🎣 AUTO FISHING
 • Instant Fishing (Fast/Perfect)
-• Input-based delay controls
+• Horizontal input layout
 • Blatant Mode V1 & V2
 • Advanced automation
 
@@ -1240,14 +1275,13 @@ Minimalist Black Design
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
-💡 NEW IN v2.2 COMPACT
-✓ Minimalist black design
-✓ Input-based delay system
-✓ Logo only on minimize
-✓ Compact UI (420x280)
-✓ Subtle rounded corners
-✓ No close button (minimize only)
-✓ Same for mobile & PC
+💡 NEW IN v2.3 GALAXY
+✓ Galaxy purple theme
+✓ Input horizontal layout
+✓ Fixed script header
+✓ Better sidebar navigation
+✓ Tab names always visible
+✓ No orange borders
 ✓ Smooth animations
 ✓ Better performance
 
@@ -1260,8 +1294,8 @@ Minimalist Black Design
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
-Created with 🧡 by Lynx Team
-Compact Black Edition 2024
+Created with 💜 by Lynx Team
+Galaxy Edition 2024
     ]],
     Font=Enum.Font.Gotham,
     TextSize=9,
@@ -1337,9 +1371,13 @@ local function createMinimizedIcon()
                 savedIconPos = icon.Position
                 if not dragMoved then
                     win.Visible = true
+                    scriptHeader.Visible = true
                     TweenService:Create(win, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
                         Size=windowSize,
                         Position=UDim2.new(0.5, -windowSize.X.Offset/2, 0.5, -windowSize.Y.Offset/2)
+                    }):Play()
+                    TweenService:Create(scriptHeader, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                        Position=UDim2.new(0, 0, 0, -55)
                     }):Play()
                     if icon then 
                         icon:Destroy() 
@@ -1359,8 +1397,12 @@ btnMin.MouseButton1Click:Connect(function()
             Size=UDim2.new(0, 0, 0, 0),
             Position=targetPos
         }):Play()
+        TweenService:Create(scriptHeader, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+            Position=UDim2.new(0, 0, 0.5, 0)
+        }):Play()
         task.wait(0.35)
         win.Visible = false
+        scriptHeader.Visible = false
         createMinimizedIcon()
         minimized = true
     end
@@ -1389,6 +1431,9 @@ UserInputService.InputChanged:Connect(function(input)
         if dragTween then dragTween:Cancel() end
         dragTween = TweenService:Create(win, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Position=newPos})
         dragTween:Play()
+        
+        -- Update header position
+        scriptHeader.Position = UDim2.new(0, newPos.X.Offset, 0, newPos.Y.Offset - 55)
     end
 end)
 
@@ -1432,6 +1477,9 @@ UserInputService.InputChanged:Connect(function(input)
             Size=newSize
         })
         resizeTween:Play()
+        
+        -- Update header size
+        scriptHeader.Size = UDim2.new(0, newWidth, 0, 50)
     end
 end)
 
@@ -1441,7 +1489,6 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Resize handle hover effect
 resizeHandle.MouseEnter:Connect(function()
     TweenService:Create(resizeHandle, TweenInfo.new(0.2), {
         BackgroundTransparency=0.3,
@@ -1464,35 +1511,33 @@ task.spawn(function()
     win.Position = UDim2.new(0.5, -windowSize.X.Offset/2, 0.5, -windowSize.Y.Offset/2)
     win.Rotation = 0
     
+    scriptHeader.Size = UDim2.new(0, 0, 0, 0)
+    scriptHeader.Position = UDim2.new(0, 0, 0.5, 0)
+    
     task.wait(0.1)
     
     TweenService:Create(win, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
         Size=windowSize
     }):Play()
+    
+    TweenService:Create(scriptHeader, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size=UDim2.new(0, 420, 0, 50),
+        Position=UDim2.new(0, 0, 0, -55)
+    }):Play()
 end)
 
--- Update nav buttons on sidebar toggle
-for page, btnData in pairs(navButtons) do
-    local originalToggle = toggleSidebar
-    toggleSidebar = function()
-        originalToggle()
-        for _, data in pairs(navButtons) do
-            data.text.Visible = sidebarExpanded
-            data.icon.Size = sidebarExpanded and UDim2.new(0, 28, 1, 0) or UDim2.new(1, 0, 1, 0)
-            data.icon.Position = sidebarExpanded and UDim2.new(0, 8, 0, 0) or UDim2.new(0, 0, 0, 0)
-        end
-    end
-end
-
-print("✨ Lynx GUI v2.2 Compact - BAGIAN 3 (FINAL) loaded!")
-print("🎉 GUI SIAP DIGUNAKAN!")
 print("━━━━━━━━━━━━━━━━━━━━━━")
-print("📦 Fitur:")
-print("  • Input-based delay controls")
-print("  • Minimalist black design")
-print("  • Logo only on minimize")
-print("  • Compact UI (420x280)")
-print("  • No close button")
+print("✨ Lynx GUI v2.3 Galaxy Edition")
+print("💜 FREE NOT FOR SALE")
+print("━━━━━━━━━━━━━━━━━━━━━━")
+print("🎉 ALL PARTS LOADED!")
+print("━━━━━━━━━━━━━━━━━━━━━━")
+print("📦 Features:")
+print("  • Galaxy purple theme")
+print("  • Horizontal input layout")
+print("  • Fixed script header")
+print("  • Tab names always visible")
 print("  • Smooth animations")
 print("━━━━━━━━━━━━━━━━━━━━━━")
 print("💎 Created by Lynx Team")
+print("━━━━━━━━━━━━━━━━━━━━━━")
