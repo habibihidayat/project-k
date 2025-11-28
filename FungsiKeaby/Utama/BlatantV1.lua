@@ -29,9 +29,9 @@ UltraBlatant.Stats = {
 
 -- Settings (sesuai dengan pattern GUI kamu)
 UltraBlatant.Settings = {
-    CompleteDelay = 0.05,    -- Delay sebelum complete
-    CancelDelay = 0.1,       -- Delay setelah complete sebelum cancel
-    AfterCancelDelay = 0.040 -- Delay setelah cancel sebelum cast lagi (untuk status OK)
+    CompleteDelay = 0.001,    -- Delay sebelum complete
+    CancelDelay = 0.001,       -- Delay setelah complete sebelum cancel
+    AfterCancelDelay = 0.027 -- Delay setelah cancel sebelum cast lagi (untuk status OK)
 }
 
 print("💀 ULTRA BLATANT MODULE LOADED!")
