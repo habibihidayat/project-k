@@ -64,10 +64,8 @@ local windowSize = UDim2.new(0, 420, 0, 280)
 local minWindowSize = Vector2.new(380, 250)
 local maxWindowSize = Vector2.new(550, 400)
 
--- Sidebar state (Start collapsed to show only icons)
-local sidebarExpanded = false
-local sidebarCollapsedWidth = 50
-local sidebarExpandedWidth = 140
+-- Sidebar state (Always expanded, no toggle)
+local sidebarWidth = 140
 
 local gui = new("ScreenGui",{
     Name="LynxGUI_Galaxy",
@@ -78,87 +76,113 @@ local gui = new("ScreenGui",{
     DisplayOrder=999
 })
 
--- Main Window Container
+-- Main Window Container - More transparent
 local win = new("Frame",{
     Parent=gui,
     Size=windowSize,
     Position=UDim2.new(0.5, -windowSize.X.Offset/2, 0.5, -windowSize.Y.Offset/2),
     BackgroundColor3=colors.bg1,
-    BackgroundTransparency=0.25,
+    BackgroundTransparency=0.15,
     BorderSizePixel=0,
     ClipsDescendants=false,
     ZIndex=3
 })
-new("UICorner",{Parent=win, CornerRadius=UDim.new(0, 8)})
+new("UICorner",{Parent=win, CornerRadius=UDim.new(0, 12)})
+
+-- Subtle outer glow
 new("UIStroke",{
     Parent=win,
-    Color=colors.border,
+    Color=colors.primary,
     Thickness=1,
-    Transparency=0.5,
+    Transparency=0.85,
     ApplyStrokeMode=Enum.ApplyStrokeMode.Border
 })
 
--- Sidebar (Below header, start collapsed)
+-- Inner shadow effect
+local innerShadow = new("Frame",{
+    Parent=win,
+    Size=UDim2.new(1, -2, 1, -2),
+    Position=UDim2.new(0, 1, 0, 1),
+    BackgroundTransparency=1,
+    BorderSizePixel=0,
+    ZIndex=2
+})
+new("UICorner",{Parent=innerShadow, CornerRadius=UDim.new(0, 11)})
+new("UIStroke",{
+    Parent=innerShadow,
+    Color=Color3.fromRGB(0, 0, 0),
+    Thickness=1,
+    Transparency=0.7
+})
+
+-- Sidebar (Below header, always visible, more transparent)
 local sidebar = new("Frame",{
     Parent=win,
-    Size=UDim2.new(0, sidebarCollapsedWidth, 1, -45),
+    Size=UDim2.new(0, sidebarWidth, 1, -45),
     Position=UDim2.new(0, 0, 0, 45),
     BackgroundColor3=colors.bg2,
-    BackgroundTransparency=0.3,
+    BackgroundTransparency=0.6,
     BorderSizePixel=0,
     ClipsDescendants=true,
     ZIndex=4
 })
-new("UICorner",{Parent=sidebar, CornerRadius=UDim.new(0, 8)})
+new("UICorner",{Parent=sidebar, CornerRadius=UDim.new(0, 12)})
 
--- Sidebar Toggle Button (Outside sidebar, fixed position)
-local sidebarToggle = new("TextButton",{
-    Parent=win,
-    Size=UDim2.new(0, 24, 0, 40),
-    Position=UDim2.new(0, sidebarCollapsedWidth - 2, 1, -50),
-    BackgroundColor3=colors.bg3,
-    BackgroundTransparency=0.3,
-    BorderSizePixel=0,
-    Text="▶",
-    Font=Enum.Font.GothamBold,
-    TextSize=12,
-    TextColor3=colors.primary,
-    ZIndex=101,
-    ClipsDescendants=false
-})
-new("UICorner",{Parent=sidebarToggle, CornerRadius=UDim.new(0, 6)})
+-- Sidebar subtle border
 new("UIStroke",{
-    Parent=sidebarToggle,
-    Color=colors.border,
+    Parent=sidebar,
+    Color=colors.primary,
     Thickness=1,
-    Transparency=0.6
+    Transparency=0.9
 })
 
--- Script Header (INSIDE window, at the top)
+-- Script Header (INSIDE window, at the top, more transparent)
 local scriptHeader = new("Frame",{
     Parent=win,
     Size=UDim2.new(1, 0, 0, 45),
     Position=UDim2.new(0, 0, 0, 0),
     BackgroundColor3=colors.bg2,
-    BackgroundTransparency=0.3,
+    BackgroundTransparency=0.6,
     BorderSizePixel=0,
     ZIndex=5
 })
-new("UICorner",{Parent=scriptHeader, CornerRadius=UDim.new(0, 8)})
+new("UICorner",{Parent=scriptHeader, CornerRadius=UDim.new(0, 12)})
 
--- Drag Handle for Header (Subtle indicator)
+-- Subtle gradient overlay
+local gradient = new("UIGradient",{
+    Parent=scriptHeader,
+    Color=ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(138, 43, 226)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(72, 61, 139))
+    },
+    Rotation=45,
+    Transparency=NumberSequence.new{
+        NumberSequenceKeypoint.new(0, 0.95),
+        NumberSequenceKeypoint.new(1, 0.98)
+    }
+})
+
+-- Drag Handle for Header (More subtle)
 local headerDragHandle = new("Frame",{
     Parent=scriptHeader,
-    Size=UDim2.new(0, 35, 0, 3),
-    Position=UDim2.new(0.5, -17.5, 0, 6),
-    BackgroundColor3=colors.textDimmer,
-    BackgroundTransparency=0.5,
+    Size=UDim2.new(0, 40, 0, 3),
+    Position=UDim2.new(0.5, -20, 0, 8),
+    BackgroundColor3=colors.primary,
+    BackgroundTransparency=0.7,
     BorderSizePixel=0,
     ZIndex=6
 })
 new("UICorner",{Parent=headerDragHandle, CornerRadius=UDim.new(1, 0)})
 
--- Title with gradient effect
+-- Drag handle glow effect
+new("UIStroke",{
+    Parent=headerDragHandle,
+    Color=colors.primary,
+    Thickness=1,
+    Transparency=0.8
+})
+
+-- Title with glow effect
 local titleLabel = new("TextLabel",{
     Parent=scriptHeader,
     Text="LynX",
@@ -166,23 +190,60 @@ local titleLabel = new("TextLabel",{
     Position=UDim2.new(0, 15, 0, 0),
     BackgroundTransparency=1,
     Font=Enum.Font.GothamBold,
-    TextSize=16,
+    TextSize=17,
     TextColor3=colors.primary,
     TextXAlignment=Enum.TextXAlignment.Left,
+    TextStrokeTransparency=0.9,
+    TextStrokeColor3=colors.primary,
     ZIndex=6
 })
 
--- Separator
+-- Title glow effect
+local titleGlow = new("TextLabel",{
+    Parent=scriptHeader,
+    Text="LynX",
+    Size=titleLabel.Size,
+    Position=titleLabel.Position,
+    BackgroundTransparency=1,
+    Font=Enum.Font.GothamBold,
+    TextSize=17,
+    TextColor3=colors.primary,
+    TextTransparency=0.7,
+    TextXAlignment=Enum.TextXAlignment.Left,
+    ZIndex=5
+})
+
+-- Animated glow pulse
+task.spawn(function()
+    while true do
+        TweenService:Create(titleGlow, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            TextTransparency=0.4
+        }):Play()
+        task.wait(2)
+        TweenService:Create(titleGlow, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            TextTransparency=0.7
+        }):Play()
+        task.wait(2)
+    end
+end)
+
+-- Separator with glow
 local separator = new("Frame",{
     Parent=scriptHeader,
     Size=UDim2.new(0, 2, 0, 25),
     Position=UDim2.new(0, 95, 0.5, -12.5),
     BackgroundColor3=colors.primary,
-    BackgroundTransparency=0.5,
+    BackgroundTransparency=0.3,
     BorderSizePixel=0,
     ZIndex=6
 })
 new("UICorner",{Parent=separator, CornerRadius=UDim.new(1, 0)})
+new("UIStroke",{
+    Parent=separator,
+    Color=colors.primary,
+    Thickness=1,
+    Transparency=0.7
+})
 
 local subtitleLabel = new("TextLabel",{
     Parent=scriptHeader,
@@ -194,39 +255,60 @@ local subtitleLabel = new("TextLabel",{
     TextSize=9,
     TextColor3=colors.textDim,
     TextXAlignment=Enum.TextXAlignment.Left,
+    TextTransparency=0.3,
     ZIndex=6
 })
 
--- Minimize button in header
+-- Minimize button in header - more polished
 local btnMinHeader = new("TextButton",{
     Parent=scriptHeader,
-    Size=UDim2.new(0, 28, 0, 28),
-    Position=UDim2.new(1, -36, 0.5, -14),
+    Size=UDim2.new(0, 30, 0, 30),
+    Position=UDim2.new(1, -38, 0.5, -15),
     BackgroundColor3=colors.bg4,
-    BackgroundTransparency=0.4,
+    BackgroundTransparency=0.5,
     BorderSizePixel=0,
     Text="─",
     Font=Enum.Font.GothamBold,
-    TextSize=16,
+    TextSize=18,
     TextColor3=colors.textDim,
+    TextTransparency=0.3,
     AutoButtonColor=false,
     ZIndex=7
 })
-new("UICorner",{Parent=btnMinHeader, CornerRadius=UDim.new(0, 6)})
+new("UICorner",{Parent=btnMinHeader, CornerRadius=UDim.new(0, 8)})
+
+local btnStroke = new("UIStroke",{
+    Parent=btnMinHeader,
+    Color=colors.primary,
+    Thickness=0,
+    Transparency=0.8
+})
 
 btnMinHeader.MouseEnter:Connect(function()
-    TweenService:Create(btnMinHeader, TweenInfo.new(0.2), {
+    TweenService:Create(btnMinHeader, TweenInfo.new(0.25, Enum.EasingStyle.Quint), {
         BackgroundColor3=colors.galaxy1,
         BackgroundTransparency=0.2,
-        TextColor3=colors.text
+        TextColor3=colors.text,
+        TextTransparency=0,
+        Size=UDim2.new(0, 32, 0, 32)
+    }):Play()
+    TweenService:Create(btnStroke, TweenInfo.new(0.25), {
+        Thickness=1.5,
+        Transparency=0.4
     }):Play()
 end)
 
 btnMinHeader.MouseLeave:Connect(function()
-    TweenService:Create(btnMinHeader, TweenInfo.new(0.2), {
+    TweenService:Create(btnMinHeader, TweenInfo.new(0.25, Enum.EasingStyle.Quint), {
         BackgroundColor3=colors.bg4,
-        BackgroundTransparency=0.4,
-        TextColor3=colors.textDim
+        BackgroundTransparency=0.5,
+        TextColor3=colors.textDim,
+        TextTransparency=0.3,
+        Size=UDim2.new(0, 30, 0, 30)
+    }):Play()
+    TweenService:Create(btnStroke, TweenInfo.new(0.25), {
+        Thickness=0,
+        Transparency=0.8
     }):Play()
 end)
 
@@ -250,18 +332,26 @@ new("UIListLayout",{
     SortOrder=Enum.SortOrder.LayoutOrder
 })
 
--- Content Area (Below header, adjusted for collapsed sidebar)
+-- Content Area (Below header, more transparent)
 local contentBg = new("Frame",{
     Parent=win,
-    Size=UDim2.new(1, -(sidebarCollapsedWidth + 7), 1, -55),
-    Position=UDim2.new(0, sidebarCollapsedWidth + 3, 0, 48),
+    Size=UDim2.new(1, -(sidebarWidth + 7), 1, -55),
+    Position=UDim2.new(0, sidebarWidth + 3, 0, 48),
     BackgroundColor3=colors.bg2,
-    BackgroundTransparency=0.4,
+    BackgroundTransparency=0.7,
     BorderSizePixel=0,
     ClipsDescendants=true,
     ZIndex=4
 })
-new("UICorner",{Parent=contentBg, CornerRadius=UDim.new(0, 8)})
+new("UICorner",{Parent=contentBg, CornerRadius=UDim.new(0, 12)})
+
+-- Content area subtle border
+new("UIStroke",{
+    Parent=contentBg,
+    Color=colors.primary,
+    Thickness=1,
+    Transparency=0.92
+})
 
 -- Function to toggle sidebar
 local function toggleSidebar()
@@ -303,48 +393,89 @@ local function toggleSidebar()
     end
 end
 
-sidebarToggle.MouseButton1Click:Connect(toggleSidebar)
-
--- Top Bar (Page Title)
+-- Top Bar (Page Title, more transparent)
 local topBar = new("Frame",{
     Parent=contentBg,
     Size=UDim2.new(1, 0, 0, 32),
     BackgroundColor3=colors.bg3,
-    BackgroundTransparency=0.5,
+    BackgroundTransparency=0.7,
     BorderSizePixel=0,
     ZIndex=5
 })
-new("UICorner",{Parent=topBar, CornerRadius=UDim.new(0, 8)})
+new("UICorner",{Parent=topBar, CornerRadius=UDim.new(0, 10)})
+
+-- Topbar glow
+new("UIStroke",{
+    Parent=topBar,
+    Color=colors.primary,
+    Thickness=1,
+    Transparency=0.93
+})
 
 local pageTitle = new("TextLabel",{
     Parent=topBar,
     Text="Main Dashboard",
     Size=UDim2.new(1, -20, 1, 0),
-    Position=UDim2.new(0, 10, 0, 0),
+    Position=UDim2.new(0, 12, 0, 0),
     Font=Enum.Font.GothamBold,
     TextSize=11,
     BackgroundTransparency=1,
     TextColor3=colors.text,
+    TextTransparency=0.2,
     TextXAlignment=Enum.TextXAlignment.Left,
     ZIndex=6
 })
 
--- Resize Handle
+-- Resize Handle - more polished
 local resizeHandle = new("TextButton",{
     Parent=win,
-    Size=UDim2.new(0, 16, 0, 16),
-    Position=UDim2.new(1, -16, 1, -16),
+    Size=UDim2.new(0, 18, 0, 18),
+    Position=UDim2.new(1, -18, 1, -18),
     BackgroundColor3=colors.bg3,
-    BackgroundTransparency=0.5,
+    BackgroundTransparency=0.6,
     BorderSizePixel=0,
     Text="⋰",
     Font=Enum.Font.GothamBold,
-    TextSize=10,
+    TextSize=11,
     TextColor3=colors.textDim,
+    TextTransparency=0.4,
     AutoButtonColor=false,
     ZIndex=100
 })
-new("UICorner",{Parent=resizeHandle, CornerRadius=UDim.new(0, 4)})
+new("UICorner",{Parent=resizeHandle, CornerRadius=UDim.new(0, 6)})
+
+local resizeStroke = new("UIStroke",{
+    Parent=resizeHandle,
+    Color=colors.primary,
+    Thickness=0,
+    Transparency=0.8
+})
+
+resizeHandle.MouseEnter:Connect(function()
+    TweenService:Create(resizeHandle, TweenInfo.new(0.25, Enum.EasingStyle.Quint), {
+        BackgroundTransparency=0.3,
+        TextTransparency=0,
+        Size=UDim2.new(0, 20, 0, 20)
+    }):Play()
+    TweenService:Create(resizeStroke, TweenInfo.new(0.25), {
+        Thickness=1.5,
+        Transparency=0.5
+    }):Play()
+end)
+
+resizeHandle.MouseLeave:Connect(function()
+    if not resizing then
+        TweenService:Create(resizeHandle, TweenInfo.new(0.25, Enum.EasingStyle.Quint), {
+            BackgroundTransparency=0.6,
+            TextTransparency=0.4,
+            Size=UDim2.new(0, 18, 0, 18)
+        }):Play()
+        TweenService:Create(resizeStroke, TweenInfo.new(0.25), {
+            Thickness=0,
+            Transparency=0.8
+        }):Play()
+    end
+end)
 
 -- Pages
 local pages = {}
@@ -390,25 +521,25 @@ mainPage.Visible = true
 -- LynxGUI_v2.3.lua - Galaxy Edition
 -- BAGIAN 2: Navigation, UI Components (Toggle, Input Horizontal, Dropdown, Button, Category)
 
--- Nav Button - Show text only when expanded
+-- Nav Button - Always show text, more transparent and smooth
 local function createNavButton(text, icon, page, order)
     local btn = new("TextButton",{
         Parent=navContainer,
-        Size=UDim2.new(1, 0, 0, 36),
+        Size=UDim2.new(1, 0, 0, 38),
         BackgroundColor3=page == currentPage and colors.bg3 or Color3.fromRGB(0, 0, 0),
-        BackgroundTransparency=page == currentPage and 0.4 or 1,
+        BackgroundTransparency=page == currentPage and 0.6 or 1,
         BorderSizePixel=0,
         Text="",
         AutoButtonColor=false,
         LayoutOrder=order,
         ZIndex=6
     })
-    new("UICorner",{Parent=btn, CornerRadius=UDim.new(0, 6)})
+    new("UICorner",{Parent=btn, CornerRadius=UDim.new(0, 9)})
     
     local indicator = new("Frame",{
         Parent=btn,
-        Size=UDim2.new(0, 2.5, 0, 18),
-        Position=UDim2.new(0, 0, 0.5, -9),
+        Size=UDim2.new(0, 3, 0, 20),
+        Position=UDim2.new(0, 0, 0.5, -10),
         BackgroundColor3=colors.primary,
         BorderSizePixel=0,
         Visible=page == currentPage,
@@ -416,33 +547,71 @@ local function createNavButton(text, icon, page, order)
     })
     new("UICorner",{Parent=indicator, CornerRadius=UDim.new(1, 0)})
     
-    -- Icon - centered when collapsed, left when expanded
+    -- Indicator glow
+    new("UIStroke",{
+        Parent=indicator,
+        Color=colors.primary,
+        Thickness=2,
+        Transparency=0.7
+    })
+    
     local iconLabel = new("TextLabel",{
         Parent=btn,
         Text=icon,
-        Size=UDim2.new(1, 0, 1, 0),
-        Position=UDim2.new(0, 0, 0, 0),
+        Size=UDim2.new(0, 30, 1, 0),
+        Position=UDim2.new(0, 10, 0, 0),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamBold,
-        TextSize=14,
+        TextSize=15,
         TextColor3=page == currentPage and colors.primary or colors.textDim,
+        TextTransparency=page == currentPage and 0 or 0.3,
         ZIndex=7
     })
     
-    -- Text - hidden when collapsed
     local textLabel = new("TextLabel",{
         Parent=btn,
         Text=text,
-        Size=UDim2.new(1, -40, 1, 0),
-        Position=UDim2.new(0, 36, 0, 0),
+        Size=UDim2.new(1, -45, 1, 0),
+        Position=UDim2.new(0, 40, 0, 0),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamSemibold,
         TextSize=10,
         TextColor3=page == currentPage and colors.text or colors.textDim,
+        TextTransparency=page == currentPage and 0.1 or 0.4,
         TextXAlignment=Enum.TextXAlignment.Left,
-        Visible=false,
         ZIndex=7
     })
+    
+    -- Smooth hover effect
+    btn.MouseEnter:Connect(function()
+        if page ~= currentPage then
+            TweenService:Create(btn, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {
+                BackgroundTransparency=0.7
+            }):Play()
+            TweenService:Create(iconLabel, TweenInfo.new(0.3), {
+                TextTransparency=0,
+                TextColor3=colors.primary
+            }):Play()
+            TweenService:Create(textLabel, TweenInfo.new(0.3), {
+                TextTransparency=0.2
+            }):Play()
+        end
+    end)
+    
+    btn.MouseLeave:Connect(function()
+        if page ~= currentPage then
+            TweenService:Create(btn, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {
+                BackgroundTransparency=1
+            }):Play()
+            TweenService:Create(iconLabel, TweenInfo.new(0.3), {
+                TextTransparency=0.3,
+                TextColor3=colors.textDim
+            }):Play()
+            TweenService:Create(textLabel, TweenInfo.new(0.3), {
+                TextTransparency=0.4
+            }):Play()
+        end
+    end)
     
     navButtons[page] = {btn=btn, icon=iconLabel, text=textLabel, indicator=indicator}
     
@@ -455,19 +624,19 @@ local function switchPage(pageName, pageTitle_text)
     
     for name, btnData in pairs(navButtons) do
         local isActive = name == pageName
-        TweenService:Create(btnData.btn, TweenInfo.new(0.2), {
+        TweenService:Create(btnData.btn, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {
             BackgroundColor3=isActive and colors.bg3 or Color3.fromRGB(0, 0, 0),
-            BackgroundTransparency=isActive and 0.4 or 1
+            BackgroundTransparency=isActive and 0.6 or 1
         }):Play()
         btnData.indicator.Visible = isActive
-        TweenService:Create(btnData.icon, TweenInfo.new(0.2), {
-            TextColor3=isActive and colors.primary or colors.textDim
+        TweenService:Create(btnData.icon, TweenInfo.new(0.3), {
+            TextColor3=isActive and colors.primary or colors.textDim,
+            TextTransparency=isActive and 0 or 0.3
         }):Play()
-        if sidebarExpanded then
-            TweenService:Create(btnData.text, TweenInfo.new(0.2), {
-                TextColor3=isActive and colors.text or colors.textDim
-            }):Play()
-        end
+        TweenService:Create(btnData.text, TweenInfo.new(0.3), {
+            TextColor3=isActive and colors.text or colors.textDim,
+            TextTransparency=isActive and 0.1 or 0.4
+        }):Play()
     end
     
     pages[pageName].Visible = true
@@ -1386,14 +1555,12 @@ btnMinHeader.MouseButton1Click:Connect(function()
     end
 end)
 
--- ==== DRAGGING SYSTEM (From Header) ====
+-- ==== DRAGGING SYSTEM (From Header) - Smoother ====
 local dragging, dragStart, startPos = false, nil, nil
-local dragTween = nil
 
 scriptHeader.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging, dragStart, startPos = true, input.Position, win.Position
-        if dragTween then dragTween:Cancel() end
     end
 end)
 
@@ -1406,9 +1573,7 @@ UserInputService.InputChanged:Connect(function(input)
             startPos.Y.Scale,
             startPos.Y.Offset + delta.Y
         )
-        if dragTween then dragTween:Cancel() end
-        dragTween = TweenService:Create(win, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Position=newPos})
-        dragTween:Play()
+        TweenService:Create(win, TweenInfo.new(0.1, Enum.EasingStyle.Quint), {Position=newPos}):Play()
     end
 end)
 
@@ -1418,15 +1583,13 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- ==== RESIZING SYSTEM ====
+-- ==== RESIZING SYSTEM - Smoother ====
 local resizing = false
 local resizeStart, startSize = nil, nil
-local resizeTween = nil
 
 resizeHandle.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         resizing, resizeStart, startSize = true, input.Position, win.Size
-        if resizeTween then resizeTween:Cancel() end
     end
 end)
 
@@ -1446,12 +1609,7 @@ UserInputService.InputChanged:Connect(function(input)
         )
         
         local newSize = UDim2.new(0, newWidth, 0, newHeight)
-        
-        if resizeTween then resizeTween:Cancel() end
-        resizeTween = TweenService:Create(win, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {
-            Size=newSize
-        })
-        resizeTween:Play()
+        TweenService:Create(win, TweenInfo.new(0.1, Enum.EasingStyle.Quint), {Size=newSize}):Play()
     end
 end)
 
@@ -1461,31 +1619,22 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-resizeHandle.MouseEnter:Connect(function()
-    TweenService:Create(resizeHandle, TweenInfo.new(0.2), {
-        BackgroundTransparency=0.3,
-        Size=UDim2.new(0, 18, 0, 18)
-    }):Play()
-end)
-
-resizeHandle.MouseLeave:Connect(function()
-    if not resizing then
-        TweenService:Create(resizeHandle, TweenInfo.new(0.2), {
-            BackgroundTransparency=0.5,
-            Size=UDim2.new(0, 16, 0, 16)
-        }):Play()
-    end
-end)
-
--- ==== OPENING ANIMATION ====
+-- ==== OPENING ANIMATION - More dramatic ====
 task.spawn(function()
     win.Size = UDim2.new(0, 0, 0, 0)
     win.Position = UDim2.new(0.5, -windowSize.X.Offset/2, 0.5, -windowSize.Y.Offset/2)
+    win.BackgroundTransparency = 1
     
     task.wait(0.1)
     
-    TweenService:Create(win, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+    -- Expand with bounce
+    TweenService:Create(win, TweenInfo.new(0.7, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
         Size=windowSize
+    }):Play()
+    
+    -- Fade in
+    TweenService:Create(win, TweenInfo.new(0.5), {
+        BackgroundTransparency=0.15
     }):Play()
 end)
 
@@ -1493,14 +1642,16 @@ print("━━━━━━━━━━━━━━━━━━━━━━")
 print("✨ Lynx GUI v2.3 Galaxy Edition")
 print("💜 FREE NOT FOR SALE")
 print("━━━━━━━━━━━━━━━━━━━━━━")
-print("🎉 ALL PARTS LOADED!")
+print("🎉 PERFECTED VERSION!")
 print("━━━━━━━━━━━━━━━━━━━━━━")
 print("📦 Features:")
+print("  • Ultra transparent design")
 print("  • Galaxy purple theme")
-print("  • Horizontal input layout")
-print("  • Fixed script header")
-print("  • Tab names always visible")
-print("  • Smooth animations")
+print("  • Smooth Quint animations")
+print("  • Always-visible sidebar")
+print("  • No toggle button")
+print("  • Glow effects")
+print("  • Polished UI")
 print("━━━━━━━━━━━━━━━━━━━━━━")
 print("💎 Created by Lynx Team")
 print("━━━━━━━━━━━━━━━━━━━━━━")
