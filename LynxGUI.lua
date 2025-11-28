@@ -133,11 +133,11 @@ new("UIStroke",{
     Transparency=0.6
 })
 
--- Script Header (FIXED - Outside sidebar, won't hide)
+-- Script Header (INSIDE window, at the top)
 local scriptHeader = new("Frame",{
     Parent=win,
-    Size=UDim2.new(0, 420, 0, 50),
-    Position=UDim2.new(0, 0, 0, -55),
+    Size=UDim2.new(1, 0, 0, 45),
+    Position=UDim2.new(0, 0, 0, 0),
     BackgroundColor3=colors.bg2,
     BackgroundTransparency=0.3,
     BorderSizePixel=0,
@@ -145,15 +145,27 @@ local scriptHeader = new("Frame",{
 })
 new("UICorner",{Parent=scriptHeader, CornerRadius=UDim.new(0, 8)})
 
+-- Drag Handle for Header (Subtle indicator)
+local headerDragHandle = new("Frame",{
+    Parent=scriptHeader,
+    Size=UDim2.new(0, 35, 0, 3),
+    Position=UDim2.new(0.5, -17.5, 0, 6),
+    BackgroundColor3=colors.textDimmer,
+    BackgroundTransparency=0.5,
+    BorderSizePixel=0,
+    ZIndex=6
+})
+new("UICorner",{Parent=headerDragHandle, CornerRadius=UDim.new(1, 0)})
+
 -- Title with gradient effect
 local titleLabel = new("TextLabel",{
     Parent=scriptHeader,
     Text="LynX",
-    Size=UDim2.new(0, 100, 1, -10),
-    Position=UDim2.new(0, 15, 0, 5),
+    Size=UDim2.new(0, 80, 1, 0),
+    Position=UDim2.new(0, 15, 0, 0),
     BackgroundTransparency=1,
     Font=Enum.Font.GothamBold,
-    TextSize=18,
+    TextSize=16,
     TextColor3=colors.primary,
     TextXAlignment=Enum.TextXAlignment.Left,
     ZIndex=6
@@ -162,8 +174,8 @@ local titleLabel = new("TextLabel",{
 -- Separator
 local separator = new("Frame",{
     Parent=scriptHeader,
-    Size=UDim2.new(0, 2, 0, 30),
-    Position=UDim2.new(0, 115, 0.5, -15),
+    Size=UDim2.new(0, 2, 0, 25),
+    Position=UDim2.new(0, 95, 0.5, -12.5),
     BackgroundColor3=colors.primary,
     BackgroundTransparency=0.5,
     BorderSizePixel=0,
@@ -174,33 +186,54 @@ new("UICorner",{Parent=separator, CornerRadius=UDim.new(1, 0)})
 local subtitleLabel = new("TextLabel",{
     Parent=scriptHeader,
     Text="Free Not For Sale",
-    Size=UDim2.new(0, 200, 1, -10),
-    Position=UDim2.new(0, 125, 0, 5),
+    Size=UDim2.new(0, 150, 1, 0),
+    Position=UDim2.new(0, 105, 0, 0),
     BackgroundTransparency=1,
     Font=Enum.Font.GothamMedium,
-    TextSize=10,
+    TextSize=9,
     TextColor3=colors.textDim,
     TextXAlignment=Enum.TextXAlignment.Left,
     ZIndex=6
 })
 
--- Galaxy glow effect
-local glowEffect = new("ImageLabel",{
+-- Minimize button in header
+local btnMinHeader = new("TextButton",{
     Parent=scriptHeader,
-    Size=UDim2.new(1, 40, 1, 40),
-    Position=UDim2.new(0, -20, 0, -20),
-    BackgroundTransparency=1,
-    Image="rbxasset://textures/ui/GuiImagePlaceholder.png",
-    ImageColor3=colors.primary,
-    ImageTransparency=0.9,
-    ZIndex=4
+    Size=UDim2.new(0, 28, 0, 28),
+    Position=UDim2.new(1, -36, 0.5, -14),
+    BackgroundColor3=colors.bg4,
+    BackgroundTransparency=0.4,
+    BorderSizePixel=0,
+    Text="─",
+    Font=Enum.Font.GothamBold,
+    TextSize=16,
+    TextColor3=colors.textDim,
+    AutoButtonColor=false,
+    ZIndex=7
 })
+new("UICorner",{Parent=btnMinHeader, CornerRadius=UDim.new(0, 6)})
 
--- Navigation Container
+btnMinHeader.MouseEnter:Connect(function()
+    TweenService:Create(btnMinHeader, TweenInfo.new(0.2), {
+        BackgroundColor3=colors.galaxy1,
+        BackgroundTransparency=0.2,
+        TextColor3=colors.text
+    }):Play()
+end)
+
+btnMinHeader.MouseLeave:Connect(function()
+    TweenService:Create(btnMinHeader, TweenInfo.new(0.2), {
+        BackgroundColor3=colors.bg4,
+        BackgroundTransparency=0.4,
+        TextColor3=colors.textDim
+    }):Play()
+end)
+
+-- Navigation Container (Below header)
 local navContainer = new("ScrollingFrame",{
     Parent=sidebar,
-    Size=UDim2.new(1, -4, 1, -10),
-    Position=UDim2.new(0, 2, 0, 5),
+    Size=UDim2.new(1, -4, 1, -50),
+    Position=UDim2.new(0, 2, 0, 48),
     BackgroundTransparency=1,
     ScrollBarThickness=2,
     ScrollBarImageColor3=colors.primary,
@@ -216,11 +249,11 @@ new("UIListLayout",{
     SortOrder=Enum.SortOrder.LayoutOrder
 })
 
--- Content Area
+-- Content Area (Below header)
 local contentBg = new("Frame",{
     Parent=win,
-    Size=UDim2.new(1, -(sidebarExpandedWidth + 7), 1, -10),
-    Position=UDim2.new(0, sidebarExpandedWidth + 3, 0, 6),
+    Size=UDim2.new(1, -(sidebarExpandedWidth + 7), 1, -55),
+    Position=UDim2.new(0, sidebarExpandedWidth + 3, 0, 48),
     BackgroundColor3=colors.bg2,
     BackgroundTransparency=0.4,
     BorderSizePixel=0,
@@ -239,8 +272,8 @@ local function toggleSidebar()
     }):Play()
     
     TweenService:Create(contentBg, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
-        Size=UDim2.new(1, -(targetWidth + 7), 1, -10),
-        Position=UDim2.new(0, targetWidth + 3, 0, 6)
+        Size=UDim2.new(1, -(targetWidth + 7), 1, -55),
+        Position=UDim2.new(0, targetWidth + 3, 0, 48)
     }):Play()
     
     if sidebarToggle then
@@ -253,7 +286,7 @@ end
 
 sidebarToggle.MouseButton1Click:Connect(toggleSidebar)
 
--- Top Bar
+-- Top Bar (Page Title)
 local topBar = new("Frame",{
     Parent=contentBg,
     Size=UDim2.new(1, 0, 0, 32),
@@ -264,22 +297,10 @@ local topBar = new("Frame",{
 })
 new("UICorner",{Parent=topBar, CornerRadius=UDim.new(0, 8)})
 
--- Drag Handle
-local dragHandle = new("Frame",{
-    Parent=topBar,
-    Size=UDim2.new(0, 30, 0, 3),
-    Position=UDim2.new(0.5, -15, 0, 5),
-    BackgroundColor3=colors.textDimmer,
-    BackgroundTransparency=0.5,
-    BorderSizePixel=0,
-    ZIndex=6
-})
-new("UICorner",{Parent=dragHandle, CornerRadius=UDim.new(1, 0)})
-
 local pageTitle = new("TextLabel",{
     Parent=topBar,
     Text="Main Dashboard",
-    Size=UDim2.new(1, -50, 1, 0),
+    Size=UDim2.new(1, -20, 1, 0),
     Position=UDim2.new(0, 10, 0, 0),
     Font=Enum.Font.GothamBold,
     TextSize=11,
@@ -288,46 +309,6 @@ local pageTitle = new("TextLabel",{
     TextXAlignment=Enum.TextXAlignment.Left,
     ZIndex=6
 })
-
--- Control button (MINIMIZE ONLY - Better design)
-local controlsFrame = new("Frame",{
-    Parent=topBar,
-    Size=UDim2.new(0, 28, 0, 28),
-    Position=UDim2.new(1, -32, 0.5, -14),
-    BackgroundTransparency=1,
-    ZIndex=6
-})
-
-local btnMin = new("TextButton",{
-    Parent=controlsFrame,
-    Size=UDim2.new(1, 0, 1, 0),
-    BackgroundColor3=colors.bg4,
-    BackgroundTransparency=0.4,
-    BorderSizePixel=0,
-    Text="─",
-    Font=Enum.Font.GothamBold,
-    TextSize=16,
-    TextColor3=colors.textDim,
-    AutoButtonColor=false,
-    ZIndex=7
-})
-new("UICorner",{Parent=btnMin, CornerRadius=UDim.new(0, 6)})
-
-btnMin.MouseEnter:Connect(function()
-    TweenService:Create(btnMin, TweenInfo.new(0.2), {
-        BackgroundColor3=colors.galaxy1,
-        BackgroundTransparency=0.2,
-        TextColor3=colors.text
-    }):Play()
-end)
-
-btnMin.MouseLeave:Connect(function()
-    TweenService:Create(btnMin, TweenInfo.new(0.2), {
-        BackgroundColor3=colors.bg4,
-        BackgroundTransparency=0.4,
-        TextColor3=colors.textDim
-    }):Play()
-end)
 
 -- Resize Handle
 local resizeHandle = new("TextButton",{
@@ -1371,13 +1352,9 @@ local function createMinimizedIcon()
                 savedIconPos = icon.Position
                 if not dragMoved then
                     win.Visible = true
-                    scriptHeader.Visible = true
                     TweenService:Create(win, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
                         Size=windowSize,
                         Position=UDim2.new(0.5, -windowSize.X.Offset/2, 0.5, -windowSize.Y.Offset/2)
-                    }):Play()
-                    TweenService:Create(scriptHeader, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                        Position=UDim2.new(0, 0, 0, -55)
                     }):Play()
                     if icon then 
                         icon:Destroy() 
@@ -1390,29 +1367,25 @@ local function createMinimizedIcon()
     end)
 end
 
-btnMin.MouseButton1Click:Connect(function()
+btnMinHeader.MouseButton1Click:Connect(function()
     if not minimized then
         local targetPos = UDim2.new(0.5, 0, 0.5, 0)
         TweenService:Create(win, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
             Size=UDim2.new(0, 0, 0, 0),
             Position=targetPos
         }):Play()
-        TweenService:Create(scriptHeader, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-            Position=UDim2.new(0, 0, 0.5, 0)
-        }):Play()
         task.wait(0.35)
         win.Visible = false
-        scriptHeader.Visible = false
         createMinimizedIcon()
         minimized = true
     end
 end)
 
--- ==== DRAGGING SYSTEM ====
+-- ==== DRAGGING SYSTEM (From Header) ====
 local dragging, dragStart, startPos = false, nil, nil
 local dragTween = nil
 
-topBar.InputBegan:Connect(function(input)
+scriptHeader.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging, dragStart, startPos = true, input.Position, win.Position
         if dragTween then dragTween:Cancel() end
@@ -1431,9 +1404,6 @@ UserInputService.InputChanged:Connect(function(input)
         if dragTween then dragTween:Cancel() end
         dragTween = TweenService:Create(win, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Position=newPos})
         dragTween:Play()
-        
-        -- Update header position
-        scriptHeader.Position = UDim2.new(0, newPos.X.Offset, 0, newPos.Y.Offset - 55)
     end
 end)
 
@@ -1477,9 +1447,6 @@ UserInputService.InputChanged:Connect(function(input)
             Size=newSize
         })
         resizeTween:Play()
-        
-        -- Update header size
-        scriptHeader.Size = UDim2.new(0, newWidth, 0, 50)
     end
 end)
 
@@ -1509,20 +1476,11 @@ end)
 task.spawn(function()
     win.Size = UDim2.new(0, 0, 0, 0)
     win.Position = UDim2.new(0.5, -windowSize.X.Offset/2, 0.5, -windowSize.Y.Offset/2)
-    win.Rotation = 0
-    
-    scriptHeader.Size = UDim2.new(0, 0, 0, 0)
-    scriptHeader.Position = UDim2.new(0, 0, 0.5, 0)
     
     task.wait(0.1)
     
     TweenService:Create(win, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
         Size=windowSize
-    }):Play()
-    
-    TweenService:Create(scriptHeader, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Size=UDim2.new(0, 420, 0, 50),
-        Position=UDim2.new(0, 0, 0, -55)
     }):Play()
 end)
 
