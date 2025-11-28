@@ -151,8 +151,17 @@ local brandName = new("TextLabel",{
     TextSize=16,
     BackgroundTransparency=1,
     TextColor3=colors.primary,
-    Visible=sidebarExpanded,
+    Visible=true,  -- SELALU TAMPIL
     ZIndex=6
+})
+
+-- Gradient effect untuk brand name
+new("UIGradient",{
+    Parent=brandName,
+    Color=ColorSequence.new{
+        ColorSequenceKeypoint.new(0, colors.primary),
+        ColorSequenceKeypoint.new(1, colors.accent)
+    }
 })
 
 -- Navigation Container
@@ -1472,17 +1481,16 @@ task.spawn(function()
 end)
 
 -- Update nav buttons on sidebar toggle
-for page, btnData in pairs(navButtons) do
-    local originalToggle = toggleSidebar
-    toggleSidebar = function()
-        originalToggle()
-        for _, data in pairs(navButtons) do
-            data.text.Visible = sidebarExpanded
-            data.icon.Size = sidebarExpanded and UDim2.new(0, 28, 1, 0) or UDim2.new(1, 0, 1, 0)
-            data.icon.Position = sidebarExpanded and UDim2.new(0, 8, 0, 0) or UDim2.new(0, 0, 0, 0)
+task.spawn(function()
+    task.wait(0.2) -- Wait for nav buttons to be created
+    for page, btnData in pairs(navButtons) do
+        if btnData.text then
+            btnData.text.Visible = sidebarExpanded
+            btnData.icon.Size = sidebarExpanded and UDim2.new(0, 28, 1, 0) or UDim2.new(1, 0, 1, 0)
+            btnData.icon.Position = sidebarExpanded and UDim2.new(0, 8, 0, 0) or UDim2.new(0, 0, 0, 0)
         end
     end
-end
+end)
 
 print("✨ Lynx GUI v2.2 Compact - BAGIAN 3 (FINAL) loaded!")
 print("🎉 GUI SIAP DIGUNAKAN!")
