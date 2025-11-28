@@ -64,6 +64,11 @@ local windowSize = UDim2.new(0, 420, 0, 280)
 local minWindowSize = Vector2.new(380, 250)
 local maxWindowSize = Vector2.new(550, 400)
 
+-- Sidebar state (Start collapsed to show only icons)
+local sidebarExpanded = false
+local sidebarCollapsedWidth = 50
+local sidebarExpandedWidth = 140
+
 local gui = new("ScreenGui",{
     Name="LynxGUI_Galaxy",
     Parent=localPlayer.PlayerGui,
@@ -93,19 +98,15 @@ new("UIStroke",{
     ApplyStrokeMode=Enum.ApplyStrokeMode.Border
 })
 
--- Sidebar state
-local sidebarExpanded = true  -- Start expanded to show names
-local sidebarCollapsedWidth = 45
-local sidebarExpandedWidth = 140
-
--- Sidebar
+-- Sidebar (Below header, start collapsed)
 local sidebar = new("Frame",{
     Parent=win,
-    Size=UDim2.new(0, sidebarExpandedWidth, 1, 0),
+    Size=UDim2.new(0, sidebarCollapsedWidth, 1, -45),
+    Position=UDim2.new(0, 0, 0, 45),
     BackgroundColor3=colors.bg2,
     BackgroundTransparency=0.3,
     BorderSizePixel=0,
-    ClipsDescendants=false,
+    ClipsDescendants=true,
     ZIndex=4
 })
 new("UICorner",{Parent=sidebar, CornerRadius=UDim.new(0, 8)})
@@ -114,11 +115,11 @@ new("UICorner",{Parent=sidebar, CornerRadius=UDim.new(0, 8)})
 local sidebarToggle = new("TextButton",{
     Parent=win,
     Size=UDim2.new(0, 24, 0, 40),
-    Position=UDim2.new(0, sidebarExpandedWidth - 2, 1, -50),
+    Position=UDim2.new(0, sidebarCollapsedWidth - 2, 1, -50),
     BackgroundColor3=colors.bg3,
     BackgroundTransparency=0.3,
     BorderSizePixel=0,
-    Text="◀",
+    Text="▶",
     Font=Enum.Font.GothamBold,
     TextSize=12,
     TextColor3=colors.primary,
@@ -249,11 +250,11 @@ new("UIListLayout",{
     SortOrder=Enum.SortOrder.LayoutOrder
 })
 
--- Content Area (Below header)
+-- Content Area (Below header, adjusted for collapsed sidebar)
 local contentBg = new("Frame",{
     Parent=win,
-    Size=UDim2.new(1, -(sidebarExpandedWidth + 7), 1, -55),
-    Position=UDim2.new(0, sidebarExpandedWidth + 3, 0, 48),
+    Size=UDim2.new(1, -(sidebarCollapsedWidth + 7), 1, -55),
+    Position=UDim2.new(0, sidebarCollapsedWidth + 3, 0, 48),
     BackgroundColor3=colors.bg2,
     BackgroundTransparency=0.4,
     BorderSizePixel=0,
@@ -268,7 +269,7 @@ local function toggleSidebar()
     local targetWidth = sidebarExpanded and sidebarExpandedWidth or sidebarCollapsedWidth
     
     TweenService:Create(sidebar, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
-        Size=UDim2.new(0, targetWidth, 1, 0)
+        Size=UDim2.new(0, targetWidth, 1, -45)
     }):Play()
     
     TweenService:Create(contentBg, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
@@ -281,6 +282,24 @@ local function toggleSidebar()
             Position=UDim2.new(0, targetWidth - 2, 1, -50)
         }):Play()
         sidebarToggle.Text = sidebarExpanded and "◀" or "▶"
+    end
+    
+    -- Update nav buttons visibility
+    for _, data in pairs(navButtons) do
+        data.text.Visible = sidebarExpanded
+        if sidebarExpanded then
+            -- Show text, icon on left
+            TweenService:Create(data.icon, TweenInfo.new(0.3), {
+                Size=UDim2.new(0, 28, 1, 0),
+                Position=UDim2.new(0, 8, 0, 0)
+            }):Play()
+        else
+            -- Hide text, icon centered
+            TweenService:Create(data.icon, TweenInfo.new(0.3), {
+                Size=UDim2.new(1, 0, 1, 0),
+                Position=UDim2.new(0, 0, 0, 0)
+            }):Play()
+        end
     end
 end
 
@@ -371,7 +390,7 @@ mainPage.Visible = true
 -- LynxGUI_v2.3.lua - Galaxy Edition
 -- BAGIAN 2: Navigation, UI Components (Toggle, Input Horizontal, Dropdown, Button, Category)
 
--- Nav Button - Always show text
+-- Nav Button - Show text only when expanded
 local function createNavButton(text, icon, page, order)
     local btn = new("TextButton",{
         Parent=navContainer,
@@ -397,11 +416,12 @@ local function createNavButton(text, icon, page, order)
     })
     new("UICorner",{Parent=indicator, CornerRadius=UDim.new(1, 0)})
     
+    -- Icon - centered when collapsed, left when expanded
     local iconLabel = new("TextLabel",{
         Parent=btn,
         Text=icon,
-        Size=UDim2.new(0, 28, 1, 0),
-        Position=UDim2.new(0, 8, 0, 0),
+        Size=UDim2.new(1, 0, 1, 0),
+        Position=UDim2.new(0, 0, 0, 0),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamBold,
         TextSize=14,
@@ -409,6 +429,7 @@ local function createNavButton(text, icon, page, order)
         ZIndex=7
     })
     
+    -- Text - hidden when collapsed
     local textLabel = new("TextLabel",{
         Parent=btn,
         Text=text,
@@ -419,7 +440,7 @@ local function createNavButton(text, icon, page, order)
         TextSize=10,
         TextColor3=page == currentPage and colors.text or colors.textDim,
         TextXAlignment=Enum.TextXAlignment.Left,
-        Visible=sidebarExpanded,
+        Visible=false,
         ZIndex=7
     })
     
@@ -465,22 +486,6 @@ btnTeleport.MouseButton1Click:Connect(function() switchPage("Teleport", "Telepor
 btnShop.MouseButton1Click:Connect(function() switchPage("Shop", "Shop Features") end)
 btnSettings.MouseButton1Click:Connect(function() switchPage("Settings", "Settings") end)
 btnInfo.MouseButton1Click:Connect(function() switchPage("Info", "About Lynx") end)
-
--- Update nav buttons visibility on sidebar toggle
-local originalToggle = toggleSidebar
-toggleSidebar = function()
-    originalToggle()
-    for _, data in pairs(navButtons) do
-        data.text.Visible = sidebarExpanded
-        if not sidebarExpanded then
-            data.icon.Size = UDim2.new(1, 0, 1, 0)
-            data.icon.Position = UDim2.new(0, 0, 0, 0)
-        else
-            data.icon.Size = UDim2.new(0, 28, 1, 0)
-            data.icon.Position = UDim2.new(0, 8, 0, 0)
-        end
-    end
-end
 
 -- ==== UI COMPONENTS ====
 
