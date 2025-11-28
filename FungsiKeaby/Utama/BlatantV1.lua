@@ -30,7 +30,8 @@ UltraBlatant.Stats = {
 -- Settings (sesuai dengan pattern GUI kamu)
 UltraBlatant.Settings = {
     CompleteDelay = 0.05,    -- Delay sebelum complete
-    CancelDelay = 0.1,       -- Delay setelah complete sebelum cast lagi
+    CancelDelay = 0.1,       -- Delay setelah complete sebelum cancel
+    AfterCancelDelay = 0.025 -- Delay setelah cancel sebelum cast lagi (untuk status OK)
 }
 
 print("💀 ULTRA BLATANT MODULE LOADED!")
@@ -74,6 +75,9 @@ local function ultraSpamLoop()
         safeFire(function()
             RF_CancelFishingInputs:InvokeServer()
         end)
+        
+        -- Wait after cancel before next cast (untuk status OK)
+        task.wait(UltraBlatant.Settings.AfterCancelDelay)
     end
 end
 
@@ -92,6 +96,8 @@ RE_MinigameChanged.OnClientEvent:Connect(function(state)
         safeFire(function()
             RF_CancelFishingInputs:InvokeServer()
         end)
+        
+        task.wait(UltraBlatant.Settings.AfterCancelDelay)
     end)
 end)
 
@@ -152,7 +158,7 @@ end
 
 print("✅ ULTRA BLATANT MODULE READY!")
 print("📚 Usage: UltraBlatant.Start() / UltraBlatant.Stop()")
-print("⚙️ Settings: UltraBlatant.Settings.CompleteDelay / .CancelDelay")
+print("⚙️ Settings: CompleteDelay / CancelDelay / AfterCancelDelay")
 print("💡 Use makeInput() for delay input in GUI")
 
 -- Return module
