@@ -1349,19 +1349,31 @@ local deepSeaLabel = new("TextLabel",{
 })
 
 makeButton(catDeepSea, "Refresh Progress", function()
-    _G.AutoQuestModule = nil
-    AutoQuestModule = require(script.Parent.AutoQuestModule)
-    deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
-    Notify("Refresh", "Progress updated!", 2)
+    if AutoQuestModule then
+        deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
+        if Notify and type(Notify.Send) == "function" then
+            Notify.Send("Refresh", "Progress updated!", 2)
+        end
+    end
 end)
 
 makeToggle(catDeepSea, "Auto Teleport", function(on)
+    if not AutoQuestModule then return end
+    
     if on then
-        AutoQuestModule.StartAutoTeleport("DeepSeaQuest")
-        Notify("Auto Teleport", "Deep Sea Quest Auto Teleport AKTIF!", 2)
+        if type(AutoQuestModule.StartAutoTeleport) == "function" then
+            AutoQuestModule.StartAutoTeleport("DeepSeaQuest")
+            if Notify and type(Notify.Send) == "function" then
+                Notify.Send("Auto Teleport", "Deep Sea Quest Auto Teleport AKTIF!", 2)
+            end
+        end
     else
-        AutoQuestModule.StopAutoTeleport()
-        Notify("Auto Teleport", "Deep Sea Quest Auto Teleport DIMATIKAN!", 2)
+        if type(AutoQuestModule.StopAutoTeleport) == "function" then
+            AutoQuestModule.StopAutoTeleport()
+            if Notify and type(Notify.Send) == "function" then
+                Notify.Send("Auto Teleport", "Deep Sea Quest Auto Teleport DIMATIKAN!", 2)
+            end
+        end
     end
     
     deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
@@ -1398,19 +1410,31 @@ local elementLabel = new("TextLabel",{
 })
 
 makeButton(catElement, "Refresh Progress", function()
-    _G.AutoQuestModule = nil
-    AutoQuestModule = require(script.Parent.AutoQuestModule)
-    elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
-    Notify("Refresh", "Progress updated!", 2)
+    if AutoQuestModule then
+        elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
+        if Notify and type(Notify.Send) == "function" then
+            Notify.Send("Refresh", "Progress updated!", 2)
+        end
+    end
 end)
 
 makeToggle(catElement, "Auto Teleport", function(on)
+    if not AutoQuestModule then return end
+    
     if on then
-        AutoQuestModule.StartAutoTeleport("ElementQuest")
-        Notify("Auto Teleport", "Element Quest Auto Teleport AKTIF!", 2)
+        if type(AutoQuestModule.StartAutoTeleport) == "function" then
+            AutoQuestModule.StartAutoTeleport("ElementQuest")
+            if Notify and type(Notify.Send) == "function" then
+                Notify.Send("Auto Teleport", "Element Quest Auto Teleport AKTIF!", 2)
+            end
+        end
     else
-        AutoQuestModule.StopAutoTeleport()
-        Notify("Auto Teleport", "Element Quest Auto Teleport DIMATIKAN!", 2)
+        if type(AutoQuestModule.StopAutoTeleport) == "function" then
+            AutoQuestModule.StopAutoTeleport()
+            if Notify and type(Notify.Send) == "function" then
+                Notify.Send("Auto Teleport", "Element Quest Auto Teleport DIMATIKAN!", 2)
+            end
+        end
     end
     
     elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
@@ -1422,16 +1446,15 @@ task.spawn(function()
     while true do
         task.wait(2)
         
-        if deepSeaLabel and deepSeaLabel.Parent then
+        if deepSeaLabel and deepSeaLabel.Parent and AutoQuestModule then
             deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
         end
         
-        if elementLabel and elementLabel.Parent then
+        if elementLabel and elementLabel.Parent and AutoQuestModule then
             elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
         end
     end
 end)
-
 -- ==== SHOP PAGE ====
 local catSell = makeCategory(shopPage, "Auto Sell System", "💰")
 
