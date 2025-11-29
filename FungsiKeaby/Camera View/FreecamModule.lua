@@ -31,6 +31,7 @@ local touchStartPos = nil
 local renderConnection = nil
 local inputChangedConnection = nil
 local inputEndedConnection = nil
+local inputBeganConnection = nil
 
 -- Character references
 local Character = Player.Character or Player.CharacterAdded:Wait()
@@ -142,28 +143,42 @@ function FreecamModule.Start()
         UIS.MouseIconEnabled = false
     end
     
-    -- Mobile touch input handling
+    -- Mobile touch input handling - PERBAIKAN
     if isMobile then
-        inputChangedConnection = UIS.InputChanged:Connect(function(input, gameProcessed)
+        -- Handle touch began
+        inputBeganConnection = UIS.InputBegan:Connect(function(input, gameProcessed)
             if not freecam then return end
             
-            if input.UserInputType == Enum.UserInputType.Touch and input == touchInput then
-                local delta = input.Position - touchStartPos
-                
-                camRot = camRot + Vector3.new(
-                    -delta.Y * sensitivity * 0.003,
-                    -delta.X * sensitivity * 0.003,
-                    0
-                )
-                
+            if input.UserInputType == Enum.UserInputType.Touch then
+                touchInput = input
                 touchStartPos = input.Position
             end
         end)
         
+        -- Handle touch changed dengan deteksi yang lebih baik
+        inputChangedConnection = UIS.InputChanged:Connect(function(input, gameProcessed)
+            if not freecam or not touchInput then return end
+            
+            if input.UserInputType == Enum.UserInputType.Touch then
+                local delta = input.Position - touchStartPos
+                
+                if delta.Magnitude > 0 then
+                    camRot = camRot + Vector3.new(
+                        -delta.Y * sensitivity * 0.003,
+                        -delta.X * sensitivity * 0.003,
+                        0
+                    )
+                    
+                    touchStartPos = input.Position
+                end
+            end
+        end)
+        
+        -- Handle touch ended
         inputEndedConnection = UIS.InputEnded:Connect(function(input, gameProcessed)
             if not freecam then return end
             
-            if input.UserInputType == Enum.UserInputType.Touch and input == touchInput then
+            if input.UserInputType == Enum.UserInputType.Touch then
                 touchInput = nil
                 touchStartPos = nil
             end
@@ -231,6 +246,11 @@ function FreecamModule.Stop()
         inputEndedConnection = nil
     end
     
+    if inputBeganConnection then
+        inputBeganConnection:Disconnect()
+        inputBeganConnection = nil
+    end
+    
     -- Restore everything
     LockCharacter(false)
     ShowAllGuis()
@@ -239,6 +259,9 @@ function FreecamModule.Stop()
     
     UIS.MouseBehavior = Enum.MouseBehavior.Default
     UIS.MouseIconEnabled = true
+    
+    touchInput = nil
+    touchStartPos = nil
     
     return true
 end
@@ -286,30 +309,34 @@ function FreecamModule.GetMainGuiName()
 end
 
 -- ============================================
--- KEYBIND F3 (OPSIONAL - DISABLED BY DEFAULT)
+-- F3 KEYBIND - AKTIF HANYA UNTUK PC
 -- ============================================
-local enableF3Keybind = false
+local f3KeybindActive = false
 
 function FreecamModule.EnableF3Keybind(enable)
-    enableF3Keybind = enable
+    f3KeybindActive = enable
+    if not isMobile then
+        local status = f3KeybindActive and "ENABLED" or "DISABLED"
+        print("⚙️ F3 Keybind: " .. status)
+    end
 end
 
-UIS.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    
-    -- F3 toggle hanya jika diaktifkan
-    if enableF3Keybind and input.KeyCode == Enum.KeyCode.F3 then
-        FreecamModule.Toggle()
-    end
-    
-    -- Touch input for mobile
-    if isMobile and freecam then
-        if input.UserInputType == Enum.UserInputType.Touch then
-            touchInput = input
-            touchStartPos = input.Position
+function FreecamModule.IsF3KeybindActive()
+    return f3KeybindActive
+end
+
+-- F3 keybind hanya untuk PC, otomatis aktif ketika freecam dihidupkan
+if not isMobile then
+    UIS.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        
+        -- F3 toggle hanya jika keybind aktif dan freecam sedang aktif
+        if f3KeybindActive and freecam and input.KeyCode == Enum.KeyCode.F3 then
+            FreecamModule.Toggle()
+            print("🎥 Freecam toggled via F3")
         end
-    end
-end)
+    end)
+end
 
 -- ============================================
 -- INFO
@@ -318,7 +345,7 @@ print("╔═══════════════════════�
 print("║   FREECAM MODULE - PC & MOBILE READY   ║")
 print("╚════════════════════════════════════════╝")
 print("► Platform: " .. (isMobile and "📱 MOBILE" or "💻 PC"))
-print("► F3 Keybind: DISABLED (use GUI toggle)")
+print("► F3 Keybind: " .. (isMobile and "N/A (Mobile)" or "READY (Toggle with GUI)"))
 print("► Ready to be controlled by GUI")
 print("═════════════════════════════════════════")
 
