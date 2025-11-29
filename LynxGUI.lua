@@ -1512,11 +1512,11 @@ local catZoom = makeCategory(cameraViewPage, "Unlimited Zoom", "🔭")
 makeToggle(catZoom, "Enable Unlimited Zoom", function(on)
     if on then
         if UnlimitedZoomModule.Enable() then
-            Notify("Zoom 🔭", "Unlimited Zoom aktif! Scroll atau pinch untuk zoom.", 4)
+            Notify.Send("Zoom 🔭", "Unlimited Zoom aktif! Scroll atau pinch untuk zoom.", 4)
         end
     else
         if UnlimitedZoomModule.Disable() then
-            Notify("Zoom 🔭", "Unlimited Zoom nonaktif.", 3)
+            Notify.Send("Zoom 🔭", "Unlimited Zoom nonaktif.", 3)
         end
     end
 end)
