@@ -1351,31 +1351,27 @@ end)
 -- Camera settings
 FreecamModule.SetMainGuiName("LynxGUI_Galaxy") -- <-- UBAH INI!
 local catFreecam = makeCategory(cameraViewPage, "Freecam Camera", "📷")
-local freecamActive = false
 
 -- Detect platform
 local UIS = game:GetService("UserInputService")
 local isMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
 
 makeToggle(catFreecam, "Enable Freecam", function(on)
-    freecamActive = on
     if on then
-        if FreecamModule.Start() then
-            -- Aktifkan F3 keybind untuk PC saja
-            if not isMobile then
-                FreecamModule.EnableF3Keybind(true)
+        -- HANYA aktifkan F3 keybind untuk PC (TIDAK langsung aktifkan freecam)
+        if not isMobile then
+            FreecamModule.EnableF3Keybind(true)
+            Notify("Freecam 📷", "Freecam siap! Tekan F3 untuk mengaktifkan.", 4)
+        else
+            -- Untuk mobile, langsung aktifkan freecam
+            if FreecamModule.Start() then
+                Notify("Freecam 📷", "Freecam aktif! Kontrol dengan touch.", 4)
             end
-            
-            local platform = isMobile and "touch" or "mouse & F3"
-            Notify("Freecam 📷", "Freecam aktif! Kontrol dengan " .. platform .. ".", 4)
         end
     else
-        if FreecamModule.Stop() then
-            -- Matikan F3 keybind
-            FreecamModule.EnableF3Keybind(false)
-            
-            Notify("Freecam 📷", "Freecam nonaktif.", 3)
-        end
+        -- Matikan F3 keybind dan freecam
+        FreecamModule.EnableF3Keybind(false)
+        Notify("Freecam 📷", "Freecam nonaktif.", 3)
     end
 end)
 
@@ -1396,7 +1392,6 @@ makeButton(catFreecam, "Reset Settings", function()
     FreecamModule.SetSensitivity(0.3)
     Notify("Reset 🔄", "Freecam settings direset!", 3)
 end)
-
 -- ==== SETTINGS PAGE ====
 local catAFK = makeCategory(settingsPage, "Anti-AFK Protection", "🧍‍♂️")
 
