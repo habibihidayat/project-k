@@ -1,24 +1,25 @@
 -- Notification.lua
--- Simple modern notification system for any GUI
+-- Simple notification (bottom-right) for exploit environments.
 
 local Notify = {}
 
 local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
--- Buat folder GUI
+-- Parent ke PlayerGui AGAR TIDAK TERBLOCK EXECUTOR
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "LynxNotifications"
-ScreenGui.Parent = CoreGui
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- Tempat notifikasi
+-- Holder kanan bawah
 local Holder = Instance.new("Frame")
 Holder.Name = "Holder"
 Holder.Parent = ScreenGui
 Holder.AnchorPoint = Vector2.new(1, 1)
-Holder.Position = UDim2.new(1, -20, 1, -20)
+Holder.Position = UDim2.new(1, -20, 1, -20) -- kanan bawah
 Holder.Size = UDim2.new(0, 300, 1, -40)
 Holder.BackgroundTransparency = 1
 
@@ -31,11 +32,11 @@ UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
 function Notify.Send(title, message, duration)
     duration = duration or 3
 
-    -- Frame Notifikasi
+    -- Frame notifikasi
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 260, 0, 60)
+    Frame.Size = UDim2.new(0, 260, 0, 65)
     Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    Frame.BackgroundTransparency = 0.1
+    Frame.BackgroundTransparency = 0.15
     Frame.BorderSize = 0
     Frame.Parent = Holder
     Frame.ClipsDescendants = true
@@ -43,13 +44,13 @@ function Notify.Send(title, message, duration)
     Frame.LayoutOrder = os.clock()
 
     local UICorner = Instance.new("UICorner", Frame)
-    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.CornerRadius = UDim.new(0, 12)
 
     -- Title
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Parent = Frame
     TitleLabel.Size = UDim2.new(1, -20, 0, 18)
-    TitleLabel.Position = UDim2.new(0, 10, 0, 8)
+    TitleLabel.Position = UDim2.new(0, 10, 0, 10)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.TextSize = 15
@@ -61,30 +62,29 @@ function Notify.Send(title, message, duration)
     local MsgLabel = Instance.new("TextLabel")
     MsgLabel.Parent = Frame
     MsgLabel.Size = UDim2.new(1, -20, 0, 35)
-    MsgLabel.Position = UDim2.new(0, 10, 0, 26)
+    MsgLabel.Position = UDim2.new(0, 10, 0, 30)
     MsgLabel.BackgroundTransparency = 1
     MsgLabel.Font = Enum.Font.Gotham
-    MsgLabel.TextSize = 13
+    MsgLabel.TextSize = 14
     MsgLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
     MsgLabel.TextXAlignment = Enum.TextXAlignment.Left
     MsgLabel.TextWrapped = true
     MsgLabel.Text = message
 
-    -- Animasi Masuk
+    -- Fade In
     Frame.BackgroundTransparency = 1
     TitleLabel.TextTransparency = 1
     MsgLabel.TextTransparency = 1
 
-    TweenService:Create(Frame, TweenInfo.new(0.25), {BackgroundTransparency = 0.1}):Play()
+    TweenService:Create(Frame, TweenInfo.new(0.25), {BackgroundTransparency = 0.15}):Play()
     TweenService:Create(TitleLabel, TweenInfo.new(0.25), {TextTransparency = 0}):Play()
     TweenService:Create(MsgLabel, TweenInfo.new(0.25), {TextTransparency = 0}):Play()
 
     task.delay(duration, function()
-        -- Animasi Keluar
-        TweenService:Create(Frame, TweenInfo.new(0.25), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(TitleLabel, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
-        TweenService:Create(MsgLabel, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
-
+        -- Fade Out
+        TweenService:Create(Frame, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(TitleLabel, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
+        TweenService:Create(MsgLabel, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
         task.wait(0.3)
         Frame:Destroy()
     end)
