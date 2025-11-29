@@ -8,6 +8,9 @@ TeleportModule.Locations = {
     ["Ancient Ruin"] = Vector3.new(6045.40234375, -588.600830078125, 4608.9375),
     ["Coral Reefs"] = Vector3.new(-2921.858154296875, 3.249999761581421, 2083.2978515625),
     ["Crater Island"] = Vector3.new(1078.454345703125, 5.0720038414001465, 5099.396484375),
+    ["Classic Island"] = Vector3.new(1253.974853515625, 9.999999046325684, 2816.7646484375),
+    ["Iron Cavern"] = Vector3.new(-8881.52734375, -581.7500610351562, 156.1653289794922),
+    ["The Iron Cafe"] = Vector3.new(-8642.7265625, -547.5001831054688, 159.8160400390625),
     ["Esoteric Depths"] = Vector3.new(3224.075927734375, -1302.85498046875, 1404.9346923828125),
     ["Fisherman Island"] = Vector3.new(92.80695343017578, 9.531265258789062, 2762.082275390625),
     ["Kohana"] = Vector3.new(-643.3051147460938, 16.03544807434082, 622.3605346679688),
@@ -37,3 +40,4 @@ function TeleportModule.TeleportTo(name)
 end
 
 return TeleportModule
+
