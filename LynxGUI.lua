@@ -1371,7 +1371,7 @@ local catFreecam = makeCategory(cameraViewPage, "Freecam Camera", "📷")
 if not isMobile then
     local noteContainer = new("Frame", {
         Parent = catFreecam,
-        Size = UDim2.new(1, 0, 0, 70),
+        Size = UDim2.new(1, 0, 0, 85),  -- UBAH dari 70 ke 85
         BackgroundColor3 = colors.bg3,
         BackgroundTransparency = 0.6,
         BorderSizePixel = 0,
