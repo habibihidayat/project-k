@@ -1331,7 +1331,7 @@ end)
 
 
 -- ==== QUEST PAGE ====
-local catDeepSea = makeCategory(questPage, "Deep Sea Quest (Ghostfinn Rod)", "👻")
+local catDeepSea = makeCategory(questPage, "Deep Sea Quest (Ghostfinn Rod)")
 
 -- Progress display
 local deepSeaProgressFrame = new("Frame",{
@@ -1360,18 +1360,15 @@ local deepSeaLabel = new("TextLabel",{
     ZIndex=8
 })
 
-makeButton(catDeepSea, "🔄 Refresh Progress", function()
+makeButton(catDeepSea, "Refresh Progress", function()
     _G.AutoQuestModule = nil -- Clear old module
     AutoQuestModule = require(script.Parent.AutoQuestModule) -- Reload
     deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
     Notify("Refresh", "Progress updated!", 2)
 end)
 
-local deepSeaAutoTeleportActive = false
-makeButton(catDeepSea, "🤖 Auto Teleport: OFF", function()
-    deepSeaAutoTeleportActive = not deepSeaAutoTeleportActive
-    
-    if deepSeaAutoTeleportActive then
+makeToggle(catDeepSea, "Auto Teleport", function(on)
+    if on then
         AutoQuestModule.StartAutoTeleport("DeepSeaQuest")
         Notify("Auto Teleport", "Deep Sea Quest Auto Teleport AKTIF!", 2)
     else
@@ -1384,7 +1381,7 @@ end)
 
 
 -- Element Quest
-local catElement = makeCategory(questPage, "Element Quest (Element Rod)", "🔥")
+local catElement = makeCategory(questPage, "Element Quest (Element Rod)")
 
 local elementProgressFrame = new("Frame",{
     Parent=catElement,
@@ -1412,18 +1409,15 @@ local elementLabel = new("TextLabel",{
     ZIndex=8
 })
 
-makeButton(catElement, "🔄 Refresh Progress", function()
+makeButton(catElement, "Refresh Progress", function()
     _G.AutoQuestModule = nil
     AutoQuestModule = require(script.Parent.AutoQuestModule)
     elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
     Notify("Refresh", "Progress updated!", 2)
 end)
 
-local elementAutoTeleportActive = false
-makeButton(catElement, "🤖 Auto Teleport: OFF", function()
-    elementAutoTeleportActive = not elementAutoTeleportActive
-    
-    if elementAutoTeleportActive then
+makeToggle(catElement, "Auto Teleport", function(on)
+    if on then
         AutoQuestModule.StartAutoTeleport("ElementQuest")
         Notify("Auto Teleport", "Element Quest Auto Teleport AKTIF!", 2)
     else
@@ -1449,7 +1443,6 @@ task.spawn(function()
         end
     end
 end)
-
 
 -- ==== SHOP PAGE ====
 local catSell = makeCategory(shopPage, "Auto Sell System", "💰")
