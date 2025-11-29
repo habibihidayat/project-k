@@ -1367,6 +1367,21 @@ makeButton(catDeepSea, "🔄 Refresh Progress", function()
     Notify("Refresh", "Progress updated!", 2)
 end)
 
+local deepSeaAutoTeleportActive = false
+makeButton(catDeepSea, "🤖 Auto Teleport: OFF", function()
+    deepSeaAutoTeleportActive = not deepSeaAutoTeleportActive
+    
+    if deepSeaAutoTeleportActive then
+        AutoQuestModule.StartAutoTeleport("DeepSeaQuest")
+        Notify("Auto Teleport", "Deep Sea Quest Auto Teleport AKTIF!", 2)
+    else
+        AutoQuestModule.StopAutoTeleport()
+        Notify("Auto Teleport", "Deep Sea Quest Auto Teleport DIMATIKAN!", 2)
+    end
+    
+    deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
+end)
+
 
 -- Element Quest
 local catElement = makeCategory(questPage, "Element Quest (Element Rod)", "🔥")
@@ -1397,13 +1412,42 @@ local elementLabel = new("TextLabel",{
     ZIndex=8
 })
 
-
-
 makeButton(catElement, "🔄 Refresh Progress", function()
     _G.AutoQuestModule = nil
     AutoQuestModule = require(script.Parent.AutoQuestModule)
     elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
     Notify("Refresh", "Progress updated!", 2)
+end)
+
+local elementAutoTeleportActive = false
+makeButton(catElement, "🤖 Auto Teleport: OFF", function()
+    elementAutoTeleportActive = not elementAutoTeleportActive
+    
+    if elementAutoTeleportActive then
+        AutoQuestModule.StartAutoTeleport("ElementQuest")
+        Notify("Auto Teleport", "Element Quest Auto Teleport AKTIF!", 2)
+    else
+        AutoQuestModule.StopAutoTeleport()
+        Notify("Auto Teleport", "Element Quest Auto Teleport DIMATIKAN!", 2)
+    end
+    
+    elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
+end)
+
+
+-- ==== REAL-TIME UPDATE ====
+task.spawn(function()
+    while true do
+        task.wait(2)
+        
+        if deepSeaLabel and deepSeaLabel.Parent then
+            deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
+        end
+        
+        if elementLabel and elementLabel.Parent then
+            elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
+        end
+    end
 end)
 
 
