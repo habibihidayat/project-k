@@ -70,11 +70,14 @@ local function HideAllGuis()
     
     for _, gui in pairs(PlayerGui:GetChildren()) do
         if gui:IsA("ScreenGui") and gui.Enabled then
-            -- JANGAN sembunyikan GUI utama script Anda
-            -- Sesuaikan nama dengan nama ScreenGui Anda
+            -- JANGAN sembunyikan GUI utama yang sudah diset
+            if mainGuiName and gui.Name == mainGuiName then
+                continue
+            end
+            
+            -- JANGAN sembunyikan GUI dengan nama umum (fallback)
             local guiName = gui.Name:lower()
             if guiName:find("main") or guiName:find("hub") or guiName:find("menu") or guiName:find("ui") then
-                -- Skip GUI utama, jangan disembunyikan
                 continue
             end
             
@@ -269,12 +272,33 @@ function FreecamModule.GetSensitivity()
 end
 
 -- ============================================
--- SETUP F3 KEYBIND (OPTIONAL)
+-- SET MAIN GUI NAME (AGAR TIDAK IKUT HILANG)
 -- ============================================
+local mainGuiName = nil
+
+function FreecamModule.SetMainGuiName(guiName)
+    mainGuiName = guiName
+    print("✅ Main GUI set to: " .. guiName)
+end
+
+function FreecamModule.GetMainGuiName()
+    return mainGuiName
+end
+
+-- ============================================
+-- KEYBIND F3 (OPSIONAL - DISABLED BY DEFAULT)
+-- ============================================
+local enableF3Keybind = false
+
+function FreecamModule.EnableF3Keybind(enable)
+    enableF3Keybind = enable
+end
+
 UIS.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     
-    if input.KeyCode == Enum.KeyCode.F3 then
+    -- F3 toggle hanya jika diaktifkan
+    if enableF3Keybind and input.KeyCode == Enum.KeyCode.F3 then
         FreecamModule.Toggle()
     end
     
@@ -294,7 +318,8 @@ print("╔═══════════════════════�
 print("║   FREECAM MODULE - PC & MOBILE READY   ║")
 print("╚════════════════════════════════════════╝")
 print("► Platform: " .. (isMobile and "📱 MOBILE" or "💻 PC"))
-print("► F3 = Quick Toggle (or use GUI)")
+print("► F3 Keybind: DISABLED (use GUI toggle)")
+print("► Ready to be controlled by GUI")
 print("═════════════════════════════════════════")
 
 return FreecamModule
