@@ -1,11 +1,12 @@
 -- ============================================
--- AUTO QUEST MODULE - FISH IT (REAL)
+-- AUTO QUEST MODULE - FISH IT (FIXED)
 -- ============================================
--- For Ghostfinn Rod & Element Rod Quests
+-- Automatic Quest Detection & Progress Tracking
 
 local AutoQuestModule = {}
 
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
@@ -36,59 +37,275 @@ AutoQuestModule.Quests = {
 }
 
 -- ============================================
--- SCAN QUEST PROGRESS FROM GUI
+-- SCAN QUEST PROGRESS FROM PLAYER DATA
 -- ============================================
 
-function AutoQuestModule.ScanQuestProgress()
+function AutoQuestModule.ScanPlayerData()
+    print("🔍 Scanning player quest data...")
+    
+    -- Method 1: Check PlayerGui Quest data
     local questGui = PlayerGui:FindFirstChild("Quest")
-    if not questGui then
-        warn("❌ Quest GUI not found!")
-        return false
-    end
-    
-    print("🔍 Scanning quest progress from GUI...")
-    
-    -- Scan Deep Sea Quest
-    local deepSeaTile = questGui:FindFirstChild("Content")
-    if deepSeaTile then
-        for _, tile in pairs(deepSeaTile:GetChildren()) do
-            if tile:IsA("Frame") and tile.Name == "Tile" then
-                local items = tile:FindFirstChild("Items")
-                if items then
-                    local questLabel = items:FindFirstChild("QuestLabel")
-                    if questLabel and questLabel.Text then
-                        -- Check if it's Deep Sea Quest or Element Quest
-                        local text = questLabel.Text
-                        
-                        if text:find("Deep Sea") or text:find("Treasure Room") or text:find("Sisyphus") then
-                            print("📋 Found Deep Sea Quest tile")
-                            -- Update progress from GUI
-                            AutoQuestModule.UpdateProgressFromGUI("DeepSeaQuest", tile)
-                        elseif text:find("Element") or text:find("Ancient Jungle") or text:find("Sacred Temple") then
-                            print("📋 Found Element Quest tile")
-                            AutoQuestModule.UpdateProgressFromGUI("ElementQuest", tile)
-                        end
-                    end
+    if questGui then
+        local content = questGui:FindFirstChild("Content")
+        if content then
+            for _, tile in pairs(content:GetChildren()) do
+                if tile:IsA("Frame") and tile.Name == "Tile" then
+                    AutoQuestModule.ParseQuestTile(tile)
                 end
             end
         end
     end
     
+    -- Method 2: Check ReplicatedStorage for quest data
+    local questData = ReplicatedStorage:FindFirstChild("QuestData")
+    if questData then
+        local playerQuests = questData:FindFirstChild(Player.UserId)
+        if playerQuests then
+            AutoQuestModule.ParseReplicatedData(playerQuests)
+        end
+    end
+    
+    -- Method 3: Check Player's leaderstats or Data folder
+    local playerData = Player:FindFirstChild("Data") or Player:FindFirstChild("leaderstats")
+    if playerData then
+        AutoQuestModule.ParsePlayerStats(playerData)
+    end
+    
+    -- Method 4: Check inventory for quest items
+    AutoQuestModule.CheckQuestItems()
+    
     print("✅ Quest scan complete!")
     return true
 end
 
-function AutoQuestModule.UpdateProgressFromGUI(questName, tile)
+-- ============================================
+-- PARSE QUEST TILE FROM GUI
+-- ============================================
+
+function AutoQuestModule.ParseQuestTile(tile)
+    local items = tile:FindFirstChild("Items")
+    if not items then return end
+    
+    local questLabel = items:FindFirstChild("QuestLabel")
+    if not questLabel then return end
+    
+    local text = questLabel.Text
+    
+    -- Detect Deep Sea Quest
+    if text:find("Deep Sea") or text:find("Treasure Room") or text:find("Sisyphus") then
+        print("📋 Parsing Deep Sea Quest from GUI...")
+        
+        -- Look for progress indicators in the tile
+        for _, child in pairs(items:GetChildren()) do
+            if child:IsA("TextLabel") then
+                local progressText = child.Text
+                
+                -- Parse progress like "150/300" or "1/3"
+                local current, required = progressText:match("(%d+)/(%d+)")
+                if current and required then
+                    -- Try to match which task this belongs to
+                    AutoQuestModule.MatchTaskProgress("DeepSeaQuest", tonumber(current), tonumber(required), progressText)
+                end
+            end
+        end
+        
+        -- Check progress bar
+        local progressBar = items:FindFirstChild("Progress") or items:FindFirstChild("ProgressBar")
+        if progressBar then
+            local fill = progressBar:FindFirstChild("Fill")
+            if fill and fill:IsA("Frame") then
+                local percentage = fill.Size.X.Scale
+                print("   Progress bar: " .. math.floor(percentage * 100) .. "%")
+            end
+        end
+    end
+    
+    -- Detect Element Quest
+    if text:find("Element") or text:find("Ancient Jungle") or text:find("Sacred Temple") then
+        print("📋 Parsing Element Quest from GUI...")
+        
+        for _, child in pairs(items:GetChildren()) do
+            if child:IsA("TextLabel") then
+                local progressText = child.Text
+                local current, required = progressText:match("(%d+)/(%d+)")
+                if current and required then
+                    AutoQuestModule.MatchTaskProgress("ElementQuest", tonumber(current), tonumber(required), progressText)
+                end
+            end
+        end
+    end
+end
+
+-- ============================================
+-- MATCH TASK PROGRESS
+-- ============================================
+
+function AutoQuestModule.MatchTaskProgress(questName, current, required, text)
     local quest = AutoQuestModule.Quests[questName]
     if not quest then return end
     
-    -- Check progress bar
-    local items = tile:FindFirstChild("Items")
-    if items then
-        local progress = items:FindFirstChild("Progress")
-        if progress then
-            -- Game might store progress info here
-            print("   Progress frame found for " .. questName)
+    -- Match by required amount
+    for i, task in ipairs(quest.Tasks) do
+        if task.Required == required then
+            task.Current = current
+            print("   ✅ Task " .. i .. ": " .. current .. "/" .. required)
+            break
+        end
+    end
+end
+
+-- ============================================
+-- PARSE REPLICATED DATA
+-- ============================================
+
+function AutoQuestModule.ParseReplicatedData(playerQuests)
+    print("📊 Parsing ReplicatedStorage quest data...")
+    
+    -- Look for quest progress values
+    for _, value in pairs(playerQuests:GetChildren()) do
+        if value:IsA("NumberValue") or value:IsA("IntValue") then
+            local name = value.Name
+            local amount = value.Value
+            
+            -- Match quest task names
+            if name:find("TreasureRoom") or name:find("RareEpic") then
+                AutoQuestModule.Quests.DeepSeaQuest.Tasks[1].Current = amount
+            elseif name:find("Mythic") and name:find("Sisyphus") then
+                AutoQuestModule.Quests.DeepSeaQuest.Tasks[2].Current = amount
+            elseif name:find("SECRET") and name:find("Sisyphus") then
+                AutoQuestModule.Quests.DeepSeaQuest.Tasks[3].Current = amount
+            elseif name:find("Coins") then
+                AutoQuestModule.Quests.DeepSeaQuest.Tasks[4].Current = amount
+            elseif name:find("Ancient") and name:find("Jungle") then
+                AutoQuestModule.Quests.ElementQuest.Tasks[2].Current = amount
+            elseif name:find("Sacred") and name:find("Temple") then
+                AutoQuestModule.Quests.ElementQuest.Tasks[3].Current = amount
+            elseif name:find("Transcended") then
+                AutoQuestModule.Quests.ElementQuest.Tasks[4].Current = amount
+            end
+        end
+    end
+end
+
+-- ============================================
+-- PARSE PLAYER STATS
+-- ============================================
+
+function AutoQuestModule.ParsePlayerStats(playerData)
+    print("💎 Parsing player stats...")
+    
+    -- Check coins
+    local coins = playerData:FindFirstChild("Coins") or playerData:FindFirstChild("Cash")
+    if coins and (coins:IsA("NumberValue") or coins:IsA("IntValue")) then
+        AutoQuestModule.Quests.DeepSeaQuest.Tasks[4].Current = coins.Value
+        print("   💰 Coins: " .. coins.Value)
+    end
+    
+    -- Check quest-specific values
+    local questProgress = playerData:FindFirstChild("QuestProgress")
+    if questProgress then
+        for _, value in pairs(questProgress:GetChildren()) do
+            if value:IsA("NumberValue") or value:IsA("IntValue") then
+                -- Match by name pattern
+                print("   📊 Found: " .. value.Name .. " = " .. value.Value)
+            end
+        end
+    end
+end
+
+-- ============================================
+-- CHECK QUEST ITEMS
+-- ============================================
+
+function AutoQuestModule.CheckQuestItems()
+    print("🎒 Checking quest items...")
+    
+    -- Check Ghostfinn Rod
+    local hasGhostfinn = AutoQuestModule.CheckHasItem("Ghostfinn Rod") or 
+                         AutoQuestModule.CheckHasItem("!!! Ghostfinn Rod")
+    if hasGhostfinn then
+        AutoQuestModule.Quests.DeepSeaQuest.Completed = true
+        AutoQuestModule.Quests.ElementQuest.Tasks[1].Current = 1
+        print("   ✅ Ghostfinn Rod owned")
+    end
+    
+    -- Check Element Rod
+    local hasElement = AutoQuestModule.CheckHasItem("Element Rod") or 
+                       AutoQuestModule.CheckHasItem("!!! Element Rod")
+    if hasElement then
+        AutoQuestModule.Quests.ElementQuest.Completed = true
+        print("   ✅ Element Rod owned")
+    end
+end
+
+function AutoQuestModule.CheckHasItem(itemName)
+    -- Check backpack
+    local backpack = Player:FindFirstChild("Backpack")
+    if backpack then
+        for _, item in pairs(backpack:GetChildren()) do
+            if item.Name:find(itemName) then
+                return true
+            end
+        end
+    end
+    
+    -- Check character
+    local character = Player.Character
+    if character then
+        for _, item in pairs(character:GetChildren()) do
+            if item.Name:find(itemName) then
+                return true
+            end
+        end
+    end
+    
+    -- Check PlayerGui inventory
+    local inventory = PlayerGui:FindFirstChild("Inventory")
+    if inventory then
+        for _, item in pairs(inventory:GetDescendants()) do
+            if item:IsA("TextLabel") and item.Text:find(itemName) then
+                return true
+            end
+        end
+    end
+    
+    return false
+end
+
+-- ============================================
+-- AUTO-DETECT FROM CHAT/NOTIFICATIONS
+-- ============================================
+
+function AutoQuestModule.MonitorNotifications()
+    local chatGui = PlayerGui:WaitForChild("Chat", 5)
+    if not chatGui then return end
+    
+    local function onMessageAdded(message)
+        if not message or not message.Text then return end
+        
+        local text = message.Text
+        
+        -- Detect quest completion messages
+        if text:find("Quest Completed") or text:find("You earned") then
+            print("🎉 Quest completion detected!")
+            task.wait(1)
+            AutoQuestModule.ScanPlayerData()
+        end
+        
+        -- Detect fish catch notifications
+        if text:find("Caught") and text:find("Rare") or text:find("Epic") then
+            -- Increment rare/epic counter
+            local task = AutoQuestModule.Quests.DeepSeaQuest.Tasks[1]
+            task.Current = math.min(task.Current + 1, task.Required)
+        end
+    end
+    
+    -- Monitor chat messages
+    for _, message in pairs(chatGui:GetDescendants()) do
+        if message:IsA("TextLabel") then
+            message:GetPropertyChangedSignal("Text"):Connect(function()
+                onMessageAdded(message)
+            end)
         end
     end
 end
@@ -114,32 +331,15 @@ function AutoQuestModule.CheckQuestCompletion(questName)
 end
 
 -- ============================================
--- CHECK IF PLAYER HAS ITEM
--- ============================================
-
-function AutoQuestModule.CheckHasItem(itemName)
-    -- Check backpack
-    local backpack = Player:FindFirstChild("Backpack")
-    if backpack and backpack:FindFirstChild(itemName) then
-        return true
-    end
-    
-    -- Check character
-    local character = Player.Character
-    if character and character:FindFirstChild(itemName) then
-        return true
-    end
-    
-    return false
-end
-
--- ============================================
 -- GET QUEST PROGRESS INFO
 -- ============================================
 
 function AutoQuestModule.GetQuestInfo(questName)
     local quest = AutoQuestModule.Quests[questName]
     if not quest then return "Quest not found" end
+    
+    -- Auto-check completion
+    AutoQuestModule.CheckQuestCompletion(questName)
     
     local info = "📋 " .. quest.Name .. "\n"
     info = info .. "━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -161,28 +361,8 @@ function AutoQuestModule.GetQuestInfo(questName)
 end
 
 -- ============================================
--- MANUAL PROGRESS UPDATE
+-- MANUAL UPDATE (Backup)
 -- ============================================
-
-function AutoQuestModule.UpdateTaskProgress(questName, taskIndex, amount)
-    local quest = AutoQuestModule.Quests[questName]
-    if not quest or not quest.Tasks[taskIndex] then return false end
-    
-    local task = quest.Tasks[taskIndex]
-    task.Current = math.min(task.Current + amount, task.Required)
-    
-    print("✅ Updated: " .. task.Name .. " → " .. task.Current .. "/" .. task.Required)
-    
-    -- Check if task completed
-    if task.Current >= task.Required then
-        print("🎉 Task completed: " .. task.Name)
-    end
-    
-    -- Check overall quest completion
-    AutoQuestModule.CheckQuestCompletion(questName)
-    
-    return true
-end
 
 function AutoQuestModule.SetTaskProgress(questName, taskIndex, current)
     local quest = AutoQuestModule.Quests[questName]
@@ -195,6 +375,23 @@ function AutoQuestModule.SetTaskProgress(questName, taskIndex, current)
     
     AutoQuestModule.CheckQuestCompletion(questName)
     return true
+end
+
+-- ============================================
+-- AUTO-REFRESH LOOP
+-- ============================================
+
+function AutoQuestModule.StartAutoRefresh(interval)
+    interval = interval or 10 -- Default: refresh every 10 seconds
+    
+    task.spawn(function()
+        while true do
+            task.wait(interval)
+            AutoQuestModule.ScanPlayerData()
+        end
+    end)
+    
+    print("🔄 Auto-refresh enabled (every " .. interval .. " seconds)")
 end
 
 -- ============================================
@@ -228,41 +425,12 @@ function AutoQuestModule.DebugPrintAll()
     print("╚════════════════════════════════════════╝\n")
 end
 
-function AutoQuestModule.DebugCheckItems()
-    print("\n🎒 ═══ CHECKING QUEST ITEMS ═══")
-    
-    -- Check Ghostfinn Rod
-    local hasGhostfinn = AutoQuestModule.CheckHasItem("!!! Ghostfinn Rod")
-    print((hasGhostfinn and "✅" or "❌") .. " Ghostfinn Rod")
-    
-    -- Check Element Rod
-    local hasElement = AutoQuestModule.CheckHasItem("!!! Element Rod")
-    print((hasElement and "✅" or "❌") .. " Element Rod")
-    
-    -- Auto update Element Quest task 1 if has Ghostfinn
-    if hasGhostfinn then
-        AutoQuestModule.SetTaskProgress("ElementQuest", 1, 1)
-    end
-    
-    print("═══════════════════════════════════\n")
-end
-
 -- ============================================
--- RESET QUEST
+-- ALIAS FOR GUI COMPATIBILITY
 -- ============================================
 
-function AutoQuestModule.ResetQuest(questName)
-    local quest = AutoQuestModule.Quests[questName]
-    if not quest then return false end
-    
-    quest.Completed = false
-    for _, task in ipairs(quest.Tasks) do
-        task.Current = 0
-    end
-    
-    print("🔄 " .. quest.Name .. " has been reset!")
-    return true
-end
+AutoQuestModule.ScanQuestProgress = AutoQuestModule.ScanPlayerData
+AutoQuestModule.DebugCheckItems = AutoQuestModule.CheckQuestItems
 
 -- ============================================
 -- AUTO INIT
@@ -275,13 +443,16 @@ task.spawn(function()
     print("║   FISH IT AUTO QUEST - INITIALIZING    ║")
     print("╚════════════════════════════════════════╝\n")
     
-    -- Auto scan GUI
-    AutoQuestModule.ScanQuestProgress()
+    -- Initial scan
+    AutoQuestModule.ScanPlayerData()
     
-    -- Auto check items
-    AutoQuestModule.DebugCheckItems()
+    -- Start monitoring
+    AutoQuestModule.MonitorNotifications()
     
-    -- Print all quests
+    -- Start auto-refresh (every 15 seconds)
+    AutoQuestModule.StartAutoRefresh(15)
+    
+    -- Print results
     AutoQuestModule.DebugPrintAll()
 end)
 
@@ -291,9 +462,9 @@ end)
 print("╔════════════════════════════════════════╗")
 print("║   FISH IT AUTO QUEST MODULE - READY    ║")
 print("╚════════════════════════════════════════╝")
-print("► Deep Sea Quest (Ghostfinn Rod): TRACKED")
-print("► Element Quest (Element Rod): TRACKED")
-print("► Manual Progress Update: ENABLED")
+print("► Auto-detection: ENABLED")
+print("► Real-time tracking: ENABLED")
+print("► Manual backup: AVAILABLE")
 print("═════════════════════════════════════════")
 
 return AutoQuestModule
