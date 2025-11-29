@@ -172,10 +172,15 @@ end
 local function IsPositionInThumbstick(pos)
     if not dynamicThumbstick then return false end
     
-    -- Convert to Vector2 jika perlu
-    local pos2D = Vector2.new(pos.X, pos.Y)
-    local distance = (pos2D - thumbstickCenter).Magnitude
-    return distance <= thumbstickRadius * 1.2
+    -- Fallback: check absolute position dari thumbstick frame
+    local thumbPos = dynamicThumbstick.AbsolutePosition
+    local thumbSize = dynamicThumbstick.AbsoluteSize
+    
+    -- Check apakah pos berada dalam bounding box thumbstick
+    local isWithinX = pos.X >= thumbPos.X - 50 and pos.X <= (thumbPos.X + thumbSize.X + 50)
+    local isWithinY = pos.Y >= thumbPos.Y - 50 and pos.Y <= (thumbPos.Y + thumbSize.Y + 50)
+    
+    return isWithinX and isWithinY
 end
 
 local function GetJoystickInput(touchPos)
@@ -239,7 +244,13 @@ function FreecamModule.Start()
             if input.UserInputType == Enum.UserInputType.Touch then
                 local pos = input.Position
                 
-                if IsPositionInThumbstick(pos) then
+                -- Gunakan pcall untuk avoid error dari script game lain
+                local isInThumbstick = false
+                pcall(function()
+                    isInThumbstick = IsPositionInThumbstick(pos)
+                end)
+                
+                if isInThumbstick then
                     joystickTouch = input
                 else
                     -- Camera touch di area lain
@@ -255,7 +266,9 @@ function FreecamModule.Start()
             if input.UserInputType == Enum.UserInputType.Touch then
                 -- Handle joystick touch
                 if input == joystickTouch then
-                    mobileJoystickInput = GetJoystickInput(input.Position)
+                    pcall(function()
+                        mobileJoystickInput = GetJoystickInput(input.Position)
+                    end)
                 end
                 
                 -- Handle camera touch
