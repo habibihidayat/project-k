@@ -32,6 +32,8 @@ local LockPosition = loadstring(game:HttpGet("https://raw.githubusercontent.com/
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
 local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/TeleportToPlayer.lua"))()
 local SavedLocation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/SavedLocation.lua"))()
+-- Quest page
+local AutoQuestModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Quest/AutoQuestModule.lua"))()
 -- Shop
 local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
 local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
@@ -485,6 +487,7 @@ end
 
 local mainPage = createPage("Main")
 local teleportPage = createPage("Teleport")
+local questPage = createPage("Quest")
 local shopPage = createPage("Shop")
 local cameraViewPage = createPage("CameraView")
 local settingsPage = createPage("Settings")
@@ -619,6 +622,7 @@ end
 
 local btnMain = createNavButton("Dashboard", "🏠", "Main", 1)
 local btnTeleport = createNavButton("Teleport", "🌍", "Teleport", 2)
+local btnQuest = createNavButton("Quest", "🛒", "Quest", 3)
 local btnShop = createNavButton("Shop", "🛒", "Shop", 3)
 local btnCameraView = createNavButton("Camera View", "🛒", "CameraView", 3)
 local btnSettings = createNavButton("Settings", "⚙️", "Settings", 4)
@@ -626,6 +630,7 @@ local btnInfo = createNavButton("About", "ℹ️", "Info", 5)
 
 btnMain.MouseButton1Click:Connect(function() switchPage("Main", "Main Dashboard") end)
 btnTeleport.MouseButton1Click:Connect(function() switchPage("Teleport", "Teleport System") end)
+btnQuest.MouseButton1Click:Connect(function() switchPage("Quest", "Auto Quest") end)
 btnShop.MouseButton1Click:Connect(function() switchPage("Shop", "Shop Features") end)
 btnCameraView.MouseButton1Click:Connect(function() switchPage("CameraView", "Camera View Settings") end)
 btnSettings.MouseButton1Click:Connect(function() switchPage("Settings", "Settings") end)
@@ -1322,6 +1327,116 @@ end)
 makeButton(catSaved, "Reset Saved Location", function()
     SavedLocation.Reset()
     Notify("Reset 🔄", "Lokasi tersimpan telah dihapus.", 3)
+end)
+
+
+-- ==== QUEST PAGE ====
+local catDeepSea = makeCategory(questPage, "Deep Sea Quest (Ghostfinn Rod)", "👻")
+
+-- Progress display
+local deepSeaProgressFrame = new("Frame",{
+    Parent=catDeepSea,
+    Size=UDim2.new(1, 0, 0, 110),
+    BackgroundColor3=colors.bg3,
+    BackgroundTransparency=0.6,
+    BorderSizePixel=0,
+    ZIndex=7
+})
+new("UICorner",{Parent=deepSeaProgressFrame, CornerRadius=UDim.new(0, 8)})
+new("UIStroke",{Parent=deepSeaProgressFrame, Color=colors.border, Thickness=1, Transparency=0.7})
+
+local deepSeaLabel = new("TextLabel",{
+    Parent=deepSeaProgressFrame,
+    Size=UDim2.new(1, -24, 1, -24),
+    Position=UDim2.new(0, 12, 0, 12),
+    BackgroundTransparency=1,
+    Text=AutoQuestModule.GetQuestInfo("DeepSeaQuest"),
+    Font=Enum.Font.Gotham,
+    TextSize=8,
+    TextColor3=colors.text,
+    TextWrapped=true,
+    TextXAlignment=Enum.TextXAlignment.Left,
+    TextYAlignment=Enum.TextYAlignment.Top,
+    ZIndex=8
+})
+
+-- Manual Update Buttons
+makeInput(catDeepSea, "Task 1: Rare/Epic (300)", 0, function(value)
+    AutoQuestModule.SetTaskProgress("DeepSeaQuest", 1, tonumber(value) or 0)
+    deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
+end)
+
+makeInput(catDeepSea, "Task 2: Mythic (3)", 0, function(value)
+    AutoQuestModule.SetTaskProgress("DeepSeaQuest", 2, tonumber(value) or 0)
+    deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
+end)
+
+makeInput(catDeepSea, "Task 3: SECRET (1)", 0, function(value)
+    AutoQuestModule.SetTaskProgress("DeepSeaQuest", 3, tonumber(value) or 0)
+    deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
+end)
+
+makeInput(catDeepSea, "Task 4: Coins (1M)", 0, function(value)
+    AutoQuestModule.SetTaskProgress("DeepSeaQuest", 4, tonumber(value) or 0)
+    deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
+end)
+
+makeButton(catDeepSea, "Refresh Progress", function()
+    AutoQuestModule.ScanQuestProgress()
+    AutoQuestModule.DebugCheckItems()
+    deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
+    Notify("Refresh 🔄", "Progress updated!", 2)
+end)
+
+-- Element Quest
+local catElement = makeCategory(questPage, "Element Quest (Element Rod)", "🔥")
+
+local elementProgressFrame = new("Frame",{
+    Parent=catElement,
+    Size=UDim2.new(1, 0, 0, 110),
+    BackgroundColor3=colors.bg3,
+    BackgroundTransparency=0.6,
+    BorderSizePixel=0,
+    ZIndex=7
+})
+new("UICorner",{Parent=elementProgressFrame, CornerRadius=UDim.new(0, 8)})
+new("UIStroke",{Parent=elementProgressFrame, Color=colors.border, Thickness=1, Transparency=0.7})
+
+local elementLabel = new("TextLabel",{
+    Parent=elementProgressFrame,
+    Size=UDim2.new(1, -24, 1, -24),
+    Position=UDim2.new(0, 12, 0, 12),
+    BackgroundTransparency=1,
+    Text=AutoQuestModule.GetQuestInfo("ElementQuest"),
+    Font=Enum.Font.Gotham,
+    TextSize=8,
+    TextColor3=colors.text,
+    TextWrapped=true,
+    TextXAlignment=Enum.TextXAlignment.Left,
+    TextYAlignment=Enum.TextYAlignment.Top,
+    ZIndex=8
+})
+
+makeInput(catElement, "Task 2: Ancient Jungle (1)", 0, function(value)
+    AutoQuestModule.SetTaskProgress("ElementQuest", 2, tonumber(value) or 0)
+    elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
+end)
+
+makeInput(catElement, "Task 3: Sacred Temple (1)", 0, function(value)
+    AutoQuestModule.SetTaskProgress("ElementQuest", 3, tonumber(value) or 0)
+    elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
+end)
+
+makeInput(catElement, "Task 4: Transcended (3)", 0, function(value)
+    AutoQuestModule.SetTaskProgress("ElementQuest", 4, tonumber(value) or 0)
+    elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
+end)
+
+makeButton(catElement, "Refresh Progress", function()
+    AutoQuestModule.ScanQuestProgress()
+    AutoQuestModule.DebugCheckItems()
+    elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
+    Notify("Refresh 🔄", "Progress updated!", 2)
 end)
 
 
