@@ -5,6 +5,17 @@ local AutoSellTimer = {
 	Thread = nil
 }
 
+-- RAW Notification (langsung SetCore)
+local function Notify(title, text, duration)
+    pcall(function()
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = title,
+            Text = text,
+            Duration = duration or 4
+        })
+    end)
+end
+
 function AutoSellTimer.Start(interval)
 	if AutoSellTimer.Enabled then
 		warn("⚠️ AutoSellTimer sudah aktif!")
@@ -23,6 +34,7 @@ function AutoSellTimer.Start(interval)
 
 	AutoSellTimer.Enabled = true
 	print("✅ AutoSellTimer dimulai (" .. AutoSellTimer.Interval .. " detik)")
+	Notify("Auto Sell Running", "Auto Sell Berjalan!", 4)
 
 	AutoSellTimer.Thread = task.spawn(function()
 		while AutoSellTimer.Enabled do
@@ -43,6 +55,7 @@ function AutoSellTimer.Stop()
 
 	AutoSellTimer.Enabled = false
 	print("🛑 AutoSellTimer dihentikan.")
+	Notify("Auto Sell Stopped", "Auto Sell Berhenti!", 4)
 end
 
 function AutoSellTimer.SetInterval(seconds)
@@ -61,3 +74,4 @@ function AutoSellTimer.GetStatus()
 end
 
 return AutoSellTimer
+
