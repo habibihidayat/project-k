@@ -1,51 +1,40 @@
--- SavedLocation.lua
--- Sistem Save / Teleport / Reset Lokasi
+-- SaveLocation.lua
+local SaveLocation = {}
+local Notification = require(script.Parent.NotificationModule)
 
-local SavedLocation = {}
+local savedPos = nil
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+-- Save posisi pemain
+function SaveLocation.Save()
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
 
--- Lokasi tersimpan (Vector3 atau nil)
-SavedLocation.Current = nil
-
-----------------------------------------------------
--- 🔵 Save lokasi saat ini
-----------------------------------------------------
-function SavedLocation.Save()
-    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    local root = char:WaitForChild("HumanoidRootPart")
-
-    SavedLocation.Current = root.Position
-
-    print("💾 Lokasi berhasil disimpan:", SavedLocation.Current)
-    return true
+    savedPos = hrp.Position
+    Notification.Send("Saved Location", "Lokasi berhasil disimpan!", 4)
 end
 
-----------------------------------------------------
--- 🔵 Teleport ke lokasi tersimpan
-----------------------------------------------------
-function SavedLocation.Teleport()
-    if not SavedLocation.Current then
-        warn("⚠️ Tidak ada lokasi tersimpan!")
+-- Teleport ke posisi tersimpan
+function SaveLocation.Teleport()
+    if not savedPos then
+        Notification.Send("Error", "Tidak ada lokasi tersimpan!", 4)
         return false
     end
+    
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
 
-    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    local root = char:WaitForChild("HumanoidRootPart")
-
-    root.CFrame = CFrame.new(SavedLocation.Current)
-    print("📍 Teleported ke lokasi tersimpan:", SavedLocation.Current)
+    hrp.CFrame = CFrame.new(savedPos)
+    Notification.Send("Teleported", "Berhasil teleport ke lokasi tersimpan!", 4)
 
     return true
 end
 
-----------------------------------------------------
--- 🔵 Reset lokasi tersimpan
-----------------------------------------------------
-function SavedLocation.Reset()
-    SavedLocation.Current = nil
-    print("🗑️ Lokasi yang tersimpan sudah dihapus.")
+-- Reset lokasi tersimpan
+function SaveLocation.Reset()
+    savedPos = nil
+    Notification.Send("Location Reset", "Lokasi tersimpan berhasil dihapus!", 4)
 end
 
-return SavedLocation
+return SaveLocation
