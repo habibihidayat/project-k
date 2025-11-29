@@ -1351,7 +1351,7 @@ end)
 -- Camera settings
 FreecamModule.SetMainGuiName("LynxGUI_Galaxy") -- <-- UBAH INI!
 
-local catFreecam = makeCategory(CameraViewPage, "Freecam Camera", "📷")
+local catFreecam = makeCategory(cameraViewPage, "Freecam Camera", "📷")
 
 local freecamActive = false
 
