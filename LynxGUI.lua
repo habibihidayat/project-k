@@ -1510,13 +1510,41 @@ end)
 local catZoom = makeCategory(cameraViewPage, "Unlimited Zoom", "🔭")
 
 makeToggle(catZoom, "Enable Unlimited Zoom", function(on)
+    -- Safety check: pastikan module sudah loaded
+    if not UnlimitedZoomModule then
+        Notify.Send("Error ❌", "UnlimitedZoomModule belum di-load!", 3)
+        warn("❌ UnlimitedZoomModule is nil!")
+        return
+    end
+    
+    -- Safety check: pastikan function Enable ada
+    if type(UnlimitedZoomModule.Enable) ~= "function" then
+        Notify.Send("Error ❌", "UnlimitedZoomModule.Enable bukan function!", 3)
+        warn("❌ UnlimitedZoomModule.Enable is not a function, type:", type(UnlimitedZoomModule.Enable))
+        return
+    end
+    
     if on then
-        if UnlimitedZoomModule.Enable() then
+        local success, result = pcall(function()
+            return UnlimitedZoomModule.Enable()
+        end)
+        
+        if success and result then
             Notify.Send("Zoom 🔭", "Unlimited Zoom aktif! Scroll atau pinch untuk zoom.", 4)
+        elseif not success then
+            Notify.Send("Error ❌", "Gagal mengaktifkan: " .. tostring(result), 3)
+            warn("❌ Enable error:", result)
         end
     else
-        if UnlimitedZoomModule.Disable() then
+        local success, result = pcall(function()
+            return UnlimitedZoomModule.Disable()
+        end)
+        
+        if success and result then
             Notify.Send("Zoom 🔭", "Unlimited Zoom nonaktif.", 3)
+        elseif not success then
+            Notify.Send("Error ❌", "Gagal menonaktifkan: " .. tostring(result), 3)
+            warn("❌ Disable error:", result)
         end
     end
 end)
