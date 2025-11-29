@@ -172,14 +172,18 @@ end
 local function IsPositionInThumbstick(pos)
     if not dynamicThumbstick then return false end
     
-    local distance = (pos - thumbstickCenter).Magnitude
-    return distance <= thumbstickRadius * 1.2 -- Sedikit lebih besar untuk tolerance
+    -- Convert to Vector2 jika perlu
+    local pos2D = Vector2.new(pos.X, pos.Y)
+    local distance = (pos2D - thumbstickCenter).Magnitude
+    return distance <= thumbstickRadius * 1.2
 end
 
 local function GetJoystickInput(touchPos)
     if not dynamicThumbstick then return Vector3.new(0, 0, 0) end
     
-    local delta = touchPos - thumbstickCenter
+    -- Convert to Vector2
+    local touchPos2D = Vector2.new(touchPos.X, touchPos.Y)
+    local delta = touchPos2D - thumbstickCenter
     local magnitude = delta.Magnitude
     
     if magnitude < 5 then
@@ -188,7 +192,13 @@ local function GetJoystickInput(touchPos)
     
     -- Normalize joystick input
     local maxDist = thumbstickRadius
-    local normalized = (delta / maxDist):Clamp(Vector2.new(-1, -1), Vector2.new(1, 1))
+    local normalized = delta / maxDist
+    
+    -- Clamp nilai
+    normalized = Vector2.new(
+        math.max(-1, math.min(1, normalized.X)),
+        math.max(-1, math.min(1, normalized.Y))
+    )
     
     -- Convert to movement direction (X = strafe, Z = forward)
     return Vector3.new(normalized.X, 0, normalized.Y)
