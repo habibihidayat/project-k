@@ -1396,13 +1396,13 @@ if not isMobile then
         Position = UDim2.new(0, 12, 0, 12),
         BackgroundTransparency = 1,
         Text = [[📌 FREECAM CONTROLS (PC)
-━━━━━━━━━━━━━━━━━━━━━━
-1. Aktifkan toggle "Enable Freecam"
-2. Tekan F3 untuk ON/OFF freecam
-3. WASD - Bergerak | Mouse - Rotasi
-4. Space/E - Naik | Shift/Q - Turun]],
+    ━━━━━━━━━━━━━━━━━━━━━━
+    1. Aktifkan toggle "Enable Freecam"
+    2. Tekan F3 untuk ON/OFF freecam
+    3. WASD - Gerak | Mouse - Rotasi
+    4. Space/E - Naik | Shift/Q - Turun]],
         Font = Enum.Font.Gotham,
-        TextSize = 9,
+        TextSize = 8,  -- Lebih kecil dari 9
         TextColor3 = colors.text,
         TextWrapped = true,
         TextXAlignment = Enum.TextXAlignment.Left,
