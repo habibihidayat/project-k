@@ -1,23 +1,34 @@
 -- SaveLocation.lua
 local SaveLocation = {}
-local Notification = require(script.Parent.NotificationModule)
 
 local savedPos = nil
 
--- Save posisi pemain
+-- RAW Notification (langsung SetCore)
+local function Notify(title, text, duration)
+    pcall(function()
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = title,
+            Text = text,
+            Duration = duration or 4
+        })
+    end)
+end
+
+-- Simpan posisi
 function SaveLocation.Save()
     local player = game.Players.LocalPlayer
     local char = player.Character or player.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
 
     savedPos = hrp.Position
-    Notification.Send("Saved Location", "Lokasi berhasil disimpan!", 4)
+
+    Notify("Saved Location", "Lokasi tersimpan!", 4)
 end
 
--- Teleport ke posisi tersimpan
+-- Teleport ke lokasi tersimpan
 function SaveLocation.Teleport()
     if not savedPos then
-        Notification.Send("Error", "Tidak ada lokasi tersimpan!", 4)
+        Notify("Error", "Belum ada lokasi yang disimpan!", 4)
         return false
     end
     
@@ -26,15 +37,15 @@ function SaveLocation.Teleport()
     local hrp = char:WaitForChild("HumanoidRootPart")
 
     hrp.CFrame = CFrame.new(savedPos)
-    Notification.Send("Teleported", "Berhasil teleport ke lokasi tersimpan!", 4)
 
+    Notify("Teleported", "Teleport berhasil!", 4)
     return true
 end
 
 -- Reset lokasi tersimpan
 function SaveLocation.Reset()
     savedPos = nil
-    Notification.Send("Location Reset", "Lokasi tersimpan berhasil dihapus!", 4)
+    Notify("Location Reset", "Lokasi tersimpan dihapus!", 4)
 end
 
 return SaveLocation
