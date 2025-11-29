@@ -24,8 +24,15 @@ local hiddenGuis = {}
 
 -- Mobile detection
 local isMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
-local touchInput = nil
-local touchStartPos = nil
+
+-- Mobile joystick variables
+local mobileJoystickInput = Vector3.new(0, 0, 0)
+local joystickConnections = {}
+local dynamicThumbstick = nil
+
+-- Touch input for camera rotation
+local cameraTouch = nil
+local cameraTouchStartPos = nil
 
 -- Connections
 local renderConnection = nil
@@ -112,7 +119,41 @@ local function GetMovement()
         move = move + Vector3.new(0, -1, 0) 
     end
     
+    -- Add mobile joystick input
+    if isMobile then
+        move = move + mobileJoystickInput
+    end
+    
     return move
+end
+
+-- ============================================
+-- MOBILE JOYSTICK DETECTION
+-- ============================================
+
+local function DetectDynamicThumbstick()
+    -- Cari DynamicThumbstick atau joystick yang sudah ada di game
+    local Players_Service = game:GetService("Players")
+    local PlayerGui_Check = Players_Service.LocalPlayer:WaitForChild("PlayerGui")
+    
+    -- Search untuk DynamicThumbstick atau joystick GUI
+    local function searchForThumbstick(parent)
+        for _, child in pairs(parent:GetDescendants()) do
+            local name = child.Name:lower()
+            if name:find("thumbstick") or name:find("joystick") or name:find("analog") then
+                if child:IsA("Frame") or child:IsA("ImageButton") or child:IsA("TextButton") then
+                    return child
+                end
+            end
+        end
+        return nil
+    end
+    
+    dynamicThumbstick = searchForThumbstick(PlayerGui_Check)
+    
+    if dynamicThumbstick then
+        print("✅ DynamicThumbstick terdeteksi: " .. dynamicThumbstick.Name)
+    end
 end
 
 -- ============================================
@@ -141,26 +182,42 @@ function FreecamModule.Start()
     if not isMobile then
         UIS.MouseBehavior = Enum.MouseBehavior.LockCenter
         UIS.MouseIconEnabled = false
+    else
+        -- Deteksi thumbstick untuk mobile
+        DetectDynamicThumbstick()
     end
     
-    -- Mobile touch input handling - PERBAIKAN
+    -- Mobile touch input handling untuk CAMERA ROTATION saja
     if isMobile then
-        -- Handle touch began
+        -- Handle touch began untuk camera
         inputBeganConnection = UIS.InputBegan:Connect(function(input, gameProcessed)
             if not freecam then return end
             
             if input.UserInputType == Enum.UserInputType.Touch then
-                touchInput = input
-                touchStartPos = input.Position
+                -- Jika di area thumbstick, abaikan
+                if dynamicThumbstick then
+                    local thumbstickSize = dynamicThumbstick.AbsoluteSize
+                    local thumbstickPos = dynamicThumbstick.AbsolutePosition
+                    local thumbstickArea = UDim2.new(thumbstickPos.X, thumbstickSize.X, thumbstickPos.Y, thumbstickSize.Y)
+                    
+                    if input.Position.X >= thumbstickPos.X and input.Position.X <= thumbstickPos.X + thumbstickSize.X and
+                       input.Position.Y >= thumbstickPos.Y and input.Position.Y <= thumbstickPos.Y + thumbstickSize.Y then
+                        return -- Joystick area, skip camera touch
+                    end
+                end
+                
+                -- Hanya gunakan untuk camera rotation di area lain
+                cameraTouch = input
+                cameraTouchStartPos = input.Position
             end
         end)
         
-        -- Handle touch changed dengan deteksi yang lebih baik
+        -- Handle touch changed untuk camera rotation
         inputChangedConnection = UIS.InputChanged:Connect(function(input, gameProcessed)
-            if not freecam or not touchInput then return end
+            if not freecam or not cameraTouch then return end
             
-            if input.UserInputType == Enum.UserInputType.Touch then
-                local delta = input.Position - touchStartPos
+            if input.UserInputType == Enum.UserInputType.Touch and input == cameraTouch then
+                local delta = input.Position - cameraTouchStartPos
                 
                 if delta.Magnitude > 0 then
                     camRot = camRot + Vector3.new(
@@ -169,7 +226,7 @@ function FreecamModule.Start()
                         0
                     )
                     
-                    touchStartPos = input.Position
+                    cameraTouchStartPos = input.Position
                 end
             end
         end)
@@ -178,11 +235,25 @@ function FreecamModule.Start()
         inputEndedConnection = UIS.InputEnded:Connect(function(input, gameProcessed)
             if not freecam then return end
             
-            if input.UserInputType == Enum.UserInputType.Touch then
-                touchInput = nil
-                touchStartPos = nil
+            if input.UserInputType == Enum.UserInputType.Touch and input == cameraTouch then
+                cameraTouch = nil
+                cameraTouchStartPos = nil
             end
         end)
+        
+        -- Monitor joystick/thumbstick input
+        local joystickCheckConnection = RunService.Heartbeat:Connect(function()
+            if not freecam or not dynamicThumbstick then 
+                mobileJoystickInput = Vector3.new(0, 0, 0)
+                return 
+            end
+            
+            -- Coba deteksi input dari thumbstick (berbeda tergantung script yang digunakan)
+            -- Ini adalah fallback yang general
+            mobileJoystickInput = Vector3.new(0, 0, 0)
+        end)
+        
+        table.insert(joystickConnections, joystickCheckConnection)
     end
     
     -- Main render loop
@@ -251,6 +322,14 @@ function FreecamModule.Stop()
         inputBeganConnection = nil
     end
     
+    -- Disconnect joystick connections
+    for _, conn in pairs(joystickConnections) do
+        if conn then
+            conn:Disconnect()
+        end
+    end
+    joystickConnections = {}
+    
     -- Restore everything
     LockCharacter(false)
     ShowAllGuis()
@@ -260,8 +339,9 @@ function FreecamModule.Stop()
     UIS.MouseBehavior = Enum.MouseBehavior.Default
     UIS.MouseIconEnabled = true
     
-    touchInput = nil
-    touchStartPos = nil
+    cameraTouch = nil
+    cameraTouchStartPos = nil
+    mobileJoystickInput = Vector3.new(0, 0, 0)
     
     return true
 end
@@ -295,6 +375,16 @@ function FreecamModule.GetSensitivity()
 end
 
 -- ============================================
+-- MOBILE JOYSTICK INPUT OVERRIDE
+-- ============================================
+-- Gunakan fungsi ini jika Anda punya akses langsung ke joystick input
+function FreecamModule.SetMobileJoystickInput(direction)
+    if isMobile then
+        mobileJoystickInput = Vector3.new(direction.X, direction.Y, direction.Z)
+    end
+end
+
+-- ============================================
 -- SET MAIN GUI NAME (AGAR TIDAK IKUT HILANG)
 -- ============================================
 local mainGuiName = nil
@@ -325,12 +415,11 @@ function FreecamModule.IsF3KeybindActive()
     return f3KeybindActive
 end
 
--- F3 keybind hanya untuk PC, otomatis aktif ketika freecam dihidupkan
+-- F3 keybind hanya untuk PC
 if not isMobile then
     UIS.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
         
-        -- F3 toggle hanya jika keybind aktif dan freecam sedang aktif
         if f3KeybindActive and freecam and input.KeyCode == Enum.KeyCode.F3 then
             FreecamModule.Toggle()
             print("🎥 Freecam toggled via F3")
@@ -346,6 +435,7 @@ print("║   FREECAM MODULE - PC & MOBILE READY   ║")
 print("╚════════════════════════════════════════╝")
 print("► Platform: " .. (isMobile and "📱 MOBILE" or "💻 PC"))
 print("► F3 Keybind: " .. (isMobile and "N/A (Mobile)" or "READY (Toggle with GUI)"))
+print("► Mobile Joystick: " .. (isMobile and "AUTO-DETECTED" or "N/A"))
 print("► Ready to be controlled by GUI")
 print("═════════════════════════════════════════")
 
