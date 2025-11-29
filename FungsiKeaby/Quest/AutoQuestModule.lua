@@ -236,10 +236,8 @@ function AutoQuestModule.GetQuestInfo(questName)
     local quest = AutoQuestModule.Quests[questName]
     if not quest then return "Quest not found" end
     
-    local info = "📋 " .. quest.Name .. "\n"
-    info = info .. "━━━━━━━━━━━━━━━━━━━━━━\n"
-    info = info .. "🎁 Reward: " .. quest.Reward .. "\n"
-    info = info .. "🤖 Auto Teleport: " .. (AutoQuestModule.AutoTeleportActive and "✅ AKTIF" or "❌ TIDAK AKTIF") .. "\n\n"
+    local info = quest.Name .. "\n"
+    info = info .. "━━━━━━━━━━━━━━━━━━━━━━\n\n"
     
     for i, task in ipairs(quest.Tasks) do
         local status = task.Current >= task.Required and "✅" or "⏳"
@@ -249,9 +247,6 @@ function AutoQuestModule.GetQuestInfo(questName)
         info = info .. status .. " " .. task.Name .. "\n"
         info = info .. "   " .. progress .. " (" .. percentage .. "%)\n"
     end
-    
-    info = info .. "\n━━━━━━━━━━━━━━━━━━━━━━\n"
-    info = info .. "Status: " .. (quest.Completed and "✅ COMPLETED" or "⏳ IN PROGRESS")
     
     return info
 end
@@ -357,3 +352,4 @@ print("► Usage: AutoQuestModule.ToggleAutoTeleport('ElementQuest')")
 print("═════════════════════════════════════════")
 
 return AutoQuestModule
+
