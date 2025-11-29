@@ -1324,7 +1324,7 @@ local catDeepSea = makeCategory(questPage, "Deep Sea Quest (Ghostfinn Rod)")
 -- Progress display
 local deepSeaProgressFrame = new("Frame",{
     Parent=catDeepSea,
-    Size=UDim2.new(1, 0, 0, 110),
+    Size=UDim2.new(1, 0, 0, 160),
     BackgroundColor3=colors.bg3,
     BackgroundTransparency=0.6,
     BorderSizePixel=0,
@@ -1349,8 +1349,8 @@ local deepSeaLabel = new("TextLabel",{
 })
 
 makeButton(catDeepSea, "Refresh Progress", function()
-    _G.AutoQuestModule = nil -- Clear old module
-    AutoQuestModule = require(script.Parent.AutoQuestModule) -- Reload
+    _G.AutoQuestModule = nil
+    AutoQuestModule = require(script.Parent.AutoQuestModule)
     deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
     Notify("Refresh", "Progress updated!", 2)
 end)
@@ -1373,7 +1373,7 @@ local catElement = makeCategory(questPage, "Element Quest (Element Rod)")
 
 local elementProgressFrame = new("Frame",{
     Parent=catElement,
-    Size=UDim2.new(1, 0, 0, 110),
+    Size=UDim2.new(1, 0, 0, 160),
     BackgroundColor3=colors.bg3,
     BackgroundTransparency=0.6,
     BorderSizePixel=0,
