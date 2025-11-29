@@ -68,28 +68,22 @@ AutoQuestModule.Quests = {
 
 function AutoQuestModule.TeleportToLocation(location)
     if not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") then
-        print("❌ Character not found!")
         return false
     end
     
     local currentTime = tick()
     if currentTime - AutoQuestModule.LastTeleportTime < AutoQuestModule.TeleportCooldown then
-        print("⏳ Cooldown teleport masih aktif...")
         return false
     end
     
     if not location then
-        print("❌ Location tidak valid!")
         return false
     end
     
-    -- Teleport dengan offset kecil untuk menghindari spawn di dalam benda
     local offsetPos = location + Vector3.new(0, 3, 0)
-    
     Player.Character.HumanoidRootPart.CFrame = CFrame.new(offsetPos)
     AutoQuestModule.LastTeleportTime = currentTime
     
-    print("✅ Teleport ke: " .. tostring(location))
     return true
 end
 
@@ -120,68 +114,55 @@ end
 
 function AutoQuestModule.StartAutoTeleport(questName)
     if AutoQuestModule.AutoTeleportActive then
-        print("⚠️ Auto teleport sudah aktif!")
         return
     end
     
     local quest = AutoQuestModule.Quests[questName]
     if not quest then
-        print("❌ Quest tidak ditemukan!")
         return
     end
     
     AutoQuestModule.AutoTeleportActive = true
-    print("✅ Auto Teleport AKTIF untuk: " .. quest.Name)
     
-    -- Spawn coroutine untuk teleport loop
     task.spawn(function()
         while AutoQuestModule.AutoTeleportActive do
             task.wait(1)
             
             if not AutoQuestModule.AutoTeleportActive then break end
             
-            -- Cek kembali quest progress
             AutoQuestModule.DetectQuestCompletion()
             
-            -- Jika quest sudah completed, stop
             if quest.Completed then
-                print("🎉 Quest " .. quest.Name .. " SELESAI!")
                 AutoQuestModule.AutoTeleportActive = false
                 break
             end
             
-            -- Dapatkan lokasi yang belum selesai
             local incompleteLocations = AutoQuestModule.GetIncompleteTaskLocations(questName)
             
             if #incompleteLocations == 0 then
-                print("🎉 Semua task quest selesai!")
                 AutoQuestModule.AutoTeleportActive = false
                 break
             end
             
-            -- Teleport ke lokasi pertama yang belum selesai
             local targetLocation = incompleteLocations[1]
             local locationSet = quest.LocationSet
             local coordinates = AutoQuestModule.Locations[locationSet][targetLocation]
             
             if coordinates then
-                print("🎯 Teleport ke: " .. targetLocation)
                 AutoQuestModule.TeleportToLocation(coordinates)
             end
             
-            task.wait(5) -- Tunggu 5 detik sebelum check ulang
+            task.wait(5)
         end
     end)
 end
 
 function AutoQuestModule.StopAutoTeleport()
     if not AutoQuestModule.AutoTeleportActive then
-        print("⚠️ Auto teleport tidak aktif!")
         return
     end
     
     AutoQuestModule.AutoTeleportActive = false
-    print("⛔ Auto Teleport DIMATIKAN")
 end
 
 function AutoQuestModule.ToggleAutoTeleport(questName)
@@ -200,17 +181,14 @@ function AutoQuestModule.DetectQuestCompletion()
     local currentRod = Player:GetAttribute("FishingRod")
     
     if currentRod then
-        -- Check for Ghostfinn Rod (Deep Sea Quest completed)
         if currentRod:find("Ghostfinn") then
             AutoQuestModule.Quests.DeepSeaQuest.Completed = true
             for i, task in ipairs(AutoQuestModule.Quests.DeepSeaQuest.Tasks) do
                 task.Current = task.Required
             end
-            -- Element Quest Task 1 auto-complete
             AutoQuestModule.Quests.ElementQuest.Tasks[1].Current = 1
         end
         
-        -- Check for Element Rod (Element Quest completed)
         if currentRod:find("Element") then
             AutoQuestModule.Quests.ElementQuest.Completed = true
             for i, task in ipairs(AutoQuestModule.Quests.ElementQuest.Tasks) do
@@ -280,7 +258,6 @@ end
 function AutoQuestModule.StartMonitoring()
     Player:GetAttributeChangedSignal("FishingRod"):Connect(function()
         local rod = Player:GetAttribute("FishingRod")
-        print("🔔 Rod changed to: " .. tostring(rod))
         AutoQuestModule.DetectQuestCompletion()
     end)
 end
@@ -332,24 +309,8 @@ AutoQuestModule.SmartDetect = AutoQuestModule.DetectQuestCompletion
 
 task.spawn(function()
     task.wait(2)
-    
-    print("\n╔════════════════════════════════════════╗")
-    print("║   FISH IT AUTO QUEST - INITIALIZED     ║")
-    print("║   (WITH AUTO TELEPORT FEATURE)         ║")
-    print("╚════════════════════════════════════════╝\n")
-    
     AutoQuestModule.DetectQuestCompletion()
     AutoQuestModule.StartMonitoring()
-    AutoQuestModule.DebugPrintAll()
 end)
 
-print("╔════════════════════════════════════════╗")
-print("║   AUTO QUEST MODULE - READY            ║")
-print("║   AUTO TELEPORT FEATURE ENABLED ✅     ║")
-print("╚════════════════════════════════════════╝")
-print("► Usage: AutoQuestModule.ToggleAutoTeleport('DeepSeaQuest')")
-print("► Usage: AutoQuestModule.ToggleAutoTeleport('ElementQuest')")
-print("═════════════════════════════════════════")
-
 return AutoQuestModule
-
