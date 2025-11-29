@@ -1417,19 +1417,11 @@ local elementLabel = new("TextLabel",{
     ZIndex=8
 })
 
-makeInput(catElement, "Task 2: Ancient Jungle (1)", 0, function(value)
-    AutoQuestModule.SetTaskProgress("ElementQuest", 2, tonumber(value) or 0)
-    elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
-end)
-
-makeInput(catElement, "Task 3: Sacred Temple (1)", 0, function(value)
-    AutoQuestModule.SetTaskProgress("ElementQuest", 3, tonumber(value) or 0)
-    elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
-end)
-
-makeInput(catElement, "Task 4: Transcended (3)", 0, function(value)
-    AutoQuestModule.SetTaskProgress("ElementQuest", 4, tonumber(value) or 0)
-    elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
+-- Hapus semua makeInput(), ganti dengan:
+makeButton(catDeepSea, "Refresh Progress", function()
+    AutoQuestModule.ScanPlayerData() -- Fungsi baru yang otomatis
+    deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
+    Notify("Refresh 🔄", "Progress updated!", 2)
 end)
 
 makeButton(catElement, "Refresh Progress", function()
