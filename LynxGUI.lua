@@ -1349,34 +1349,41 @@ makeToggle(catWeather, "Enable Auto Weather", function(on)
 end)
 
 -- Camera settings
-local catFreecam = makeCategory(cameraViewPage, "Freecam Camera", "📷")
+FreecamModule.SetMainGuiName("LynxGUI_Galaxy") -- <-- UBAH INI!
+
+local catFreecam = makeCategory(CameraViewPage, "Freecam Camera", "📷")
+
+local freecamActive = false
 
 makeToggle(catFreecam, "Enable Freecam", function(on)
+    freecamActive = on
     if on then
         if FreecamModule.Start() then
-            Notify("Freecam 📷", "Freecam diaktifkan! Tekan F3 untuk toggle.", 4)
+            Notify("Freecam 📷", "Freecam aktif! Kontrol dengan mouse.", 4)
         end
     else
         if FreecamModule.Stop() then
-            Notify("Freecam 📷", "Freecam dinonaktifkan.", 3)
+            Notify("Freecam 📷", "Freecam nonaktif.", 3)
         end
     end
 end)
 
 makeInput(catFreecam, "Movement Speed", 50, function(value)
-    FreecamModule.SetSpeed(value)
-    Notify("Speed ⚡", "Speed diatur ke: " .. value, 2)
+    local speed = tonumber(value) or 50
+    FreecamModule.SetSpeed(speed)
+    print("✅ Freecam Speed: " .. speed)
 end)
 
 makeInput(catFreecam, "Mouse Sensitivity", 0.3, function(value)
-    FreecamModule.SetSensitivity(value)
-    Notify("Sensitivity 🖱️", "Sensitivity diatur ke: " .. value, 2)
+    local sens = tonumber(value) or 0.3
+    FreecamModule.SetSensitivity(sens)
+    print("✅ Freecam Sensitivity: " .. sens)
 end)
 
-makeButton(catFreecam, "Reset to Default", function()
+makeButton(catFreecam, "Reset Settings", function()
     FreecamModule.SetSpeed(50)
     FreecamModule.SetSensitivity(0.3)
-    Notify("Reset 🔄", "Settings freecam direset ke default.", 3)
+    Notify("Reset 🔄", "Freecam settings direset!", 3)
 end)
 
 -- ==== SETTINGS PAGE ====
