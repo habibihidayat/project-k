@@ -39,6 +39,7 @@ local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com
 local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/AntiAFK.lua"))()
 local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
 local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoBuyWeather.lua"))()
+local Notify = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/NotificationModule.lua"))()
 
 -- Galaxy Color Palette
 local colors = {
@@ -1230,10 +1231,10 @@ end)
 makeToggle(catSupport, "Lock Position", function(on)
     if on then
         LockPosition.Start()
-        Notify("Lock Position", "Posisi kamu dikunci!", 4)
+        Notify.Send("Lock Position", "Posisi kamu dikunci!", 4)
     else
         LockPosition.Stop()
-        Notify("Lock Position", "Posisi kamu dilepas!", 4)
+        Notify.Send("Lock Position", "Posisi kamu dilepas!", 4)
     end
 end)
 
