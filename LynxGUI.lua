@@ -1461,7 +1461,7 @@ task.spawn(function()
 end)
 
 -- ==== SHOP PAGE ====
-local catSell = makeCategory(shopPage, "Auto Sell System", "💰")
+local catSell = makeCategory(shopPage, "Sell All", "💰")
 
 makeButton(catSell, "Sell All Now", function()
     if AutoSell and AutoSell.SellOnce then
