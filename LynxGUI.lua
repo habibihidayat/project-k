@@ -1360,32 +1360,11 @@ local deepSeaLabel = new("TextLabel",{
     ZIndex=8
 })
 
--- Manual Update Buttons
-makeInput(catDeepSea, "Task 1: Rare/Epic (300)", 0, function(value)
-    AutoQuestModule.SetTaskProgress("DeepSeaQuest", 1, tonumber(value) or 0)
+makeButton(catDeepSea, "🔍 Deep Scan", function()
+    AutoQuestModule.DeepInspectGame() -- Scan detail
+    AutoQuestModule.SmartDetect()     -- Auto detect
     deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
-end)
-
-makeInput(catDeepSea, "Task 2: Mythic (3)", 0, function(value)
-    AutoQuestModule.SetTaskProgress("DeepSeaQuest", 2, tonumber(value) or 0)
-    deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
-end)
-
-makeInput(catDeepSea, "Task 3: SECRET (1)", 0, function(value)
-    AutoQuestModule.SetTaskProgress("DeepSeaQuest", 3, tonumber(value) or 0)
-    deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
-end)
-
-makeInput(catDeepSea, "Task 4: Coins (1M)", 0, function(value)
-    AutoQuestModule.SetTaskProgress("DeepSeaQuest", 4, tonumber(value) or 0)
-    deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
-end)
-
-makeButton(catDeepSea, "Refresh Progress", function()
-    AutoQuestModule.ScanQuestProgress()
-    AutoQuestModule.DebugCheckItems()
-    deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
-    Notify("Refresh 🔄", "Progress updated!", 2)
+    Notify("Deep Scan", "Check console (F9) for results!", 3)
 end)
 
 -- Element Quest
@@ -1417,12 +1396,7 @@ local elementLabel = new("TextLabel",{
     ZIndex=8
 })
 
--- Hapus semua makeInput(), ganti dengan:
-makeButton(catDeepSea, "Refresh Progress", function()
-    AutoQuestModule.ScanPlayerData() -- Fungsi baru yang otomatis
-    deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
-    Notify("Refresh 🔄", "Progress updated!", 2)
-end)
+
 
 makeButton(catElement, "Refresh Progress", function()
     AutoQuestModule.ScanQuestProgress()
