@@ -35,6 +35,8 @@ local SavedLocation = loadstring(game:HttpGet("https://raw.githubusercontent.com
 -- Shop
 local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
 local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
+-- Camera View
+local FreecamModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/FreecamModule.lua"))()
 -- Misc
 local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/AntiAFK.lua"))()
 local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
@@ -483,6 +485,7 @@ end
 local mainPage = createPage("Main")
 local teleportPage = createPage("Teleport")
 local shopPage = createPage("Shop")
+local cameraViewPage = createPage("CameraView")
 local settingsPage = createPage("Settings")
 local infoPage = createPage("Info")
 mainPage.Visible = true
@@ -616,12 +619,14 @@ end
 local btnMain = createNavButton("Dashboard", "🏠", "Main", 1)
 local btnTeleport = createNavButton("Teleport", "🌍", "Teleport", 2)
 local btnShop = createNavButton("Shop", "🛒", "Shop", 3)
+local btnCameraView = createNavButton("Camera View", "🛒", "CameraView", 3)
 local btnSettings = createNavButton("Settings", "⚙️", "Settings", 4)
 local btnInfo = createNavButton("About", "ℹ️", "Info", 5)
 
 btnMain.MouseButton1Click:Connect(function() switchPage("Main", "Main Dashboard") end)
 btnTeleport.MouseButton1Click:Connect(function() switchPage("Teleport", "Teleport System") end)
 btnShop.MouseButton1Click:Connect(function() switchPage("Shop", "Shop Features") end)
+btnCameraView.MouseButton1Click:Connect(function() switchPage("CameraView", "Camera View Settings") end)
 btnSettings.MouseButton1Click:Connect(function() switchPage("Settings", "Settings") end)
 btnInfo.MouseButton1Click:Connect(function() switchPage("Info", "About Lynx") end)
 
@@ -1341,6 +1346,37 @@ makeToggle(catWeather, "Enable Auto Weather", function(on)
     else
         AutoBuyWeather.Stop()
     end
+end)
+
+-- Camera settings
+local catFreecam = makeCategory(cameraViewPage, "Freecam Camera", "📷")
+
+makeToggle(catFreecam, "Enable Freecam", function(on)
+    if on then
+        if FreecamModule.Start() then
+            Notify("Freecam 📷", "Freecam diaktifkan! Tekan F3 untuk toggle.", 4)
+        end
+    else
+        if FreecamModule.Stop() then
+            Notify("Freecam 📷", "Freecam dinonaktifkan.", 3)
+        end
+    end
+end)
+
+makeInput(catFreecam, "Movement Speed", 50, function(value)
+    FreecamModule.SetSpeed(value)
+    Notify("Speed ⚡", "Speed diatur ke: " .. value, 2)
+end)
+
+makeInput(catFreecam, "Mouse Sensitivity", 0.3, function(value)
+    FreecamModule.SetSensitivity(value)
+    Notify("Sensitivity 🖱️", "Sensitivity diatur ke: " .. value, 2)
+end)
+
+makeButton(catFreecam, "Reset to Default", function()
+    FreecamModule.SetSpeed(50)
+    FreecamModule.SetSensitivity(0.3)
+    Notify("Reset 🔄", "Settings freecam direset ke default.", 3)
 end)
 
 -- ==== SETTINGS PAGE ====
