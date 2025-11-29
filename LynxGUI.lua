@@ -1521,14 +1521,15 @@ makeToggle(catZoom, "Enable Unlimited Zoom", function(on)
     end
 end)
 
-FreecamModule.SetMainGuiName("LynxGUI_Galaxy") -- <-- UBAH INI!
+FreecamModule.SetMainGuiName("LynxGUI_Galaxy")
+
 local catFreecam = makeCategory(cameraViewPage, "Freecam Camera", "📷")
 
 -- Note untuk PC saja - Info Container Style
 if not isMobile then
     local noteContainer = new("Frame", {
         Parent = catFreecam,
-        Size = UDim2.new(1, 0, 0, 85),  -- UBAH dari 70 ke 85
+        Size = UDim2.new(1, 0, 0, 85),
         BackgroundColor3 = colors.bg3,
         BackgroundTransparency = 0.6,
         BorderSizePixel = 0,
@@ -1559,7 +1560,7 @@ if not isMobile then
     3. WASD - Gerak | Mouse - Rotasi
     4. Space/E - Naik | Shift/Q - Turun]],
         Font = Enum.Font.Gotham,
-        TextSize = 8,  -- Lebih kecil dari 9
+        TextSize = 8,
         TextColor3 = colors.text,
         TextWrapped = true,
         TextXAlignment = Enum.TextXAlignment.Left,
@@ -1574,39 +1575,57 @@ local isMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
 
 makeToggle(catFreecam, "Enable Freecam", function(on)
     if on then
-        -- HANYA aktifkan F3 keybind untuk PC (TIDAK langsung aktifkan freecam)
         if not isMobile then
-            FreecamModule.EnableF3Keybind(true)
-            Notify("Freecam 📷", "Freecam siap! Tekan F3 untuk mengaktifkan.", 4)
+            if FreecamModule and type(FreecamModule.EnableF3Keybind) == "function" then
+                FreecamModule.EnableF3Keybind(true)
+                if Notify and type(Notify.Send) == "function" then
+                    Notify.Send("Freecam", "Freecam siap! Tekan F3 untuk mengaktifkan.", 4)
+                end
+            end
         else
-            -- Untuk mobile, langsung aktifkan freecam
-            if FreecamModule.Start() then
-                Notify("Freecam 📷", "Freecam aktif! Kontrol dengan touch.", 4)
+            if FreecamModule and type(FreecamModule.Start) == "function" then
+                FreecamModule.Start()
+                if Notify and type(Notify.Send) == "function" then
+                    Notify.Send("Freecam", "Freecam aktif! Kontrol dengan touch.", 4)
+                end
             end
         end
     else
-        -- Matikan F3 keybind dan freecam
-        FreecamModule.EnableF3Keybind(false)
-        Notify("Freecam 📷", "Freecam nonaktif.", 3)
+        if FreecamModule and type(FreecamModule.EnableF3Keybind) == "function" then
+            FreecamModule.EnableF3Keybind(false)
+            if Notify and type(Notify.Send) == "function" then
+                Notify.Send("Freecam", "Freecam nonaktif.", 3)
+            end
+        end
     end
 end)
 
 makeInput(catFreecam, "Movement Speed", 50, function(value)
     local speed = tonumber(value) or 50
-    FreecamModule.SetSpeed(speed)
-    print("✅ Freecam Speed: " .. speed)
+    if FreecamModule and type(FreecamModule.SetSpeed) == "function" then
+        FreecamModule.SetSpeed(speed)
+    end
 end)
 
 makeInput(catFreecam, "Mouse Sensitivity", 0.3, function(value)
     local sens = tonumber(value) or 0.3
-    FreecamModule.SetSensitivity(sens)
-    print("✅ Freecam Sensitivity: " .. sens)
+    if FreecamModule and type(FreecamModule.SetSensitivity) == "function" then
+        FreecamModule.SetSensitivity(sens)
+    end
 end)
 
 makeButton(catFreecam, "Reset Settings", function()
-    FreecamModule.SetSpeed(50)
-    FreecamModule.SetSensitivity(0.3)
-    Notify("Reset 🔄", "Freecam settings direset!", 3)
+    if FreecamModule then
+        if type(FreecamModule.SetSpeed) == "function" then
+            FreecamModule.SetSpeed(50)
+        end
+        if type(FreecamModule.SetSensitivity) == "function" then
+            FreecamModule.SetSensitivity(0.3)
+        end
+        if Notify and type(Notify.Send) == "function" then
+            Notify.Send("Reset", "Freecam settings direset!", 3)
+        end
+    end
 end)
 
 -- ==== SETTINGS PAGE ====
