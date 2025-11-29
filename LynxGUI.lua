@@ -36,6 +36,7 @@ local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com
 local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/AntiAFK.lua"))()
 local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
 local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoBuyWeather.lua"))()
+local Notify = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Notification.lua"))()
 
 -- Galaxy Color Palette
 local colors = {
@@ -1263,17 +1264,26 @@ Players.PlayerRemoving:Connect(refreshPlayerList)
 local catSaved = makeCategory(teleportPage, "Saved Location", "⭐")
 
 makeButton(catSaved, "Save Current Location", function()
-    SavedLocation.Save()
+    if SavedLocation.Save() then
+        Notify.Send("Location Saved", "Lokasi kamu berhasil disimpan.", 3)
+    else
+        Notify.Send("Failed", "Gagal menyimpan lokasi!", 3)
+    end
 end)
 
 makeButton(catSaved, "Teleport to Saved Location", function()
-    SavedLocation.Teleport()
+    local ok = SavedLocation.Teleport()
+    if ok then
+        Notify.Send("Teleported", "Berhasil teleport ke lokasi tersimpan.", 3)
+    else
+        Notify.Send("Failed", "Tidak ada lokasi tersimpan!", 3)
+    end
 end)
 
 makeButton(catSaved, "Reset Saved Location", function()
     SavedLocation.Reset()
+    Notify.Send("Reset Complete", "Lokasi simpanan telah dihapus.", 3)
 end)
-
 
 -- ==== SHOP PAGE ====
 local catSell = makeCategory(shopPage, "Auto Sell System", "💰")
