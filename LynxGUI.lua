@@ -37,6 +37,7 @@ local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habi
 local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
 -- Camera View
 local FreecamModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/FreecamModule.lua"))()
+local UnlimitedZoomModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/UnlimitedZoom.lua"))()
 -- Misc
 local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/AntiAFK.lua"))()
 local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
@@ -1349,6 +1350,20 @@ makeToggle(catWeather, "Enable Auto Weather", function(on)
 end)
 
 -- Camera settings
+local catZoom = makeCategory(cameraViewPage, "Unlimited Zoom", "🔭")
+
+makeToggle(catZoom, "Enable Unlimited Zoom", function(on)
+    if on then
+        if UnlimitedZoomModule.Enable() then
+            Notify("Zoom 🔭", "Unlimited Zoom aktif! Scroll atau pinch untuk zoom.", 4)
+        end
+    else
+        if UnlimitedZoomModule.Disable() then
+            Notify("Zoom 🔭", "Unlimited Zoom nonaktif.", 3)
+        end
+    end
+end)
+
 FreecamModule.SetMainGuiName("LynxGUI_Galaxy") -- <-- UBAH INI!
 local catFreecam = makeCategory(cameraViewPage, "Freecam Camera", "📷")
 
