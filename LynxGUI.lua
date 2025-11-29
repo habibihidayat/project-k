@@ -1446,15 +1446,20 @@ task.spawn(function()
     while true do
         task.wait(2)
         
-        if deepSeaLabel and deepSeaLabel.Parent and AutoQuestModule then
-            deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
-        end
+        pcall(function()
+            if deepSeaLabel and deepSeaLabel.Parent and AutoQuestModule and type(AutoQuestModule.GetQuestInfo) == "function" then
+                deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
+            end
+        end)
         
-        if elementLabel and elementLabel.Parent and AutoQuestModule then
-            elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
-        end
+        pcall(function()
+            if elementLabel and elementLabel.Parent and AutoQuestModule and type(AutoQuestModule.GetQuestInfo) == "function" then
+                elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
+            end
+        end)
     end
 end)
+
 -- ==== SHOP PAGE ====
 local catSell = makeCategory(shopPage, "Auto Sell System", "💰")
 
