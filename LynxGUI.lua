@@ -1263,11 +1263,11 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 table.sort(playerItems)
 
-makeDropdown(teleportPage, "Teleport to Player", "👤", playerItems, function(selectedPlayer)
-    TeleportToPlayer.TeleportTo(selectedPlayer)
-end, "PlayerTeleport")
+-- PLAYER TELEPORT WITH AUTO REFRESH
+local playerDropdown
+local playerItems = {}
 
-local function refreshPlayerList()
+local function updatePlayerList()
     table.clear(playerItems)
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= localPlayer then
@@ -1275,10 +1275,34 @@ local function refreshPlayerList()
         end
     end
     table.sort(playerItems)
+    
+    -- Hapus dropdown lama jika ada
+    if playerDropdown and playerDropdown.Parent then
+        playerDropdown:Destroy()
+    end
+    
+    -- Buat dropdown baru dengan list ter-update
+    playerDropdown = makeDropdown(teleportPage, "Teleport to Player", "👤", playerItems, function(selectedPlayer)
+        TeleportToPlayer.TeleportTo(selectedPlayer)
+    end, "PlayerTeleport")
 end
 
-Players.PlayerAdded:Connect(refreshPlayerList)
-Players.PlayerRemoving:Connect(refreshPlayerList)
+-- Initial update
+updatePlayerList()
+
+-- Auto refresh ketika player join
+Players.PlayerAdded:Connect(function(player)
+    task.wait(0.5) -- Delay kecil untuk stabilitas
+    updatePlayerList()
+    print("🟢 Player joined: " .. player.Name .. " | List updated!")
+end)
+
+-- Auto refresh ketika player leave
+Players.PlayerRemoving:Connect(function(player)
+    task.wait(0.1)
+    updatePlayerList()
+    print("🔴 Player left: " .. player.Name .. " | List updated!")
+end)
 
 local catSaved = makeCategory(teleportPage, "Saved Location", "⭐")
 
