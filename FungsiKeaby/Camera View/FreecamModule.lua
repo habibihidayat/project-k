@@ -70,6 +70,14 @@ local function HideAllGuis()
     
     for _, gui in pairs(PlayerGui:GetChildren()) do
         if gui:IsA("ScreenGui") and gui.Enabled then
+            -- JANGAN sembunyikan GUI utama script Anda
+            -- Sesuaikan nama dengan nama ScreenGui Anda
+            local guiName = gui.Name:lower()
+            if guiName:find("main") or guiName:find("hub") or guiName:find("menu") or guiName:find("ui") then
+                -- Skip GUI utama, jangan disembunyikan
+                continue
+            end
+            
             table.insert(hiddenGuis, gui)
             gui.Enabled = false
         end
