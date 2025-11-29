@@ -29,9 +29,7 @@ local blatantv2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/hab
 local NoFishingAnimation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/NoFishingAnimation.lua"))()
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
 local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/TeleportToPlayer.lua"))()
-local SavedLocation = loadstring(game:HttpGet("LINK_RAW_SAVEDLOCATION_LUA_MU"))()
-
-
+local SavedLocation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/SavedLocation.lua"))()
 
 local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
 local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
@@ -1261,6 +1259,21 @@ end
 
 Players.PlayerAdded:Connect(refreshPlayerList)
 Players.PlayerRemoving:Connect(refreshPlayerList)
+
+local catSaved = makeCategory(teleportPage, "Saved Location", "⭐")
+
+makeButton(catSaved, "Save Current Location", function()
+    SavedLocation.Save()
+end)
+
+makeButton(catSaved, "Teleport to Saved Location", function()
+    SavedLocation.Teleport()
+end)
+
+makeButton(catSaved, "Reset Saved Location", function()
+    SavedLocation.Reset()
+end)
+
 
 -- ==== SHOP PAGE ====
 local catSell = makeCategory(shopPage, "Auto Sell System", "💰")
