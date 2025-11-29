@@ -644,7 +644,7 @@ local function makeCategory(parent, title, icon)
         Parent=parent,
         Size=UDim2.new(1, 0, 0, 36),
         BackgroundColor3=colors.bg3,
-        BackgroundTransparency=0.6,  -- Lebih transparan dari 0.5
+        BackgroundTransparency=0.6,
         BorderSizePixel=0,
         AutomaticSize=Enum.AutomaticSize.Y,
         ClipsDescendants=false,
@@ -656,7 +656,7 @@ local function makeCategory(parent, title, icon)
         Parent=categoryFrame,
         Color=colors.border,
         Thickness=0,
-        Transparency=0.8  -- Lebih transparan dari 0.7
+        Transparency=0.8
     })
     
     local header = new("TextButton",{
@@ -669,23 +669,11 @@ local function makeCategory(parent, title, icon)
         ZIndex=7
     })
     
-    local iconLabel = new("TextLabel",{
-        Parent=header,
-        Text=icon,
-        Size=UDim2.new(0, 28, 1, 0),
-        Position=UDim2.new(0, 8, 0, 0),
-        BackgroundTransparency=1,
-        Font=Enum.Font.GothamBold,
-        TextSize=14,
-        TextColor3=colors.primary,
-        ZIndex=8
-    })
-    
     local titleLabel = new("TextLabel",{
         Parent=header,
         Text=title,
-        Size=UDim2.new(1, -70, 1, 0),
-        Position=UDim2.new(0, 36, 0, 0),
+        Size=UDim2.new(1, -50, 1, 0),
+        Position=UDim2.new(0, 8, 0, 0),
         BackgroundTransparency=1,
         Font=Enum.Font.GothamBold,
         TextSize=11,
@@ -708,8 +696,8 @@ local function makeCategory(parent, title, icon)
     
     local contentContainer = new("Frame",{
         Parent=categoryFrame,
-        Size=UDim2.new(1, -16, 0, 0),  -- Padding kiri kanan 8px
-        Position=UDim2.new(0, 8, 0, 38),  -- Padding kiri 8px
+        Size=UDim2.new(1, -16, 0, 0),
+        Position=UDim2.new(0, 8, 0, 38),
         BackgroundTransparency=1,
         Visible=false,
         AutomaticSize=Enum.AutomaticSize.Y,
@@ -725,7 +713,7 @@ local function makeCategory(parent, title, icon)
         contentContainer.Visible = isOpen
         TweenService:Create(arrow, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Rotation=isOpen and 180 or 0}):Play()
         TweenService:Create(categoryFrame, TweenInfo.new(0.25), {
-            BackgroundTransparency=isOpen and 0.4 or 0.6  -- Lebih transparan
+            BackgroundTransparency=isOpen and 0.4 or 0.6
         }):Play()
         TweenService:Create(categoryStroke, TweenInfo.new(0.25), {Thickness=isOpen and 1 or 0}):Play()
     end)
