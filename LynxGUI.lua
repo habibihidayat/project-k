@@ -1264,25 +1264,21 @@ Players.PlayerRemoving:Connect(refreshPlayerList)
 local catSaved = makeCategory(teleportPage, "Saved Location", "⭐")
 
 makeButton(catSaved, "Save Current Location", function()
-    if SavedLocation.Save() then
-        Notify.Send("Location Saved", "Lokasi kamu berhasil disimpan.", 3)
-    else
-        Notify.Send("Failed", "Gagal menyimpan lokasi!", 3)
-    end
+    SavedLocation.Save()
+    Notify.Send("Saved", "Lokasi berhasil disimpan.", 3)
 end)
 
-makeButton(catSaved, "Teleport to Saved Location", function()
-    local ok = SavedLocation.Teleport()
-    if ok then
-        Notify.Send("Teleported", "Berhasil teleport ke lokasi tersimpan.", 3)
+makeButton(catSaved, "Teleport Saved Location", function()
+    if SavedLocation.Teleport() then
+        Notify.Send("Teleported 🚀", "Berhasil teleport ke lokasi tersimpan.", 3)
     else
-        Notify.Send("Failed", "Tidak ada lokasi tersimpan!", 3)
+        Notify.Send("Error ❌", "Tidak ada lokasi yang disimpan!", 3)
     end
 end)
 
 makeButton(catSaved, "Reset Saved Location", function()
     SavedLocation.Reset()
-    Notify.Send("Reset Complete", "Lokasi simpanan telah dihapus.", 3)
+    Notify.Send("Reset", "Lokasi tersimpan telah dihapus.", 3)
 end)
 
 -- ==== SHOP PAGE ====
