@@ -1373,7 +1373,41 @@ local isMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
 
 -- Note untuk PC saja
 if not isMobile then
-    makeNote(catFreecam, "📌 Note: Aktifkan toggle, lalu tekan F3 untuk mengaktifkan/menonaktifkan freecam.")
+    local noteFrame = new("Frame", {
+        Parent = catFreecam,
+        Size = UDim2.new(1, -24, 0, 40),
+        BackgroundColor3 = Color3.fromRGB(138, 43, 226), -- Purple
+        BackgroundTransparency = 0.85,
+        BorderSizePixel = 0,
+        ZIndex = 6
+    })
+    
+    new("UICorner", {
+        Parent = noteFrame,
+        CornerRadius = UDim.new(0, 6)
+    })
+    
+    new("UIStroke", {
+        Parent = noteFrame,
+        Color = Color3.fromRGB(138, 43, 226),
+        Thickness = 1,
+        Transparency = 0.7
+    })
+    
+    local noteText = new("TextLabel", {
+        Parent = noteFrame,
+        Size = UDim2.new(1, -16, 1, -8),
+        Position = UDim2.new(0, 8, 0, 4),
+        BackgroundTransparency = 1,
+        Text = "📌 Note: Aktifkan toggle, lalu tekan F3 untuk mengaktifkan/menonaktifkan freecam.",
+        Font = Enum.Font.Gotham,
+        TextSize = 10,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextWrapped = true,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Center,
+        ZIndex = 7
+    })
 end
 
 makeToggle(catFreecam, "Enable Freecam", function(on)
@@ -1412,6 +1446,7 @@ makeButton(catFreecam, "Reset Settings", function()
     FreecamModule.SetSensitivity(0.3)
     Notify("Reset 🔄", "Freecam settings direset!", 3)
 end)
+
 -- ==== SETTINGS PAGE ====
 local catAFK = makeCategory(settingsPage, "Anti-AFK Protection", "🧍‍♂️")
 
