@@ -1475,15 +1475,13 @@ makeInput(catTimer, "Sell Interval (seconds)", 5, function(value)
     AutoSellTimer.SetInterval(value)
 end)
 
-makeButton(catTimer, "Start Auto Sell", function()
+makeToggle(catTimer, "Auto Sell Timer", function(on)
     if AutoSellTimer then
-        AutoSellTimer.Start(AutoSellTimer.Interval)
-    end
-end)
-
-makeButton(catTimer, "Stop Auto Sell", function()
-    if AutoSellTimer then
-        AutoSellTimer.Stop()
+        if on then
+            AutoSellTimer.Start(AutoSellTimer.Interval)
+        else
+            AutoSellTimer.Stop()
+        end
     end
 end)
 
