@@ -431,12 +431,19 @@ function FreecamModule.GetMainGuiName()
 end
 
 -- ============================================
--- F3 KEYBIND - PC ONLY
+-- F3 KEYBIND - PC ONLY (MASTER SWITCH LOGIC)
 -- ============================================
 local f3KeybindActive = false
 
 function FreecamModule.EnableF3Keybind(enable)
     f3KeybindActive = enable
+    
+    -- Jika toggle GUI dimatikan, matikan freecam juga
+    if not enable and freecam then
+        FreecamModule.Stop()
+        print("🔴 Freecam disabled (Toggle GUI OFF)")
+    end
+    
     if not isMobile then
         local status = f3KeybindActive and "ENABLED" or "DISABLED"
         print("⚙️ F3 Keybind: " .. status)
@@ -447,13 +454,20 @@ function FreecamModule.IsF3KeybindActive()
     return f3KeybindActive
 end
 
+-- F3 Input Handler (PC Only)
 if not isMobile then
     UIS.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
         
-        if f3KeybindActive and freecam and input.KeyCode == Enum.KeyCode.F3 then
+        -- Cek apakah F3 ditekan DAN toggle GUI aktif
+        if input.KeyCode == Enum.KeyCode.F3 and f3KeybindActive then
             FreecamModule.Toggle()
-            print("🎥 Freecam toggled via F3")
+            
+            if freecam then
+                print("🎥 Freecam ACTIVATED via F3")
+            else
+                print("🔴 Freecam DEACTIVATED via F3")
+            end
         end
     end)
 end
