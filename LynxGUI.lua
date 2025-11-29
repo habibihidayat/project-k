@@ -1360,12 +1360,13 @@ local deepSeaLabel = new("TextLabel",{
     ZIndex=8
 })
 
-makeButton(catDeepSea, "🔍 Deep Scan", function()
-    AutoQuestModule.DeepInspectGame() -- Scan detail
-    AutoQuestModule.SmartDetect()     -- Auto detect
+makeButton(catDeepSea, "🔄 Refresh Progress", function()
+    _G.AutoQuestModule = nil -- Clear old module
+    AutoQuestModule = require(script.Parent.AutoQuestModule) -- Reload
     deepSeaLabel.Text = AutoQuestModule.GetQuestInfo("DeepSeaQuest")
-    Notify("Deep Scan", "Check console (F9) for results!", 3)
+    Notify("Refresh", "Progress updated!", 2)
 end)
+
 
 -- Element Quest
 local catElement = makeCategory(questPage, "Element Quest (Element Rod)", "🔥")
@@ -1398,11 +1399,11 @@ local elementLabel = new("TextLabel",{
 
 
 
-makeButton(catElement, "Refresh Progress", function()
-    AutoQuestModule.ScanQuestProgress()
-    AutoQuestModule.DebugCheckItems()
+makeButton(catElement, "🔄 Refresh Progress", function()
+    _G.AutoQuestModule = nil
+    AutoQuestModule = require(script.Parent.AutoQuestModule)
     elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
-    Notify("Refresh 🔄", "Progress updated!", 2)
+    Notify("Refresh", "Progress updated!", 2)
 end)
 
 
