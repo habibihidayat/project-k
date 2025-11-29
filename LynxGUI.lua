@@ -1299,14 +1299,12 @@ end)
 makeButton(catTimer, "Start Auto Sell", function()
     if AutoSellTimer then
         AutoSellTimer.Start(AutoSellTimer.Interval)
-        Notify("Auto Sell Running", "Auto Sell aktif.", 3)
     end
 end)
 
 makeButton(catTimer, "Stop Auto Sell", function()
     if AutoSellTimer then
         AutoSellTimer.Stop()
-        Notify("Auto Sell Stopped", "Auto Sell Berhenti.", 3)
     end
 end)
 
