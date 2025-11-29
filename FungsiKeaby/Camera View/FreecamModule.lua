@@ -445,7 +445,7 @@ function FreecamModule.EnableF3Keybind(enable)
     end
     
     if not isMobile then
-        local status = f3KeybindActive and "ENABLED" or "DISABLED"
+        local status = f3KeybindActive and "ENABLED (Press F3 to activate)" or "DISABLED"
         print("⚙️ F3 Keybind: " .. status)
     end
 end
