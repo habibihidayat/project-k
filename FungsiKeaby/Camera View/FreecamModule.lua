@@ -29,6 +29,7 @@ local isMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
 local mobileJoystickInput = Vector3.new(0, 0, 0)
 local joystickConnections = {}
 local dynamicThumbstick = nil
+local useHumanoidMoveVector = true
 
 -- Touch input for camera rotation
 local cameraTouch = nil
@@ -135,6 +136,8 @@ local thumbstickModule = nil
 local lastJoystickInput = Vector3.new(0, 0, 0)
 
 local function DetectDynamicThumbstick()
+    if not isMobile then return end
+    
     -- Cari DynamicThumbstick atau joystick yang sudah ada di game
     local Players_Service = game:GetService("Players")
     local PlayerGui_Check = Players_Service.LocalPlayer:WaitForChild("PlayerGui")
@@ -152,26 +155,17 @@ local function DetectDynamicThumbstick()
         return nil
     end
     
-    dynamicThumbstick = searchForThumbstick(PlayerGui_Check)
-    
-    if dynamicThumbstick then
-        print("✅ DynamicThumbstick terdeteksi: " .. dynamicThumbstick.Name)
+    pcall(function()
+        dynamicThumbstick = searchForThumbstick(PlayerGui_Check)
         
-        -- Coba cari module atau script yang associate dengan thumbstick
-        local parent = dynamicThumbstick.Parent
-        while parent do
-            if parent:FindFirstChild("LocalScript") then
-                for _, script in pairs(parent:FindFirstChild("LocalScript"):GetChildren()) do
-                    if script:IsA("LocalScript") then
-                        print("📝 Found LocalScript di " .. parent.Name)
-                    end
-                end
-            end
-            parent = parent.Parent
+        if dynamicThumbstick then
+            print("✅ DynamicThumbstick terdeteksi: " .. dynamicThumbstick.Name)
+            useHumanoidMoveVector = false -- Prioritas ke thumbstick jika ditemukan
+        else
+            print("ℹ️ Thumbstick tidak ditemukan, menggunakan Humanoid.MoveVector")
+            useHumanoidMoveVector = true
         end
-    else
-        print("⚠️ DynamicThumbstick tidak ditemukan")
-    end
+    end)
 end
 
 -- ============================================
@@ -266,34 +260,51 @@ function FreecamModule.Start()
                 return 
             end
             
-            -- Coba berbagai cara deteksi joystick input
-            local joystickInput = Vector3.new(0, 0, 0)
-            
-            if dynamicThumbstick then
-                -- Method 1: Check untuk BindableEvent atau object dengan joystick data
-                if dynamicThumbstick:FindFirstChild("Direction") then
-                    local dir = dynamicThumbstick.Direction.Value
-                    joystickInput = Vector3.new(dir.X, 0, dir.Y)
+            -- Method 1: Gunakan Humanoid.MoveVector (paling reliable)
+            if useHumanoidMoveVector and Humanoid then
+                local moveVec = Humanoid.MoveVector
+                if moveVec.Magnitude > 0 then
+                    -- Convert MoveVector ke joystick input
+                    -- MoveVector format: (X=kiri/kanan, 0, Z=maju/mundur)
+                    mobileJoystickInput = Vector3.new(moveVec.X, 0, moveVec.Z)
+                    return
                 end
+            end
+            
+            -- Method 2: Fallback ke thumbstick detection (jika ada)
+            if dynamicThumbstick then
+                local joystickInput = Vector3.new(0, 0, 0)
                 
-                -- Method 2: Check untuk property bernama similar
-                if dynamicThumbstick:FindFirstChild("JoystickData") then
-                    local data = dynamicThumbstick.JoystickData.Value
-                    if typeof(data) == "Vector2" then
-                        joystickInput = Vector3.new(data.X, 0, data.Y)
+                -- Cek child dengan Vector2Value
+                for _, obj in pairs(dynamicThumbstick:GetChildren()) do
+                    if obj:IsA("Vector2Value") then
+                        local val = obj.Value
+                        joystickInput = Vector3.new(val.X, 0, val.Y)
+                        mobileJoystickInput = joystickInput
+                        return
                     end
                 end
                 
-                -- Method 3: Check untuk ObjectValue atau ValueBase
-                for _, obj in pairs(dynamicThumbstick:GetChildren()) do
-                    if obj:IsA("Vector2Value") then
-                        joystickInput = Vector3.new(obj.Value.X, 0, obj.Value.Y)
-                        break
+                -- Cek property bernama Direction atau Value
+                if dynamicThumbstick:FindFirstChild("Direction") then
+                    local obj = dynamicThumbstick.Direction
+                    if obj:IsA("Vector2Value") or obj:IsA("ObjectValue") then
+                        pcall(function()
+                            local val = obj.Value
+                            if typeof(val) == "Vector2" then
+                                joystickInput = Vector3.new(val.X, 0, val.Y)
+                                mobileJoystickInput = joystickInput
+                                return
+                            end
+                        end)
                     end
                 end
             end
             
-            mobileJoystickInput = joystickInput
+            -- Reset jika tidak ada input
+            if not useHumanoidMoveVector and not dynamicThumbstick then
+                mobileJoystickInput = Vector3.new(0, 0, 0)
+            end
         end)
         
         table.insert(joystickConnections, joystickCheckConnection)
