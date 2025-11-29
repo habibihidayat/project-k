@@ -1367,16 +1367,53 @@ end)
 FreecamModule.SetMainGuiName("LynxGUI_Galaxy") -- <-- UBAH INI!
 local catFreecam = makeCategory(cameraViewPage, "Freecam Camera", "📷")
 
+-- Note untuk PC saja - Info Container Style
+if not isMobile then
+    local noteContainer = new("Frame", {
+        Parent = catFreecam,
+        Size = UDim2.new(1, 0, 0, 70),
+        BackgroundColor3 = colors.bg3,
+        BackgroundTransparency = 0.6,
+        BorderSizePixel = 0,
+        ZIndex = 7
+    })
+    
+    new("UICorner", {
+        Parent = noteContainer,
+        CornerRadius = UDim.new(0, 8)
+    })
+    
+    new("UIStroke", {
+        Parent = noteContainer,
+        Color = colors.border,
+        Thickness = 1,
+        Transparency = 0.7
+    })
+    
+    local noteText = new("TextLabel", {
+        Parent = noteContainer,
+        Size = UDim2.new(1, -24, 1, -24),
+        Position = UDim2.new(0, 12, 0, 12),
+        BackgroundTransparency = 1,
+        Text = [[📌 FREECAM CONTROLS (PC)
+━━━━━━━━━━━━━━━━━━━━━━
+1. Aktifkan toggle "Enable Freecam"
+2. Tekan F3 untuk ON/OFF freecam
+3. WASD - Bergerak | Mouse - Rotasi
+4. Space/E - Naik | Shift/Q - Turun]],
+        Font = Enum.Font.Gotham,
+        TextSize = 9,
+        TextColor3 = colors.text,
+        TextWrapped = true,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Top,
+        ZIndex = 8
+    })
+end
+
 -- Detect platform
 local UIS = game:GetService("UserInputService")
 local isMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
-
--- Note untuk PC saja - menggunakan makeButton tanpa fungsi sebagai label
-if not isMobile then
-    local noteButton = makeButton(catFreecam, "📌 Note: Tekan F3 setelah toggle ON", function()
-        -- Tidak melakukan apa-apa, hanya sebagai informasi
-    end)
-end
 
 makeToggle(catFreecam, "Enable Freecam", function(on)
     if on then
