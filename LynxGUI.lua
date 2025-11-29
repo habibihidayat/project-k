@@ -37,7 +37,7 @@ local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.co
 
 -- Galaxy Color Palette
 local colors = {
-    primary = Color3.fromRGB(255, 255, 255),       -- Purple
+    primary = Color3.fromRGB(255, 140, 0),       -- Purple
     secondary = Color3.fromRGB(147, 112, 219),    -- Medium purple
     accent = Color3.fromRGB(186, 85, 211),        -- Orchid
     galaxy1 = Color3.fromRGB(123, 104, 238),      -- Medium slate blue
