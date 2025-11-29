@@ -1371,6 +1371,11 @@ local catFreecam = makeCategory(cameraViewPage, "Freecam Camera", "📷")
 local UIS = game:GetService("UserInputService")
 local isMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
 
+-- Note untuk PC saja
+if not isMobile then
+    makeNote(catFreecam, "📌 Note: Aktifkan toggle, lalu tekan F3 untuk mengaktifkan/menonaktifkan freecam.")
+end
+
 makeToggle(catFreecam, "Enable Freecam", function(on)
     if on then
         -- HANYA aktifkan F3 keybind untuk PC (TIDAK langsung aktifkan freecam)
