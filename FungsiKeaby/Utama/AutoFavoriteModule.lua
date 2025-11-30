@@ -1,7 +1,6 @@
 -- ============================================
--- AUTO FAVORITE MODULE - FISH IT ROBLOX
+-- AUTO FAVORITE MODULE - FISH IT ROBLOX (UPDATED)
 -- ============================================
--- File: AutoFavoriteModule.lua
 
 local AutoFavorite = {}
 
@@ -12,19 +11,20 @@ local RunService = game:GetService("RunService")
 
 -- Variables
 local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
 local isRunning = false
-local debugMode = true -- Set false untuk disable debug prints
+local debugMode = true
 
 -- Settings
 AutoFavorite.Settings = {
-    SelectedRarities = {}, -- Rarities yang akan di-favorite
-    CheckInterval = 0.5, -- Check setiap 0.5 detik
+    SelectedRarities = {},
+    CheckInterval = 0.5,
 }
 
 -- All available rarities
 AutoFavorite.AllRarities = {
     "Common",
-    "Uncommon", 
+    "Uncommon",
     "Rare",
     "Epic",
     "Legendary",
@@ -32,157 +32,101 @@ AutoFavorite.AllRarities = {
     "Secret"
 }
 
+-- Remotes (berdasarkan hasil scan)
+local FavoriteItemRemote = nil
+local FishCaughtRemote = nil
+
+-- Connections
+local fishCaughtConnection = nil
+
 -- ============================================
 -- DEBUG FUNCTIONS
 -- ============================================
 
 local function DebugPrint(...)
     if debugMode then
-        print("[AUTO FAVORITE DEBUG]", ...)
+        print("[AUTO FAVORITE]", ...)
     end
 end
 
 local function DebugWarn(...)
     if debugMode then
-        warn("[AUTO FAVORITE DEBUG]", ...)
+        warn("[AUTO FAVORITE]", ...)
     end
 end
 
 -- ============================================
--- INVENTORY DETECTION FUNCTIONS
+-- INITIALIZE REMOTES
 -- ============================================
 
-local function FindInventoryData()
-    DebugPrint("========================================")
-    DebugPrint("MENCARI INVENTORY DATA...")
-    DebugPrint("========================================")
+local function InitializeRemotes()
+    DebugPrint("Initializing remotes...")
     
-    -- Method 1: Cek ReplicatedStorage untuk Modules/Data
-    DebugPrint("\n[1] Checking ReplicatedStorage...")
-    for _, item in pairs(ReplicatedStorage:GetDescendants()) do
-        local name = item.Name:lower()
-        if name:find("inventory") or name:find("backpack") or name:find("fish") or name:find("item") then
-            DebugPrint("  → Found:", item:GetFullName(), "| Type:", item.ClassName)
-        end
-    end
-    
-    -- Method 2: Cek Player Data
-    DebugPrint("\n[2] Checking Player Data...")
-    if Player:FindFirstChild("Data") then
-        DebugPrint("  → Player.Data found!")
-        for _, item in pairs(Player.Data:GetDescendants()) do
-            DebugPrint("    →", item:GetFullName(), "| Type:", item.ClassName, "| Value:", tostring(item.Value or "N/A"))
-        end
-    else
-        DebugWarn("  → Player.Data NOT found!")
-    end
-    
-    -- Method 3: Cek PlayerGui untuk Inventory UI
-    DebugPrint("\n[3] Checking PlayerGui...")
-    local PlayerGui = Player:WaitForChild("PlayerGui")
-    for _, gui in pairs(PlayerGui:GetDescendants()) do
-        local name = gui.Name:lower()
-        if name:find("inventory") or name:find("backpack") or name:find("storage") then
-            DebugPrint("  → Found GUI:", gui:GetFullName(), "| Type:", gui.ClassName)
-        end
-    end
-    
-    -- Method 4: Cek RemoteEvents/RemoteFunctions
-    DebugPrint("\n[4] Checking Remote Events...")
-    for _, remote in pairs(ReplicatedStorage:GetDescendants()) do
-        if remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction") then
-            local name = remote.Name:lower()
-            if name:find("favorite") or name:find("inventory") or name:find("fish") or name:find("item") then
-                DebugPrint("  → Found Remote:", remote:GetFullName(), "| Type:", remote.ClassName)
-            end
-        end
-    end
-    
-    DebugPrint("\n========================================")
-    DebugPrint("DEBUG SCAN SELESAI!")
-    DebugPrint("========================================")
-end
-
--- ============================================
--- INVENTORY LISTENER
--- ============================================
-
-local function SetupInventoryListener()
-    DebugPrint("\n[SETUP] Mencoba setup listener...")
-    
-    -- Method 1: Listen ke ChildAdded di PlayerGui
-    local PlayerGui = Player:WaitForChild("PlayerGui")
-    
-    -- Cari Inventory GUI
-    local inventoryGui = nil
-    for _, gui in pairs(PlayerGui:GetChildren()) do
-        if gui.Name:lower():find("inventory") or gui.Name:lower():find("backpack") then
-            inventoryGui = gui
-            DebugPrint("[LISTENER] Found Inventory GUI:", gui.Name)
-            break
-        end
-    end
-    
-    if inventoryGui then
-        -- Listen ke perubahan di inventory
-        inventoryGui.DescendantAdded:Connect(function(descendant)
-            DebugPrint("[EVENT] New item added to inventory!")
-            DebugPrint("  → Name:", descendant.Name)
-            DebugPrint("  → Type:", descendant.ClassName)
-            DebugPrint("  → Parent:", descendant.Parent.Name)
-            
-            -- Cek apakah ini fish item
-            if descendant:IsA("Frame") or descendant:IsA("TextLabel") or descendant:IsA("ImageLabel") then
-                for _, child in pairs(descendant:GetDescendants()) do
-                    DebugPrint("    → Child:", child.Name, "=", tostring(child.Text or child.Value or "N/A"))
+    -- Cari FavoriteItem RemoteEvent
+    local netFolder = ReplicatedStorage:FindFirstChild("Packages")
+    if netFolder then
+        netFolder = netFolder:FindFirstChild("_Index")
+        if netFolder then
+            netFolder = netFolder:FindFirstChild("sleitnick_net@0.2.0")
+            if netFolder then
+                netFolder = netFolder:FindFirstChild("net")
+                if netFolder then
+                    local reFolder = netFolder:FindFirstChild("RE")
+                    if reFolder then
+                        FavoriteItemRemote = reFolder:FindFirstChild("FavoriteItem")
+                        FishCaughtRemote = reFolder:FindFirstChild("FishCaught")
+                        
+                        if FavoriteItemRemote then
+                            DebugPrint("✅ FavoriteItem remote found!")
+                        else
+                            DebugWarn("❌ FavoriteItem remote NOT found!")
+                        end
+                        
+                        if FishCaughtRemote then
+                            DebugPrint("✅ FishCaught remote found!")
+                        else
+                            DebugWarn("❌ FishCaught remote NOT found!")
+                        end
+                    end
                 end
             end
-        end)
-        
-        DebugPrint("[LISTENER] Inventory listener setup complete!")
-    else
-        DebugWarn("[LISTENER] Inventory GUI not found!")
-    end
-    
-    -- Method 2: Listen ke RemoteEvent
-    for _, remote in pairs(ReplicatedStorage:GetDescendants()) do
-        if remote:IsA("RemoteEvent") then
-            local name = remote.Name:lower()
-            if name:find("fish") or name:find("catch") or name:find("inventory") then
-                DebugPrint("[REMOTE] Hooking to:", remote:GetFullName())
-                
-                -- Hook the remote (dapat menyebabkan error di beberapa executor)
-                pcall(function()
-                    local oldFireServer = remote.FireServer
-                    remote.FireServer = function(...)
-                        local args = {...}
-                        DebugPrint("[REMOTE FIRED]", remote.Name)
-                        for i, arg in pairs(args) do
-                            DebugPrint("  → Arg", i, ":", tostring(arg))
-                        end
-                        return oldFireServer(...)
-                    end
-                end)
-            end
         end
     end
+    
+    return FavoriteItemRemote ~= nil
 end
 
 -- ============================================
--- FISH DETECTION & FAVORITE LOGIC
+-- GET FISH DATA FROM REPLICATED STORAGE
 -- ============================================
 
-local function GetFishRarity(fishData)
-    -- Coba berbagai cara untuk mendapatkan rarity
-    if type(fishData) == "table" then
-        return fishData.Rarity or fishData.rarity or fishData.Tier or fishData.tier
-    elseif type(fishData) == "string" then
-        -- Parse dari string jika format "Name [Rarity]"
-        local rarity = fishData:match("%[(.-)%]")
-        return rarity
+local function GetFishData(fishName)
+    local Items = ReplicatedStorage:FindFirstChild("Items")
+    if not Items then 
+        DebugWarn("Items folder not found!")
+        return nil 
     end
-    return nil
+    
+    local fishModule = Items:FindFirstChild(fishName)
+    if not fishModule or not fishModule:IsA("ModuleScript") then
+        return nil
+    end
+    
+    local success, fishData = pcall(function()
+        return require(fishModule)
+    end)
+    
+    if success then
+        return fishData
+    else
+        DebugWarn("Failed to require fish module:", fishName)
+        return nil
+    end
 end
+
+-- ============================================
+-- CHECK IF SHOULD FAVORITE
+-- ============================================
 
 local function ShouldFavorite(rarity)
     if not rarity then return false end
@@ -196,30 +140,116 @@ local function ShouldFavorite(rarity)
     return false
 end
 
-local function FavoriteFish(fishId)
-    DebugPrint("[FAVORITE] Attempting to favorite fish:", fishId)
+-- ============================================
+-- FAVORITE FISH FUNCTION
+-- ============================================
+
+local function FavoriteFish(fishId, fishName)
+    if not FavoriteItemRemote then
+        DebugWarn("FavoriteItem remote not available!")
+        return false
+    end
     
-    -- Cari RemoteEvent untuk favorite
-    local favoriteRemote = ReplicatedStorage:FindFirstChild("FavoriteFish", true) or
-                          ReplicatedStorage:FindFirstChild("Favorite", true) or
-                          ReplicatedStorage:FindFirstChild("ToggleFavorite", true)
+    DebugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    DebugPrint("⭐ FAVORITING FISH:")
+    DebugPrint("  → Name:", fishName)
+    DebugPrint("  → ID:", fishId)
     
-    if favoriteRemote and favoriteRemote:IsA("RemoteEvent") then
-        DebugPrint("[FAVORITE] Found remote:", favoriteRemote:GetFullName())
-        favoriteRemote:FireServer(fishId)
-        DebugPrint("[FAVORITE] Successfully favorited!")
+    local success, err = pcall(function()
+        FavoriteItemRemote:FireServer(fishId)
+    end)
+    
+    if success then
+        DebugPrint("✅ Fish favorited successfully!")
+        DebugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         return true
     else
-        DebugWarn("[FAVORITE] Favorite remote not found!")
+        DebugWarn("❌ Failed to favorite fish:", err)
+        DebugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         return false
     end
 end
 
 -- ============================================
--- MAIN AUTO FAVORITE LOGIC
+-- FISH CAUGHT EVENT HANDLER
 -- ============================================
 
-local connection = nil
+local function OnFishCaught(...)
+    local args = {...}
+    
+    DebugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    DebugPrint("🎣 FISH CAUGHT EVENT TRIGGERED!")
+    DebugPrint("  → Arguments received:", #args)
+    
+    for i, arg in pairs(args) do
+        DebugPrint("  → Arg[" .. i .. "]:", typeof(arg), "=", tostring(arg))
+        
+        -- Jika argument adalah table, print isinya
+        if type(arg) == "table" then
+            for key, value in pairs(arg) do
+                DebugPrint("    →", key, "=", tostring(value))
+            end
+        end
+    end
+    
+    -- Coba extract fish name dan ID dari arguments
+    local fishName = nil
+    local fishId = nil
+    local rarity = nil
+    
+    -- Method 1: Cek apakah ada argument yang table dengan field Name/Rarity
+    for _, arg in pairs(args) do
+        if type(arg) == "table" then
+            if arg.Name then fishName = arg.Name end
+            if arg.Id or arg.ID or arg.id then 
+                fishId = arg.Id or arg.ID or arg.id 
+            end
+            if arg.Rarity or arg.rarity then 
+                rarity = arg.Rarity or arg.rarity 
+            end
+        elseif type(arg) == "string" then
+            -- Bisa jadi ini fish name atau ID
+            if not fishName then
+                fishName = arg
+            elseif not fishId then
+                fishId = arg
+            end
+        end
+    end
+    
+    DebugPrint("  → Extracted Name:", fishName)
+    DebugPrint("  → Extracted ID:", fishId)
+    DebugPrint("  → Extracted Rarity:", rarity)
+    
+    -- Jika belum ada rarity, coba ambil dari ReplicatedStorage
+    if fishName and not rarity then
+        local fishData = GetFishData(fishName)
+        if fishData then
+            rarity = fishData.Rarity or fishData.rarity or fishData.Tier or fishData.tier
+            DebugPrint("  → Rarity from module:", rarity)
+        end
+    end
+    
+    -- Check apakah perlu di-favorite
+    if rarity and ShouldFavorite(rarity) then
+        DebugPrint("  → ✅ Rarity matches! Attempting to favorite...")
+        
+        if fishId then
+            task.wait(0.5) -- Tunggu sebentar agar fish masuk inventory
+            FavoriteFish(fishId, fishName or "Unknown")
+        else
+            DebugWarn("  → ❌ Fish ID not found, cannot favorite!")
+        end
+    else
+        DebugPrint("  → ℹ️  Rarity doesn't match selected rarities, skipping.")
+    end
+    
+    DebugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+end
+
+-- ============================================
+-- MAIN FUNCTIONS
+-- ============================================
 
 function AutoFavorite.Start()
     if isRunning then
@@ -227,23 +257,27 @@ function AutoFavorite.Start()
         return false
     end
     
+    -- Initialize remotes
+    if not InitializeRemotes() then
+        DebugWarn("Failed to initialize remotes!")
+        return false
+    end
+    
     isRunning = true
-    DebugPrint("========================================")
-    DebugPrint("AUTO FAVORITE STARTED!")
+    
+    DebugPrint("╔════════════════════════════════════════╗")
+    DebugPrint("║     AUTO FAVORITE STARTED!             ║")
+    DebugPrint("╚════════════════════════════════════════╝")
     DebugPrint("Selected Rarities:", table.concat(AutoFavorite.Settings.SelectedRarities, ", "))
-    DebugPrint("========================================")
+    DebugPrint("Listening for fish caught events...")
     
-    -- Setup listener
-    SetupInventoryListener()
-    
-    -- Main loop untuk check inventory
-    connection = RunService.Heartbeat:Connect(function()
-        if not isRunning then return end
-        
-        -- TODO: Implement actual fish detection
-        -- Ini akan diupdate setelah kita tahu struktur data yang benar
-        
-    end)
+    -- Connect ke FishCaught event
+    if FishCaughtRemote then
+        fishCaughtConnection = FishCaughtRemote.OnClientEvent:Connect(OnFishCaught)
+        DebugPrint("✅ Connected to FishCaught event!")
+    else
+        DebugWarn("❌ FishCaught remote not found!")
+    end
     
     return true
 end
@@ -256,14 +290,15 @@ function AutoFavorite.Stop()
     
     isRunning = false
     
-    if connection then
-        connection:Disconnect()
-        connection = nil
+    -- Disconnect event
+    if fishCaughtConnection then
+        fishCaughtConnection:Disconnect()
+        fishCaughtConnection = nil
     end
     
-    DebugPrint("========================================")
-    DebugPrint("AUTO FAVORITE STOPPED!")
-    DebugPrint("========================================")
+    DebugPrint("╔════════════════════════════════════════╗")
+    DebugPrint("║     AUTO FAVORITE STOPPED!             ║")
+    DebugPrint("╚════════════════════════════════════════╝")
     
     return true
 end
@@ -283,26 +318,46 @@ function AutoFavorite.ToggleDebug(enable)
 end
 
 function AutoFavorite.RunDebugScan()
-    FindInventoryData()
+    DebugPrint("Running debug scan...")
+    DebugPrint("Remotes initialized:", FavoriteItemRemote ~= nil)
+    DebugPrint("FishCaught remote:", FishCaughtRemote ~= nil)
+    DebugPrint("Selected rarities:", table.concat(AutoFavorite.Settings.SelectedRarities, ", "))
+    DebugPrint("Is running:", isRunning)
 end
 
 -- ============================================
--- AUTO SCAN ON LOAD
+-- TEST FUNCTION
+-- ============================================
+
+function AutoFavorite.TestFavorite(fishId, fishName)
+    DebugPrint("Testing favorite function...")
+    DebugPrint("Fish ID:", fishId)
+    DebugPrint("Fish Name:", fishName)
+    
+    if not FavoriteItemRemote then
+        InitializeRemotes()
+    end
+    
+    FavoriteFish(fishId, fishName)
+end
+
+-- ============================================
+-- AUTO INITIALIZE ON LOAD
 -- ============================================
 task.spawn(function()
-    task.wait(2) -- Wait untuk game load
-    DebugPrint("\n🔍 Running initial debug scan...")
-    FindInventoryData()
+    task.wait(2)
+    InitializeRemotes()
 end)
 
 -- ============================================
 -- INFO
 -- ============================================
 print("╔════════════════════════════════════════╗")
-print("║     AUTO FAVORITE MODULE - LOADED      ║")
+print("║   AUTO FAVORITE MODULE V2 - LOADED     ║")
 print("╚════════════════════════════════════════╝")
+print("► Based on actual Fish It game structure")
+print("► RemoteEvent: FavoriteItem & FishCaught")
 print("► Debug Mode: ENABLED")
-print("► Call AutoFavorite.RunDebugScan() for manual scan")
 print("═════════════════════════════════════════")
 
 return AutoFavorite
