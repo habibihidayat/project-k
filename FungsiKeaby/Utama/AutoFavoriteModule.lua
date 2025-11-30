@@ -62,38 +62,28 @@ end
 local function InitializeRemotes()
     DebugPrint("Initializing remotes...")
     
-    -- Cari FavoriteItem RemoteEvent
-    local netFolder = ReplicatedStorage:FindFirstChild("Packages")
-    if netFolder then
-        netFolder = netFolder:FindFirstChild("_Index")
-        if netFolder then
-            netFolder = netFolder:FindFirstChild("sleitnick_net@0.2.0")
-            if netFolder then
-                netFolder = netFolder:FindFirstChild("net")
-                if netFolder then
-                    local reFolder = netFolder:FindFirstChild("RE")
-                    if reFolder then
-                        FavoriteItemRemote = reFolder:FindFirstChild("FavoriteItem")
-                        FishCaughtRemote = reFolder:FindFirstChild("FishCaught")
-                        
-                        if FavoriteItemRemote then
-                            DebugPrint("✅ FavoriteItem remote found!")
-                        else
-                            DebugWarn("❌ FavoriteItem remote NOT found!")
-                        end
-                        
-                        if FishCaughtRemote then
-                            DebugPrint("✅ FishCaught remote found!")
-                        else
-                            DebugWarn("❌ FishCaught remote NOT found!")
-                        end
-                    end
-                end
+    -- Method 1: Cari dengan GetDescendants (lebih reliable)
+    for _, remote in pairs(ReplicatedStorage:GetDescendants()) do
+        if remote:IsA("RemoteEvent") then
+            if remote.Name == "FavoriteItem" then
+                FavoriteItemRemote = remote
+                DebugPrint("✅ FavoriteItem remote found:", remote:GetFullName())
+            elseif remote.Name == "FishCaught" then
+                FishCaughtRemote = remote
+                DebugPrint("✅ FishCaught remote found:", remote:GetFullName())
             end
         end
     end
     
-    return FavoriteItemRemote ~= nil
+    if not FavoriteItemRemote then
+        DebugWarn("❌ FavoriteItem remote NOT found!")
+    end
+    
+    if not FishCaughtRemote then
+        DebugWarn("❌ FishCaught remote NOT found!")
+    end
+    
+    return FavoriteItemRemote ~= nil and FishCaughtRemote ~= nil
 end
 
 -- ============================================
@@ -257,10 +247,34 @@ function AutoFavorite.Start()
         return false
     end
     
+    DebugPrint("╔════════════════════════════════════════╗")
+    DebugPrint("║     STARTING AUTO FAVORITE...          ║")
+    DebugPrint("╚════════════════════════════════════════╝")
+    
     -- Initialize remotes
     if not InitializeRemotes() then
-        DebugWarn("Failed to initialize remotes!")
-        return false
+        DebugWarn("⚠️  Failed to initialize remotes!")
+        DebugWarn("Trying alternative method...")
+        
+        -- Alternative: Cari manual dengan path yang benar
+        local success = pcall(function()
+            FavoriteItemRemote = ReplicatedStorage:FindFirstChild("FavoriteItem", true)
+            FishCaughtRemote = ReplicatedStorage:FindFirstChild("FishCaught", true)
+        end)
+        
+        if FavoriteItemRemote then
+            DebugPrint("✅ Found FavoriteItem via alternative method!")
+        end
+        
+        if FishCaughtRemote then
+            DebugPrint("✅ Found FishCaught via alternative method!")
+        end
+        
+        if not FavoriteItemRemote or not FishCaughtRemote then
+            DebugWarn("❌ Still cannot find remotes!")
+            DebugWarn("Please check if remotes exist in ReplicatedStorage")
+            -- Jangan return false, biarkan jalan untuk testing
+        end
     end
     
     isRunning = true
@@ -269,14 +283,19 @@ function AutoFavorite.Start()
     DebugPrint("║     AUTO FAVORITE STARTED!             ║")
     DebugPrint("╚════════════════════════════════════════╝")
     DebugPrint("Selected Rarities:", table.concat(AutoFavorite.Settings.SelectedRarities, ", "))
+    DebugPrint("FavoriteItem Remote:", FavoriteItemRemote and "✅ Found" or "❌ Not Found")
+    DebugPrint("FishCaught Remote:", FishCaughtRemote and "✅ Found" or "❌ Not Found")
+    DebugPrint("")
     DebugPrint("Listening for fish caught events...")
+    DebugPrint("Go fishing to test the system!")
     
     -- Connect ke FishCaught event
     if FishCaughtRemote then
         fishCaughtConnection = FishCaughtRemote.OnClientEvent:Connect(OnFishCaught)
         DebugPrint("✅ Connected to FishCaught event!")
     else
-        DebugWarn("❌ FishCaught remote not found!")
+        DebugWarn("❌ Cannot connect to FishCaught - remote not found!")
+        DebugWarn("Auto favorite may not work properly.")
     end
     
     return true
@@ -318,11 +337,57 @@ function AutoFavorite.ToggleDebug(enable)
 end
 
 function AutoFavorite.RunDebugScan()
-    DebugPrint("Running debug scan...")
-    DebugPrint("Remotes initialized:", FavoriteItemRemote ~= nil)
-    DebugPrint("FishCaught remote:", FishCaughtRemote ~= nil)
-    DebugPrint("Selected rarities:", table.concat(AutoFavorite.Settings.SelectedRarities, ", "))
-    DebugPrint("Is running:", isRunning)
+    DebugPrint("╔════════════════════════════════════════╗")
+    DebugPrint("║     DEBUG SCAN - FINDING REMOTES       ║")
+    DebugPrint("╚════════════════════════════════════════╝")
+    
+    DebugPrint("\n[1] Scanning for FavoriteItem remote...")
+    local foundFavorite = false
+    for _, remote in pairs(ReplicatedStorage:GetDescendants()) do
+        if remote:IsA("RemoteEvent") and remote.Name == "FavoriteItem" then
+            DebugPrint("  ✅ FOUND:", remote:GetFullName())
+            foundFavorite = true
+        end
+    end
+    if not foundFavorite then
+        DebugWarn("  ❌ FavoriteItem remote NOT FOUND")
+    end
+    
+    DebugPrint("\n[2] Scanning for FishCaught remote...")
+    local foundFishCaught = false
+    for _, remote in pairs(ReplicatedStorage:GetDescendants()) do
+        if remote:IsA("RemoteEvent") and remote.Name == "FishCaught" then
+            DebugPrint("  ✅ FOUND:", remote:GetFullName())
+            foundFishCaught = true
+        end
+    end
+    if not foundFishCaught then
+        DebugWarn("  ❌ FishCaught remote NOT FOUND")
+    end
+    
+    DebugPrint("\n[3] Current Status:")
+    DebugPrint("  → Remotes initialized:", FavoriteItemRemote ~= nil and FishCaughtRemote ~= nil)
+    DebugPrint("  → FavoriteItem remote:", FavoriteItemRemote and "✅" or "❌")
+    DebugPrint("  → FishCaught remote:", FishCaughtRemote and "✅" or "❌")
+    DebugPrint("  → Selected rarities:", table.concat(AutoFavorite.Settings.SelectedRarities, ", "))
+    DebugPrint("  → Is running:", isRunning)
+    
+    DebugPrint("\n[4] Listing ALL RemoteEvents with 'Fish' or 'Favorite':")
+    local count = 0
+    for _, remote in pairs(ReplicatedStorage:GetDescendants()) do
+        if remote:IsA("RemoteEvent") then
+            local name = remote.Name:lower()
+            if name:find("fish") or name:find("favorite") or name:find("item") then
+                count = count + 1
+                DebugPrint("  →", remote.Name, "-", remote:GetFullName())
+            end
+        end
+    end
+    DebugPrint("  → Found", count, "relevant remotes")
+    
+    DebugPrint("\n╔════════════════════════════════════════╗")
+    DebugPrint("║     DEBUG SCAN COMPLETE!               ║")
+    DebugPrint("╚════════════════════════════════════════╝")
 end
 
 -- ============================================
