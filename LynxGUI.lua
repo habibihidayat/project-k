@@ -28,7 +28,7 @@ local blatantv1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/hab
 local blatantv2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/BlatantV2.lua"))()
 local NoFishingAnimation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/NoFishingAnimation.lua"))()
 local LockPosition = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/LockPosition.lua"))()
-local AutoFavorite = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/AutoFavoriteModule.lua"))()
+local AutoEquipRod = loadstring(game:HttpGet("path/to/AutoEquipRod.lua"))()
 -- Teleport
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
 local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/TeleportToPlayer.lua"))()
@@ -1238,96 +1238,15 @@ makeToggle(catSupport, "Lock Position", function(on)
     end
 end)
 
-
-local catAutoFavorite = makeCategory(mainPage, "Auto Favorite System", "⭐")
-
--- Selected rarities tracking
-local selectedRarities = {}
-
--- Multi-select dropdown untuk pilih rarity
-makeDropdown(catAutoFavorite, "Select Rarities to Favorite", "🎯", AutoFavorite.AllRarities, function(rarity)
-    -- Toggle rarity in selection
-    local index = table.find(selectedRarities, rarity)
-    if index then
-        table.remove(selectedRarities, index)
-        print("❌ Removed:", rarity)
-    else
-        table.insert(selectedRarities, rarity)
-        print("✅ Added:", rarity)
-    end
-    
-    -- Update settings
-    AutoFavorite.SetRarities(selectedRarities)
-    
-    -- Show current selection
-    if #selectedRarities > 0 then
-        print("📋 Selected Rarities:", table.concat(selectedRarities, ", "))
-    else
-        print("📋 No rarities selected")
-    end
-end, "RarityDropdown")
-
--- Toggle untuk enable/disable auto favorite
-makeToggle(catAutoFavorite, "Enable Auto Favorite", function(on)
+-- ✨ NEW: Auto Equip Rod
+makeToggle(catSupport, "Auto Equip Rod", function(on)
     if on then
-        if #selectedRarities == 0 then
-            Notify("Warning ⚠️", "Pilih minimal 1 rarity terlebih dahulu!", 4)
-            return
-        end
-        
-        if AutoFavorite.Start() then
-            Notify("Auto Favorite ⭐", "Aktif! Rarity: " .. table.concat(selectedRarities, ", "), 5)
-        end
+        AutoEquipRod.Start()
+        Notify.Send("Auto Equip Rod", "Rod akan otomatis di-equip!", 4)
     else
-        if AutoFavorite.Stop() then
-            Notify("Auto Favorite ⭐", "Nonaktif.", 3)
-        end
+        AutoEquipRod.Stop()
+        Notify.Send("Auto Equip Rod", "Auto equip dimatikan!", 4)
     end
-end)
-
--- Button untuk preset rarity
-makeButton(catAutoFavorite, "Preset: Rare+ Only", function()
-    selectedRarities = {"Rare", "Epic", "Legendary", "Mythic", "Secret"}
-    AutoFavorite.SetRarities(selectedRarities)
-    Notify("Preset ✨", "Rare+ dipilih!", 3)
-    print("📋 Selected:", table.concat(selectedRarities, ", "))
-end)
-
-makeButton(catAutoFavorite, "Preset: Legendary+ Only", function()
-    selectedRarities = {"Legendary", "Mythic", "Secret"}
-    AutoFavorite.SetRarities(selectedRarities)
-    Notify("Preset ✨", "Legendary+ dipilih!", 3)
-    print("📋 Selected:", table.concat(selectedRarities, ", "))
-end)
-
-makeButton(catAutoFavorite, "Clear All Selection", function()
-    selectedRarities = {}
-    AutoFavorite.SetRarities(selectedRarities)
-    Notify("Clear 🗑️", "Semua rarity di-clear!", 3)
-end)
-
--- ============================================
--- [3] DEBUG TOOLS (PENTING UNTUK TESTING!)
--- ============================================
-
-local catDebug = makeCategory(mainPage, "Debug Tools", "🔍")
-
-makeButton(catDebug, "Run Inventory Scan", function()
-    AutoFavorite.RunDebugScan()
-    Notify("Debug 🔍", "Scan selesai! Cek console (F9)", 4)
-end)
-
-makeToggle(catDebug, "Enable Debug Mode", function(on)
-    AutoFavorite.ToggleDebug(on)
-    Notify("Debug 🔍", "Debug mode: " .. (on and "ON" or "OFF"), 3)
-end)
-
-makeButton(catDebug, "Print Current Settings", function()
-    print("========================================")
-    print("AUTO FAVORITE SETTINGS:")
-    print("Running:", AutoFavorite.IsRunning())
-    print("Selected Rarities:", table.concat(selectedRarities, ", "))
-    print("========================================")
 end)
 
 -- ==== TELEPORT PAGE ====
