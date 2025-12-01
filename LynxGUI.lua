@@ -1255,11 +1255,19 @@ end)
 
 makeToggle(catSupport, "Disable Cutscenes", function(on)
     if on then
-        DisableCutscenes.Start()
-        Notify.Send("Disable Cutscenes", "Semua cutscenes dimatikan!", 4)
+        local success = DisableCutscenes.Start()
+        if success then
+            Notify.Send("Disable Cutscenes", "✓ Semua cutscenes dimatikan!", 4)
+        else
+            Notify.Send("Disable Cutscenes", "⚠ Sudah aktif!", 3)
+        end
     else
-        DisableCutscenes.Stop()
-        Notify.Send("Disable Cutscenes", "Cutscenes kembali normal.", 4)
+        local success = DisableCutscenes.Stop()
+        if success then
+            Notify.Send("Disable Cutscenes", "✓ Cutscenes kembali normal.", 4)
+        else
+            Notify.Send("Disable Cutscenes", "⚠ Sudah nonaktif!", 3)
+        end
     end
 end)
 
