@@ -1519,27 +1519,18 @@ makeToggle(catWeather, "Enable Auto Weather", function(on)
     end
 end)
 
-local catMerchant = makeCategory(shopPage, "Remote Merchant", "🛒")
+local catMerchant = makeCategory(shopPage, "Open Merchant Store", "🛒")
 
 makeButton(catMerchant, "Open Merchant", function()
     MerchantSystem.Open()
-    Notify("Merchant 🛒", "Merchant dibuka!", 3)
+    Notify.Send("Merchant 🛒", "Merchant dibuka!", 3)
 end)
 
 makeButton(catMerchant, "Close Merchant", function()
     MerchantSystem.Close()
-    Notify("Merchant 🛒", "Merchant ditutup!", 3)
+    Notify.Send("Merchant 🛒", "Merchant ditutup!", 3)
 end)
 
-makeInput(catMerchant, "Buy Item ID", "8", function(value)
-    local id = tonumber(value)
-    if id then
-        MerchantSystem.Buy(id)
-        Notify("Merchant 🛒", "Membeli item ID: " .. id, 3)
-    else
-        Notify("Error ❌", "ID harus berupa angka!", 3)
-    end
-end)
 
 
 -- Camera settings
