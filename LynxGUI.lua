@@ -30,7 +30,7 @@ local NoFishingAnimation = loadstring(game:HttpGet("https://raw.githubuserconten
 local LockPosition = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/LockPosition.lua"))()
 local AutoEquipRod = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/AutoEquipRod.lua"))()
 local DisableCutscenes = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/DisableCutscenes.lua"))()
-local DisableSmallNotification = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/DisableSmallNotification.lua"))()
+local DisableExtras = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/DisableExtras.lua"))()
 
 -- Teleport
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
@@ -1272,18 +1272,30 @@ makeToggle(catSupport, "Disable Cutscenes", function(on)
     end
 end)
 
+-- Load module di bagian atas file GUI
+local DisableExtras = loadstring(game:HttpGet("LINK_RAW_DISABLE_EXTRAS"))()
+
+-- Toggle Small Notification
 makeToggle(catSupport, "Disable Small Notification", function(on)
     if on then
-        DisableSmallNotification.Start()
+        DisableExtras.StartSmallNotification()
         Notify.Send("Disable Small Notification", "✓ Small Notification dinonaktifkan!", 4)
     else
-        DisableSmallNotification.Stop()
+        DisableExtras.StopSmallNotification()
         Notify.Send("Disable Small Notification", "Small Notification bisa muncul kembali.", 3)
     end
 end)
 
-
-
+-- Toggle Skin Effect
+makeToggle(catSupport, "Disable Skin Effect", function(on)
+    if on then
+        DisableExtras.StartSkinEffect()
+        Notify.Send("Disable Skin Effect", "✓ Skin effect dihapus!", 4)
+    else
+        DisableExtras.StopSkinEffect()
+        Notify.Send("Disable Skin Effect", "Skin effect bisa muncul kembali.", 3)
+    end
+end)
 
 -- ==== TELEPORT PAGE ====
 local locationItems = {}
