@@ -1,65 +1,86 @@
 --=====================================================
--- DisableCutscenes.lua (FINAL)
+-- DisableCutscenes.lua (FINAL MODULE VERSION)
+-- Memiliki: Start(), Stop()
 --=====================================================
+
+local DisableCutscenes = {}
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- Ambil folder net (aman karena sudah kamu cek ada di sini)
 local Packages = ReplicatedStorage:WaitForChild("Packages")
 local Index = Packages:WaitForChild("_Index")
 local NetFolder = Index:WaitForChild("sleitnick_net@0.2.0")
 local net = NetFolder:WaitForChild("net")
 
--- Remote events yang akan dipaksa dimatikan
 local ReplicateCutscene = net:FindFirstChild("ReplicateCutscene")
 local StopCutscene = net:FindFirstChild("StopCutscene")
 local BlackoutScreen = net:FindFirstChild("BlackoutScreen")
 
--- Opsional debug switch
-local DEBUG = false
+local running = false
+local _connections = {}
+local _loopThread = nil
 
-local function debugPrint(...)
-	if DEBUG then
-		print("[DisableCutscenes]", ...)
-	end
+local function connect(event, fn)
+    if event then
+        local c = event.OnClientEvent:Connect(fn)
+        table.insert(_connections, c)
+    end
 end
 
-debugPrint("Loaded. Disabling all cutscenes...")
+-----------------------------------------------------
+-- START
+-----------------------------------------------------
+function DisableCutscenes.Start()
+    if running then return end
+    running = true
 
---========================================
--- 1. Auto block jika server memanggil cutscene
---========================================
-if ReplicateCutscene and ReplicateCutscene:IsA("RemoteEvent") then
-	debugPrint("Blocking ReplicateCutscene...")
+    -- Block ReplicateCutscene
+    connect(ReplicateCutscene, function(...)
+        if running and StopCutscene then
+            StopCutscene:FireServer()
+        end
+    end)
 
-	ReplicateCutscene.OnClientEvent:Connect(function(...)
-		debugPrint("Server tried to play cutscene, blocking...")
-		if StopCutscene then
-			StopCutscene:FireServer()
-		end
-	end)
+    -- Block BlackoutScreen
+    connect(BlackoutScreen, function(...)
+        -- just ignore
+    end)
+
+    -- Loop paksa StopCutscene tiap 1 detik
+    _loopThread = task.spawn(function()
+        while running do
+            if StopCutscene then
+                StopCutscene:FireServer()
+            end
+            task.wait(1)
+        end
+    end)
+
+    print("[DisableCutscenes] ENABLED")
 end
 
---========================================
--- 2. Auto block blackout/fade
---========================================
-if BlackoutScreen and BlackoutScreen:IsA("RemoteEvent") then
-	debugPrint("Blocking BlackoutScreen...")
+-----------------------------------------------------
+-- STOP
+-----------------------------------------------------
+function DisableCutscenes.Stop()
+    if not running then return end
+    running = false
 
-	BlackoutScreen.OnClientEvent:Connect(function(...)
-		debugPrint("Blackout attempted -> Blocked")
-	end)
+    -- Hapus semua koneksi listener
+    for _, c in ipairs(_connections) do
+        c:Disconnect()
+    end
+
+    _connections = {}
+
+    -- Stop loop
+    if _loopThread then
+        task.cancel(_loopThread)
+        _loopThread = nil
+    end
+
+    print("[DisableCutscenes] DISABLED")
 end
 
---========================================
--- 3. Pastikan cutscene tetap dihentikan paksa
---========================================
-task.spawn(function()
-	while task.wait(1) do
-		if StopCutscene then
-			StopCutscene:FireServer()
-		end
-	end
-end)
-
-debugPrint("All cutscenes disabled successfully.")
+-----------------------------------------------------
+return DisableCutscenes
