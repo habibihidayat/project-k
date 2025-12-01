@@ -1272,9 +1272,6 @@ makeToggle(catSupport, "Disable Cutscenes", function(on)
     end
 end)
 
--- Load module di bagian atas file GUI
-local DisableExtras = loadstring(game:HttpGet("LINK_RAW_DISABLE_EXTRAS"))()
-
 -- Toggle Small Notification
 makeToggle(catSupport, "Disable Small Notification", function(on)
     if on then
