@@ -1,26 +1,49 @@
 -- DisableSmallNotification.lua
 local module = {}
 
-local player = game.Players.LocalPlayer
-local connection
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
 
-function module.Start()
-    if connection then return false end -- Sudah aktif
-    connection = player.PlayerGui.ChildAdded:Connect(function(child)
-        if child.Name == "Small Notification" then
+local active = false
+
+-- Fungsi utama untuk disable small notification
+local function disableNotifications()
+    if not player or not player:FindFirstChild("PlayerGui") then return end
+    local gui = player.PlayerGui
+
+    -- Hapus jika sudah ada
+    local existing = gui:FindFirstChild("Small Notification")
+    if existing then
+        existing:Destroy()
+    end
+end
+
+-- Loop terus menerus untuk memaksa disable
+local function startLoop()
+    if active then return end
+    active = true
+
+    -- Cek setiap frame
+    RunService.Heartbeat:Connect(function()
+        if active then
+            disableNotifications()
+        end
+    end)
+
+    -- Juga deteksi ketika ada yang ditambahkan
+    player.PlayerGui.ChildAdded:Connect(function(child)
+        if active and child.Name == "Small Notification" then
             child:Destroy()
         end
     end)
-    return true
 end
 
-function module.Stop()
-    if connection then
-        connection:Disconnect()
-        connection = nil
-        return true
-    end
-    return false -- Tidak aktif
+local function stopLoop()
+    active = false
 end
+
+module.Start = startLoop
+module.Stop = stopLoop
 
 return module
