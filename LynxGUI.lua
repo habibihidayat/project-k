@@ -1603,16 +1603,20 @@ end)
 -- ============================
 local catBait = makeCategory(shopPage, "Buy Bait", "🪱")
 
--- DATA BAIT LENGKAP
+-- DATA BAIT DARI SCAN
 local BaitData = {
-    ["Basic Bait"] = {id = 17, price = 50},
-    ["Super Bait"] = {id = 18, price = 250},
-    ["Pro Bait"] = {id = 19, price = 1000},
-    ["Golden Bait"] = {id = 20, price = 5000},
-    ["Mythic Bait"] = {id = 21, price = 15000},
+    ["Chroma Bait"]       = {id = 6,  price = 290000},
+    ["Luck Bait"]         = {id = 2,  price = 1000},
+    ["Midnight Bait"]     = {id = 3,  price = 3000},
+    ["Topwater Bait"]     = {id = 10, price = 100},
+    ["Dark Matter Bait"]  = {id = 8,  price = 630000},
+    ["Nature Bait"]       = {id = 17, price = 83500},
+    ["Aether Bait"]       = {id = 16, price = 3700000},
+    ["Corrupt Bait"]      = {id = 15, price = 1148484},
+    ["Floral Bait"]       = {id = 20, price = 4000000},
 }
 
--- BUAT DROPDOWN LIST: "Nama Bait (Harga)"
+-- BUAT DROPDOWN LIST
 local BaitList = {}
 local BaitMap = {}
 
@@ -1626,7 +1630,6 @@ end
 
 local SelectedBait = nil
 
--- DROPDOWN
 makeDropdown(catBait, "Select Bait", "🪱", BaitList, function(displayName)
     local baitName = BaitMap[displayName]
     SelectedBait = baitName
@@ -1650,7 +1653,6 @@ makeButton(catBait, "BUY SELECTED BAIT", function()
 
     Notify.Send("Buy Bait", "Membeli " .. SelectedBait .. "...", 3)
 end)
-
 
 -- Camera settings
 local catZoom = makeCategory(cameraViewPage, "Unlimited Zoom", "🔭")
