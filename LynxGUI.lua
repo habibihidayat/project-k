@@ -39,7 +39,7 @@ local AutoQuestModule = loadstring(game:HttpGet("https://raw.githubusercontent.c
 local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
 local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
 local OpenShop = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/OpenShop.lua"))()
-local GuiControl = require(game.ReplicatedStorage.Modules.GuiControl)
+local RodBuyer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/RodBuyer.lua"))()
 -- Camera View
 local FreecamModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/FreecamModule.lua"))()
 local UnlimitedZoomModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/UnlimitedZoom.lua"))()
@@ -1541,36 +1541,19 @@ end)
 -- ============================
 --  ROD SHOP CATEGORY
 -- ============================
-local catRodShop = makeCategory(shopPage, "Rod Shop", "🎣")
 
-makeButton(catRodShop, "Open Rod Shop", function()
-    GuiControl:Open("Rod Shop")
-    Notify.Send("Rod Shop 🎣", "Rod Shop dibuka!", 3)
+local catRod = makeCategory(shopPage, "Rod Shop", "🎣")
+
+makeButton(catRod, "Buy Angler Rod", function()
+    RodBuyer.Buy("AnglerRod")
 end)
 
-makeButton(catRodShop, "Close Rod Shop", function()
-    if GuiControl:IsOpen("Rod Shop") then
-        GuiControl:Close()
-    end
-    Notify.Send("Rod Shop 🎣", "Rod Shop ditutup!", 3)
+makeButton(catRod, "Buy Ares Rod", function()
+    RodBuyer.Buy("AresRod")
 end)
 
-
--- ============================
---  BAIT SHOP CATEGORY
--- ============================
-local catBaitShop = makeCategory(shopPage, "Bait Shop", "🪱")
-
-makeButton(catBaitShop, "Open Bait Shop", function()
-    GuiControl:Open("Bait Shop")
-    Notify.Send("Bait Shop 🪱", "Bait Shop dibuka!", 3)
-end)
-
-makeButton(catBaitShop, "Close Bait Shop", function()
-    if GuiControl:IsOpen("Bait Shop") then
-        GuiControl:Close()
-    end
-    Notify.Send("Bait Shop 🪱", "Bait Shop ditutup!", 3)
+makeButton(catRod, "Buy Bamboo Rod", function()
+    RodBuyer.Buy("BambooRod")
 end)
 
 
