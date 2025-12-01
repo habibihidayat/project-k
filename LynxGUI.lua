@@ -1538,45 +1538,48 @@ end)
 -- ============================
 --  BUY RODS CATEGORY (REMOTE)
 -- ============================
-local catRod = makeCategory(shopPage, "Buy Rod (Remote)", "🎣")
+local catRod = makeCategory(shopPage, "Buy Rod", "🎣")
 
--- Rod ID hasil RemoteSpy
+-- Rod ID hasil RemoteSpy (dictionary)
 local RodIDs = {
     ["Basic Rod"] = 168,
-    ["Wooden Rod"] = 169,
+    ["Gatau Rod"] = 76,
     ["Iron Rod"] = 170,
     ["Pro Rod"] = 171,
     ["Mythic Rod"] = 172,
 }
 
--- Variabel untuk menyimpan rod terpilih
+-- HARUS: daftar nama untuk dropdown (array)
+local RodList = {
+    "Basic Rod",
+    "Gatau Rod",
+    "Iron Rod",
+    "Pro Rod",
+    "Mythic Rod",
+}
+
 local SelectedRod = nil
 
--- Dropdown untuk memilih rod
-makeDropdown(catRod, "Select Rod", "🎣", RodIDs, function(chosenName)
+-- Dropdown memakai array RodList
+makeDropdown(catRod, "Select Rod", "🎣", RodList, function(chosenName)
     SelectedRod = chosenName
-    Notify.Send("Rod Selected", "Kamu memilih: " .. tostring(chosenName), 3)
+    Notify.Send("Rod Selected", "Kamu memilih: " .. chosenName, 3)
 end, "RodDropdown")
 
-
--- Tombol BUY (mengganti toggle)
+-- Tombol BUY
 makeButton(catRod, "BUY SELECTED ROD", function()
-
     if not SelectedRod then
         Notify.Send("Buy Rod", "Pilih rod terlebih dahulu!", 3)
         return
     end
 
     local RodID = RodIDs[SelectedRod]
-
     if not RodID then
         Notify.Send("Error", "Rod ID tidak ditemukan!", 3)
         return
     end
 
-    -- Pemanggilan remote
     RemoteBuyer.BuyRod(RodID)
-
     Notify.Send("Buy Rod", "Membeli " .. SelectedRod .. "...", 3)
 end)
 
