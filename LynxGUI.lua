@@ -39,6 +39,7 @@ local AutoQuestModule = loadstring(game:HttpGet("https://raw.githubusercontent.c
 local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
 local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
 local OpenShop = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/OpenShop.lua"))()
+local GuiControl = require(game.ReplicatedStorage.Modules.GuiControl)
 -- Camera View
 local FreecamModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/FreecamModule.lua"))()
 local UnlimitedZoomModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/UnlimitedZoom.lua"))()
@@ -1519,52 +1520,57 @@ makeToggle(catWeather, "Enable Auto Weather", function(on)
     end
 end)
 
---========================================--
--- MERCHANT STORE
---========================================--
-
+-- ============================
+--  MERCHANT CATEGORY
+-- ============================
 local catMerchant = makeCategory(shopPage, "Merchant Store", "🛒")
 
 makeButton(catMerchant, "Open Merchant", function()
-    OpenShop.OpenMerchant()
-    Notify.Send("Merchant", "Merchant dibuka!", 3)
+    GuiControl:Open("Merchant")
+    Notify.Send("Merchant 🛒", "Merchant dibuka!", 3)
 end)
 
 makeButton(catMerchant, "Close Merchant", function()
-    OpenShop.CloseMerchant()
-    Notify.Send("Merchant", "Merchant ditutup!", 3)
+    if GuiControl:IsOpen("Merchant") then
+        GuiControl:Close()
+    end
+    Notify.Send("Merchant 🛒", "Merchant ditutup!", 3)
 end)
 
---========================================--
--- ROD SHOP
---========================================--
 
+-- ============================
+--  ROD SHOP CATEGORY
+-- ============================
 local catRodShop = makeCategory(shopPage, "Rod Shop", "🎣")
 
 makeButton(catRodShop, "Open Rod Shop", function()
-    OpenShop.OpenRodShop()
-    Notify.Send("Rod Shop", "Rod Shop dibuka!", 3)
+    GuiControl:Open("Rod Shop")
+    Notify.Send("Rod Shop 🎣", "Rod Shop dibuka!", 3)
 end)
 
 makeButton(catRodShop, "Close Rod Shop", function()
-    OpenShop.CloseRodShop()
-    Notify.Send("Rod Shop", "Rod Shop ditutup!", 3)
+    if GuiControl:IsOpen("Rod Shop") then
+        GuiControl:Close()
+    end
+    Notify.Send("Rod Shop 🎣", "Rod Shop ditutup!", 3)
 end)
 
---========================================--
--- BAIT SHOP
---========================================--
 
+-- ============================
+--  BAIT SHOP CATEGORY
+-- ============================
 local catBaitShop = makeCategory(shopPage, "Bait Shop", "🪱")
 
 makeButton(catBaitShop, "Open Bait Shop", function()
-    OpenShop.OpenBaitShop()
-    Notify.Send("Bait Shop", "Bait Shop dibuka!", 3)
+    GuiControl:Open("Bait Shop")
+    Notify.Send("Bait Shop 🪱", "Bait Shop dibuka!", 3)
 end)
 
 makeButton(catBaitShop, "Close Bait Shop", function()
-    OpenShop.CloseBaitShop()
-    Notify.Send("Bait Shop", "Bait Shop ditutup!", 3)
+    if GuiControl:IsOpen("Bait Shop") then
+        GuiControl:Close()
+    end
+    Notify.Send("Bait Shop 🪱", "Bait Shop ditutup!", 3)
 end)
 
 
