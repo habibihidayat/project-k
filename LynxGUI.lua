@@ -30,6 +30,7 @@ local NoFishingAnimation = loadstring(game:HttpGet("https://raw.githubuserconten
 local LockPosition = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/LockPosition.lua"))()
 local AutoEquipRod = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/AutoEquipRod.lua"))()
 local DisableCutscenes = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/DisableCutscenes.lua"))()
+local DisableSmallNotification = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/DisableSmallNotification.lua"))()
 
 -- Teleport
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
@@ -1270,6 +1271,18 @@ makeToggle(catSupport, "Disable Cutscenes", function(on)
         end
     end
 end)
+
+-- ✨ NEW: Disable Small Notification
+makeToggle(catSupport, "Disable Small Notification", function(on)
+    if on then
+        DisableSmallNotification.Start()
+        Notify.Send("Disable Small Notification", "✓ Small Notification dinonaktifkan!", 4)
+    else
+        DisableSmallNotification.Stop()
+        Notify.Send("Disable Small Notification", "Small Notification bisa muncul kembali.", 3)
+    end
+end)
+
 
 
 -- ==== TELEPORT PAGE ====
