@@ -1538,22 +1538,21 @@ makeButton(catMerchant, "Close Merchant", function()
 end)
 
 
--- ============================
---  ROD SHOP CATEGORY
--- ============================
-
 local catRod = makeCategory(shopPage, "Rod Shop", "🎣")
 
-makeButton(catRod, "Buy Angler Rod", function()
-    RodBuyer.Buy("AnglerRod")
-end)
-
+-- 126 = Ares Rod
 makeButton(catRod, "Buy Ares Rod", function()
-    RodBuyer.Buy("AresRod")
+    RodBuyer.Buy(126)
 end)
 
+-- 168 = Angler Rod
+makeButton(catRod, "Buy Angler Rod", function()
+    RodBuyer.Buy(168)
+end)
+
+-- 258 = Bamboo Rod
 makeButton(catRod, "Buy Bamboo Rod", function()
-    RodBuyer.Buy("BambooRod")
+    RodBuyer.Buy(258)
 end)
 
 
