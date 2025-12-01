@@ -1538,29 +1538,54 @@ end)
 -- ============================
 --  BUY RODS CATEGORY (REMOTE)
 -- ============================
+
 local catRod = makeCategory(shopPage, "Buy Rod", "🎣")
 
--- Rod ID hasil RemoteSpy (dictionary)
+-- Rod ID hasil scan log (lengkap ID + PRICE)
 local RodIDs = {
-    ["Basic Rod"] = 168,
-    ["Gatau Rod"] = 76,
-    ["Iron Rod"] = 170,
-    ["Pro Rod"] = 171,
-    ["Mythic Rod"] = 172,
+    ["Chrome Rod"]        = 7,      -- 437000
+    ["Lucky Rod"]         = 4,      -- 15000
+    ["Magma Rod"]         = 3,      -- ??
+    ["Starter Rod"]       = 1,      -- 50
+    ["Steampunk Rod"]     = 6,      -- 215000
+    ["Hyper Rod"]         = 9,      -- ??
+    ["Gold Rod"]          = 8,      -- ??
+    ["Lava Rod"]          = 2,      -- ??
+    ["Carbon Rod"]        = 76,     -- 750
+    ["Gingerbread Rod"]   = 103,    -- ??
+    ["Ice Rod"]           = 78,     -- 5000
+    ["Luck Rod"]          = 79,     -- 325
+    ["Midnight Rod"]      = 80,     -- 50000
+    ["Toy Rod"]           = 84,      -- ??
+    ["Grass Rod"]         = 85,     -- 1500
+    ["Candy Cane Rod"]    = 100,    -- ??
+    ["Christmas Tree Rod"]= 101,    -- ??
+    ["Demascus Rod"]      = 77,     -- 3000
+    ["Frozen Rod"]        = 102,    -- ??
+    ["Cute Rod"]          = 123,    -- ??
+    ["Angelic Rod"]       = 124,    -- ??
+    ["Astral Rod"]        = 5,      -- 1000000
+    ["Ares Rod"]          = 126,    -- 3000000
+    ["Ghoul Rod"]         = 129,    -- ??
+    ["Angler Rod"]        = 168,    -- 8000000
+    ["Ghostfinn Rod"]     = 169,    -- ??
+    ["Element Rod"]       = 257,    -- ??
+    ["Hazmat Rod"]        = 256,    -- ??
+    ["Fluorescent Rod"]   = 255,    -- 715000
+    ["Bamboo Rod"]        = 258,    -- 12000000
+    ["Studded Rod"]       = 400,    -- ??
 }
 
--- HARUS: daftar nama untuk dropdown (array)
-local RodList = {
-    "Basic Rod",
-    "Gatau Rod",
-    "Iron Rod",
-    "Pro Rod",
-    "Mythic Rod",
-}
+-- Daftar dropdown (otomatis)
+local RodList = {}
+for rodName in pairs(RodIDs) do
+    table.insert(RodList, rodName)
+end
+table.sort(RodList)
 
 local SelectedRod = nil
 
--- Dropdown memakai array RodList
+-- Dropdown
 makeDropdown(catRod, "Select Rod", "🎣", RodList, function(chosenName)
     SelectedRod = chosenName
     Notify.Send("Rod Selected", "Kamu memilih: " .. chosenName, 3)
@@ -1568,21 +1593,18 @@ end, "RodDropdown")
 
 -- Tombol BUY
 makeButton(catRod, "BUY SELECTED ROD", function()
+
     if not SelectedRod then
         Notify.Send("Buy Rod", "Pilih rod terlebih dahulu!", 3)
         return
     end
 
     local RodID = RodIDs[SelectedRod]
-    if not RodID then
-        Notify.Send("Error", "Rod ID tidak ditemukan!", 3)
-        return
-    end
-
     RemoteBuyer.BuyRod(RodID)
-    Notify.Send("Buy Rod", "Membeli " .. SelectedRod .. "...", 3)
-end)
 
+    Notify.Send("Buy Rod", "Membeli " .. SelectedRod .. "...", 3)
+
+end)
 
 -- Camera settings
 local catZoom = makeCategory(cameraViewPage, "Unlimited Zoom", "🔭")
