@@ -1,5 +1,5 @@
 --=====================================================
--- DisableCutscenes.lua (ATTRIBUTE BLOCKING VERSION)
+-- DisableCutscenes.lua (GUI TOGGLE OPTIMIZED VERSION)
 -- Memblokir cutscene dengan mencegah InCutscene attribute
 --=====================================================
 local DisableCutscenes = {}
@@ -18,22 +18,32 @@ local BlackoutScreen = net:FindFirstChild("BlackoutScreen")
 
 local running = false
 local _connections = {}
-local _loopThread = nil
-local _attributeThread = nil
+local _threads = {}
 
 local function connect(signal, fn)
     if signal then
-        local c = signal:Connect(fn)
-        table.insert(_connections, c)
-        return c
+        local success, connection = pcall(function()
+            return signal:Connect(fn)
+        end)
+        if success and connection then
+            table.insert(_connections, connection)
+            return connection
+        end
+    end
+end
+
+local function addThread(thread)
+    if thread then
+        table.insert(_threads, thread)
     end
 end
 
 local function blockInCutsceneAttribute()
-    -- Set InCutscene ke false dan prevent perubahan
-    if LocalPlayer:GetAttribute("InCutscene") then
-        LocalPlayer:SetAttribute("InCutscene", false)
-    end
+    pcall(function()
+        if LocalPlayer:GetAttribute("InCutscene") then
+            LocalPlayer:SetAttribute("InCutscene", false)
+        end
+    end)
 end
 
 local function stopAllCutscenes()
@@ -51,7 +61,7 @@ local function stopAllCutscenes()
     -- Force attribute ke false
     blockInCutsceneAttribute()
     
-    -- Cleanup UI
+    -- Cleanup UI cutscene
     local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
     if PlayerGui then
         for _, gui in ipairs(PlayerGui:GetChildren()) do
@@ -59,135 +69,158 @@ local function stopAllCutscenes()
                 local name = gui.Name:lower()
                 if name:find("cutscene") or name:find("blackout") or 
                    name:find("fade") or name:find("transition") then
-                    gui.Enabled = false
-                    task.spawn(function()
-                        pcall(function() gui:Destroy() end)
+                    pcall(function()
+                        gui.Enabled = false
+                        gui:Destroy()
                     end)
                 end
             end
         end
     end
     
-    -- Unlock GuiControl jika terkunci
-    local GuiControl = ReplicatedStorage:FindFirstChild("Modules")
-    if GuiControl then
-        GuiControl = GuiControl:FindFirstChild("GuiControl")
-        if GuiControl then
-            pcall(function()
-                local GuiControlModule = require(GuiControl)
-                if GuiControlModule.Unlock then
-                    GuiControlModule:Unlock()
-                end
-                if GuiControlModule.SetHUDVisibility then
-                    GuiControlModule:SetHUDVisibility(true)
-                end
-            end)
+    -- Unlock GuiControl
+    pcall(function()
+        local GuiControlModule = require(ReplicatedStorage.Modules.GuiControl)
+        if GuiControlModule.Unlock then
+            GuiControlModule:Unlock()
         end
-    end
+        if GuiControlModule.SetHUDVisibility then
+            GuiControlModule:SetHUDVisibility(true)
+        end
+    end)
 end
 
 -----------------------------------------------------
 -- START
 -----------------------------------------------------
 function DisableCutscenes.Start()
-    if running then return end
+    if running then 
+        warn("[DisableCutscenes] Already running!")
+        return false
+    end
+    
     running = true
     
-    -- CRITICAL: Block InCutscene attribute changes
-    _attributeThread = task.spawn(function()
+    -- Thread 1: Monitor InCutscene attribute secara agresif
+    addThread(task.spawn(function()
         while running do
-            -- Monitor dan force InCutscene ke false
             if LocalPlayer:GetAttribute("InCutscene") == true then
                 LocalPlayer:SetAttribute("InCutscene", false)
                 stopAllCutscenes()
             end
-            task.wait(0.1) -- Check setiap 0.1 detik
+            task.wait(0.05) -- Check setiap 50ms untuk response cepat
         end
-    end)
+    end))
     
-    -- Listen untuk attribute changes
+    -- Thread 2: Attribute change listener
     connect(LocalPlayer:GetAttributeChangedSignal("InCutscene"), function()
         if running and LocalPlayer:GetAttribute("InCutscene") == true then
-            LocalPlayer:SetAttribute("InCutscene", false)
-            stopAllCutscenes()
-        end
-    end)
-    
-    -- Block ReplicateCutscene event
-    connect(ReplicateCutscene.OnClientEvent, function(...)
-        if running then
-            -- Immediately set attribute to false
-            LocalPlayer:SetAttribute("InCutscene", false)
-            stopAllCutscenes()
-        end
-    end)
-    
-    -- Block BlackoutScreen
-    if BlackoutScreen then
-        connect(BlackoutScreen.OnClientEvent, function(...)
-            if running then
+            task.spawn(function()
+                LocalPlayer:SetAttribute("InCutscene", false)
                 stopAllCutscenes()
+            end)
+        end
+    end)
+    
+    -- Thread 3: Block ReplicateCutscene event
+    if ReplicateCutscene then
+        connect(ReplicateCutscene.OnClientEvent, function(...)
+            if running then
+                task.spawn(function()
+                    LocalPlayer:SetAttribute("InCutscene", false)
+                    stopAllCutscenes()
+                end)
             end
         end)
     end
     
-    -- Monitor PlayerGui untuk UI baru
+    -- Thread 4: Block BlackoutScreen
+    if BlackoutScreen then
+        connect(BlackoutScreen.OnClientEvent, function(...)
+            if running then
+                task.spawn(stopAllCutscenes)
+            end
+        end)
+    end
+    
+    -- Thread 5: Monitor UI cutscene yang muncul
     local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
     connect(PlayerGui.ChildAdded, function(child)
         if running and child:IsA("ScreenGui") then
             local name = child.Name:lower()
             if name:find("cutscene") or name:find("blackout") or 
                name:find("fade") or name:find("transition") then
-                child.Enabled = false
                 task.spawn(function()
-                    pcall(function() child:Destroy() end)
+                    pcall(function()
+                        child.Enabled = false
+                        child:Destroy()
+                    end)
+                    stopAllCutscenes()
                 end)
-                stopAllCutscenes()
             end
         end
     end)
     
-    -- Loop backup untuk memastikan
-    _loopThread = task.spawn(function()
+    -- Thread 6: Backup loop untuk safety
+    addThread(task.spawn(function()
         while running do
             stopAllCutscenes()
-            task.wait(0.5)
+            task.wait(0.3) -- Backup check setiap 300ms
         end
-    end)
+    end))
     
-    -- Initial cleanup
-    stopAllCutscenes()
+    -- Initial cleanup saat start
+    task.spawn(stopAllCutscenes)
     
-    print("[DisableCutscenes] ENABLED - Blocking InCutscene attribute")
+    print("[DisableCutscenes] ✓ ENABLED - All cutscenes blocked")
+    return true
 end
 
 -----------------------------------------------------
 -- STOP
 -----------------------------------------------------
 function DisableCutscenes.Stop()
-    if not running then return end
+    if not running then 
+        warn("[DisableCutscenes] Not running!")
+        return false
+    end
+    
     running = false
     
-    -- Disconnect semua
-    for _, c in ipairs(_connections) do
+    -- Disconnect semua connections
+    for _, connection in ipairs(_connections) do
         pcall(function()
-            c:Disconnect()
+            connection:Disconnect()
         end)
     end
-    _connections = {}
+    table.clear(_connections)
     
-    -- Stop threads
-    if _loopThread then
-        task.cancel(_loopThread)
-        _loopThread = nil
+    -- Cancel semua threads
+    for _, thread in ipairs(_threads) do
+        pcall(function()
+            task.cancel(thread)
+        end)
     end
+    table.clear(_threads)
     
-    if _attributeThread then
-        task.cancel(_attributeThread)
-        _attributeThread = nil
-    end
-    
-    print("[DisableCutscenes] DISABLED")
+    print("[DisableCutscenes] ✗ DISABLED - Cutscenes restored")
+    return true
+end
+
+-----------------------------------------------------
+-- STATUS CHECK (optional, untuk debugging)
+-----------------------------------------------------
+function DisableCutscenes.IsRunning()
+    return running
+end
+
+function DisableCutscenes.GetStatus()
+    return {
+        Running = running,
+        Connections = #_connections,
+        Threads = #_threads,
+        InCutscene = LocalPlayer:GetAttribute("InCutscene")
+    }
 end
 
 -----------------------------------------------------
