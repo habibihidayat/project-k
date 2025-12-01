@@ -38,6 +38,7 @@ local AutoQuestModule = loadstring(game:HttpGet("https://raw.githubusercontent.c
 -- Shop
 local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
 local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
+local MerchantSystem = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/MerchantSystem.lua"))()
 -- Camera View
 local FreecamModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/FreecamModule.lua"))()
 local UnlimitedZoomModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/UnlimitedZoom.lua"))()
@@ -1518,7 +1519,7 @@ makeToggle(catWeather, "Enable Auto Weather", function(on)
     end
 end)
 
-local catMerchant = makeCategory(shopPage, "Open Merchant", "🛒")
+local catMerchant = makeCategory(shopPage, "Remote Merchant", "🛒")
 
 makeButton(catMerchant, "Open Merchant", function()
     MerchantSystem.Open()
