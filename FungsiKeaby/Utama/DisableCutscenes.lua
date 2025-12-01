@@ -1,6 +1,6 @@
 --=====================================================
--- DisableCutscenes.lua (GUI TOGGLE OPTIMIZED VERSION)
--- Memblokir cutscene dengan mencegah InCutscene attribute
+-- DisableCutscenes.lua (ERROR-FREE VERSION)
+-- Memblokir cutscene tanpa GuiControl require
 --=====================================================
 local DisableCutscenes = {}
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -46,7 +46,48 @@ local function blockInCutsceneAttribute()
     end)
 end
 
+local function unlockPlayerGui()
+    -- Unlock GUI tanpa require GuiControl
+    local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
+    if PlayerGui then
+        -- Enable semua ScreenGui yang mungkin di-disable
+        for _, gui in ipairs(PlayerGui:GetChildren()) do
+            if gui:IsA("ScreenGui") and not gui.Enabled then
+                local name = gui.Name:lower()
+                -- Skip cutscene GUI, enable yang lain
+                if not (name:find("cutscene") or name:find("blackout") or 
+                        name:find("fade") or name:find("transition")) then
+                    pcall(function()
+                        gui.Enabled = true
+                    end)
+                end
+            end
+        end
+    end
+    
+    -- Restore camera jika terkunci
+    local Camera = workspace.CurrentCamera
+    if Camera then
+        pcall(function()
+            Camera.CameraType = Enum.CameraType.Custom
+        end)
+    end
+    
+    -- Enable character movement
+    local Character = LocalPlayer.Character
+    if Character then
+        local Humanoid = Character:FindFirstChild("Humanoid")
+        if Humanoid then
+            pcall(function()
+                Humanoid.WalkSpeed = 16 -- Reset ke default
+            end)
+        end
+    end
+end
+
 local function stopAllCutscenes()
+    if not running then return end
+    
     -- Fire StopCutscene
     if StopCutscene then
         for i = 1, 3 do
@@ -71,6 +112,7 @@ local function stopAllCutscenes()
                    name:find("fade") or name:find("transition") then
                     pcall(function()
                         gui.Enabled = false
+                        task.wait(0.1)
                         gui:Destroy()
                     end)
                 end
@@ -78,16 +120,8 @@ local function stopAllCutscenes()
         end
     end
     
-    -- Unlock GuiControl
-    pcall(function()
-        local GuiControlModule = require(ReplicatedStorage.Modules.GuiControl)
-        if GuiControlModule.Unlock then
-            GuiControlModule:Unlock()
-        end
-        if GuiControlModule.SetHUDVisibility then
-            GuiControlModule:SetHUDVisibility(true)
-        end
-    end)
+    -- Unlock GUI dan restore controls (tanpa require)
+    unlockPlayerGui()
 end
 
 -----------------------------------------------------
@@ -106,9 +140,9 @@ function DisableCutscenes.Start()
         while running do
             if LocalPlayer:GetAttribute("InCutscene") == true then
                 LocalPlayer:SetAttribute("InCutscene", false)
-                stopAllCutscenes()
+                task.spawn(stopAllCutscenes)
             end
-            task.wait(0.05) -- Check setiap 50ms untuk response cepat
+            task.wait(0.05)
         end
     end))
     
@@ -153,6 +187,7 @@ function DisableCutscenes.Start()
                 task.spawn(function()
                     pcall(function()
                         child.Enabled = false
+                        task.wait(0.05)
                         child:Destroy()
                     end)
                     stopAllCutscenes()
@@ -161,15 +196,15 @@ function DisableCutscenes.Start()
         end
     end)
     
-    -- Thread 6: Backup loop untuk safety
+    -- Thread 6: Backup loop
     addThread(task.spawn(function()
         while running do
             stopAllCutscenes()
-            task.wait(0.3) -- Backup check setiap 300ms
+            task.wait(0.3)
         end
     end))
     
-    -- Initial cleanup saat start
+    -- Initial cleanup
     task.spawn(stopAllCutscenes)
     
     print("[DisableCutscenes] ✓ ENABLED - All cutscenes blocked")
@@ -208,7 +243,7 @@ function DisableCutscenes.Stop()
 end
 
 -----------------------------------------------------
--- STATUS CHECK (optional, untuk debugging)
+-- STATUS CHECK
 -----------------------------------------------------
 function DisableCutscenes.IsRunning()
     return running
