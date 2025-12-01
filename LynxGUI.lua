@@ -39,7 +39,7 @@ local AutoQuestModule = loadstring(game:HttpGet("https://raw.githubusercontent.c
 local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
 local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
 local MerchantSystem = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/OpenShop.lua"))()
-local RodBuyer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/RodBuyer.lua"))()
+-- local RodBuyer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/RodBuyer.lua"))()
 -- Camera View
 local FreecamModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/FreecamModule.lua"))()
 local UnlimitedZoomModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/UnlimitedZoom.lua"))()
@@ -1537,22 +1537,22 @@ end)
 
 
 
-local catRod = makeCategory(shopPage, "Rod Shop", "🎣")
+-- local catRod = makeCategory(shopPage, "Rod Shop", "🎣")
 
 -- 126 = Ares Rod
-makeButton(catRod, "Buy Ares Rod", function()
-    RodBuyer.Buy(126)
-end)
+--makeButton(catRod, "Buy Ares Rod", function()
+  --  RodBuyer.Buy(126)
+--end)
 
 -- 168 = Angler Rod
-makeButton(catRod, "Buy Angler Rod", function()
-    RodBuyer.Buy(168)
-end)
+--makeButton(catRod, "Buy Angler Rod", function()
+ --   RodBuyer.Buy(168)
+--end)
 
 -- 258 = Bamboo Rod
-makeButton(catRod, "Buy Bamboo Rod", function()
-    RodBuyer.Buy(258)
-end)
+--makeButton(catRod, "Buy Bamboo Rod", function()
+  --  RodBuyer.Buy(258)
+-- end)
 
 
 -- Camera settings
