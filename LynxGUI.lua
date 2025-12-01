@@ -1598,6 +1598,60 @@ makeButton(catRod, "BUY SELECTED ROD", function()
     Notify.Send("Buy Rod", "Membeli " .. SelectedRod .. "...", 3)
 end)
 
+-- ============================
+--  BUY BAIT CATEGORY (REMOTE)
+-- ============================
+local catBait = makeCategory(shopPage, "Buy Bait", "🪱")
+
+-- DATA BAIT LENGKAP
+local BaitData = {
+    ["Basic Bait"] = {id = 17, price = 50},
+    ["Super Bait"] = {id = 18, price = 250},
+    ["Pro Bait"] = {id = 19, price = 1000},
+    ["Golden Bait"] = {id = 20, price = 5000},
+    ["Mythic Bait"] = {id = 21, price = 15000},
+}
+
+-- BUAT DROPDOWN LIST: "Nama Bait (Harga)"
+local BaitList = {}
+local BaitMap = {}
+
+for baitName, info in pairs(BaitData) do
+    local price = info.price and tostring(info.price) or "Unknown Price"
+    local display = baitName .. " (" .. price .. ")"
+
+    table.insert(BaitList, display)
+    BaitMap[display] = baitName
+end
+
+local SelectedBait = nil
+
+-- DROPDOWN
+makeDropdown(catBait, "Select Bait", "🪱", BaitList, function(displayName)
+    local baitName = BaitMap[displayName]
+    SelectedBait = baitName
+
+    local info = BaitData[baitName]
+    local priceTxt = info.price and tostring(info.price) or "Unknown Price"
+
+    Notify.Send("Bait Selected",
+        "Bait: " .. baitName .. "\nPrice: " .. priceTxt, 3)
+end, "BaitDropdown")
+
+-- TOMBOL BUY
+makeButton(catBait, "BUY SELECTED BAIT", function()
+    if not SelectedBait then
+        Notify.Send("Buy Bait", "Pilih bait dulu!", 3)
+        return
+    end
+
+    local bait = BaitData[SelectedBait]
+    RemoteBuyer.BuyBait(bait.id)
+
+    Notify.Send("Buy Bait", "Membeli " .. SelectedBait .. "...", 3)
+end)
+
+
 -- Camera settings
 local catZoom = makeCategory(cameraViewPage, "Unlimited Zoom", "🔭")
 
