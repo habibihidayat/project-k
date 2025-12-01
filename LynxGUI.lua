@@ -1272,7 +1272,6 @@ makeToggle(catSupport, "Disable Cutscenes", function(on)
     end
 end)
 
--- ✨ NEW: Disable Small Notification
 makeToggle(catSupport, "Disable Small Notification", function(on)
     if on then
         DisableSmallNotification.Start()
@@ -1282,6 +1281,7 @@ makeToggle(catSupport, "Disable Small Notification", function(on)
         Notify.Send("Disable Small Notification", "Small Notification bisa muncul kembali.", 3)
     end
 end)
+
 
 
 
