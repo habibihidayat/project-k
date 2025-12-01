@@ -1,29 +1,40 @@
--- Remote Merchant System (Standalone Version)
--- Bisa dijalankan via raw link (loadstring + HttpGet)
+--// OPEN GUI SHOPS FROM EXTERNAL SCRIPT
+-- Fungsi ini membuka GUI apa pun berdasarkan nama folder di PlayerGui
 
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local Player = game.Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
 
--- Merchant UI di PlayerGui
-local MerchantUI = PlayerGui:WaitForChild("Merchant")
+local Shops = {
+    Merchant = "Merchant",
+    RodShop = "Rod Shop",
+    BaitShop = "Bait Shop"
+}
 
--- ==== FUNCTIONS ====
-
-local function OpenMerchant()
-    if MerchantUI then
-        MerchantUI.Enabled = true
+local function OpenShop(shopKey)
+    local guiName = Shops[shopKey]
+    if not guiName then
+        warn("Shop key tidak ditemukan:", shopKey)
+        return
     end
-end
 
-local function CloseMerchant()
-    if MerchantUI then
-        MerchantUI.Enabled = false
+    local shopGui = PlayerGui:FindFirstChild(guiName)
+    if shopGui then
+        shopGui.Enabled = true
+    else
+        warn("GUI tidak ditemukan di PlayerGui:", guiName)
     end
 end
 
 return {
-    Open = OpenMerchant,
-    Close = CloseMerchant
+    OpenMerchant = function()
+        OpenShop("Merchant")
+    end,
+
+    OpenRodShop = function()
+        OpenShop("RodShop")
+    end,
+
+    OpenBaitShop = function()
+        OpenShop("BaitShop")
+    end
 }
