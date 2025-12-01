@@ -1527,12 +1527,12 @@ local catMerchant = makeCategory(shopPage, "Remote Merchant", "🛒")
 
 makeButton(catMerchant, "Open Merchant", function()
     MerchantSystem.Open()
-    Notify("Merchant 🛒", "Merchant dibuka!", 3)
+    Notify.Send("Merchant 🛒", "Merchant dibuka!", 3)
 end)
 
 makeButton(catMerchant, "Close Merchant", function()
     MerchantSystem.Close()
-    Notify("Merchant 🛒", "Merchant ditutup!", 3)
+    Notify.Send("Merchant 🛒", "Merchant ditutup!", 3)
 end)
 
 
