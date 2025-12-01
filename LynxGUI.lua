@@ -38,7 +38,7 @@ local AutoQuestModule = loadstring(game:HttpGet("https://raw.githubusercontent.c
 -- Shop
 local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
 local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
-local MerchantSystem = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/MerchantSystem.lua"))()
+local OpenShop = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/OpenShop.lua"))()
 -- Camera View
 local FreecamModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/FreecamModule.lua"))()
 local UnlimitedZoomModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/UnlimitedZoom.lua"))()
@@ -1519,18 +1519,53 @@ makeToggle(catWeather, "Enable Auto Weather", function(on)
     end
 end)
 
-local catMerchant = makeCategory(shopPage, "Open Merchant Store", "🛒")
+--========================================--
+-- MERCHANT STORE
+--========================================--
+
+local catMerchant = makeCategory(shopPage, "Merchant Store", "🛒")
 
 makeButton(catMerchant, "Open Merchant", function()
-    MerchantSystem.Open()
-    Notify.Send("Merchant 🛒", "Merchant dibuka!", 3)
+    OpenShop.OpenMerchant()
+    Notify.Send("Merchant", "Merchant dibuka!", 3)
 end)
 
 makeButton(catMerchant, "Close Merchant", function()
-    MerchantSystem.Close()
-    Notify.Send("Merchant 🛒", "Merchant ditutup!", 3)
+    OpenShop.CloseMerchant()
+    Notify.Send("Merchant", "Merchant ditutup!", 3)
 end)
 
+--========================================--
+-- ROD SHOP
+--========================================--
+
+local catRodShop = makeCategory(shopPage, "Rod Shop", "🎣")
+
+makeButton(catRodShop, "Open Rod Shop", function()
+    OpenShop.OpenRodShop()
+    Notify.Send("Rod Shop", "Rod Shop dibuka!", 3)
+end)
+
+makeButton(catRodShop, "Close Rod Shop", function()
+    OpenShop.CloseRodShop()
+    Notify.Send("Rod Shop", "Rod Shop ditutup!", 3)
+end)
+
+--========================================--
+-- BAIT SHOP
+--========================================--
+
+local catBaitShop = makeCategory(shopPage, "Bait Shop", "🪱")
+
+makeButton(catBaitShop, "Open Bait Shop", function()
+    OpenShop.OpenBaitShop()
+    Notify.Send("Bait Shop", "Bait Shop dibuka!", 3)
+end)
+
+makeButton(catBaitShop, "Close Bait Shop", function()
+    OpenShop.CloseBaitShop()
+    Notify.Send("Bait Shop", "Bait Shop ditutup!", 3)
+end)
 
 
 -- Camera settings
