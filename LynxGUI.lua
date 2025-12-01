@@ -38,7 +38,7 @@ local AutoQuestModule = loadstring(game:HttpGet("https://raw.githubusercontent.c
 -- Shop
 local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
 local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
-local OpenShop = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/OpenShop.lua"))()
+local MerchantSystem = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/OpenShop.lua"))()
 local RodBuyer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/RodBuyer.lua"))()
 -- Camera View
 local FreecamModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/FreecamModule.lua"))()
@@ -1523,19 +1523,18 @@ end)
 -- ============================
 --  MERCHANT CATEGORY
 -- ============================
-local catMerchant = makeCategory(shopPage, "Merchant Store", "🛒")
+local catMerchant = makeCategory(shopPage, "Remote Merchant", "🛒")
 
 makeButton(catMerchant, "Open Merchant", function()
-    GuiControl:Open("Merchant")
-    Notify.Send("Merchant 🛒", "Merchant dibuka!", 3)
+    MerchantSystem.Open()
+    Notify("Merchant 🛒", "Merchant dibuka!", 3)
 end)
 
 makeButton(catMerchant, "Close Merchant", function()
-    if GuiControl:IsOpen("Merchant") then
-        GuiControl:Close()
-    end
-    Notify.Send("Merchant 🛒", "Merchant ditutup!", 3)
+    MerchantSystem.Close()
+    Notify("Merchant 🛒", "Merchant ditutup!", 3)
 end)
+
 
 
 local catRod = makeCategory(shopPage, "Rod Shop", "🎣")
