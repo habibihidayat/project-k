@@ -1540,7 +1540,7 @@ end)
 -- ============================
 local catRod = makeCategory(shopPage, "Buy Rod", "🎣")
 
--- DATA ROD LENGKAP (HASIL SCAN)
+-- DATA ROD LENGKAP
 local RodData = {
     ["Chrome Rod"] = {id = 7, price = 437000},
     ["Lucky Rod"] = {id = 4, price = 15000},
@@ -1575,26 +1575,30 @@ local RodData = {
     ["Studded Rod"] = {id = 400, price = nil},
 }
 
--- ARRAY untuk dropdown
+-- BUAT DROPDOWN LIST: "Nama Rod (Harga)"
 local RodList = {}
-for name,_ in pairs(RodData) do
-    table.insert(RodList, name)
+local RodMap = {} -- mapping output dropdown → original rod name
+
+for rodName, info in pairs(RodData) do
+    local price = info.price and tostring(info.price) or "Unknown Price"
+    local display = rodName .. " (" .. price .. ")"
+
+    table.insert(RodList, display)
+    RodMap[display] = rodName
 end
 
 local SelectedRod = nil
 
--- LABEL untuk menampilkan harga
-local priceLabel = makeLabel(catRod, "Price: -")
+-- DROPDOWN
+makeDropdown(catRod, "Select Rod", "🎣", RodList, function(displayName)
+    local rodName = RodMap[displayName]
+    SelectedRod = rodName
 
--- DROPDOWN PILIH ROD
-makeDropdown(catRod, "Select Rod", "🎣", RodList, function(chosenName)
-    SelectedRod = chosenName
-    local data = RodData[chosenName]
+    local info = RodData[rodName]
+    local priceTxt = info.price and tostring(info.price) or "Unknown Price"
 
-    local priceText = data.price and tostring(data.price) or "Unknown Price"
-    priceLabel.Set("Price: " .. priceText)
-
-    Notify.Send("Rod Selected", "Rod: " .. chosenName .. "\nPrice: " .. priceText, 3)
+    Notify.Send("Rod Selected",
+        "Rod: " .. rodName .. "\nPrice: " .. priceTxt, 3)
 end, "RodDropdown")
 
 -- TOMBOL BUY
@@ -1605,12 +1609,8 @@ makeButton(catRod, "BUY SELECTED ROD", function()
     end
 
     local rod = RodData[SelectedRod]
-    if not rod then
-        Notify.Send("Error", "Rod tidak ditemukan!", 3)
-        return
-    end
-
     RemoteBuyer.BuyRod(rod.id)
+
     Notify.Send("Buy Rod", "Membeli " .. SelectedRod .. "...", 3)
 end)
 
