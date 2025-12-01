@@ -39,7 +39,7 @@ local AutoQuestModule = loadstring(game:HttpGet("https://raw.githubusercontent.c
 local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
 local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
 local MerchantSystem = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/OpenShop.lua"))()
-local RodBuyer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/RodBuyer.lua"))()
+local RemoteBuyer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/RemoteBuyer.lua"))()
 -- Camera View
 local FreecamModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/FreecamModule.lua"))()
 local UnlimitedZoomModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Camera%20View/UnlimitedZoom.lua"))()
@@ -1535,24 +1535,51 @@ makeButton(catMerchant, "Close Merchant", function()
     Notify.Send("Merchant 🛒", "Merchant ditutup!", 3)
 end)
 
+-- ============================
+--  BUY RODS CATEGORY (REMOTE)
+-- ============================
+local catRod = makeCategory(shopPage, "Buy Rod (Remote)", "🎣")
+
+-- Rod ID hasil RemoteSpy
+local RodIDs = {
+    ["Basic Rod"] = 168,
+    ["Wooden Rod"] = 169,
+    ["Iron Rod"] = 170,
+    ["Pro Rod"] = 171,
+    ["Mythic Rod"] = 172,
+}
+
+-- Variabel untuk menyimpan rod terpilih
+local SelectedRod = nil
+
+-- Dropdown untuk memilih rod
+makeDropdown(catRod, "Select Rod", "🎣", RodIDs, function(chosenName)
+    SelectedRod = chosenName
+    Notify.Send("Rod Selected", "Kamu memilih: " .. tostring(chosenName), 3)
+end, "RodDropdown")
 
 
-local catRod = makeCategory(shopPage, "Rod Shop", "🎣")
+-- Tombol BUY (mengganti toggle)
+makeButton(catRod, "BUY SELECTED ROD", function()
 
--- 126 = Ares Rod
-makeButton(catRod, "Buy Ares Rod", function()
-    RodBuyer.Buy(126)
+    if not SelectedRod then
+        Notify.Send("Buy Rod", "Pilih rod terlebih dahulu!", 3)
+        return
+    end
+
+    local RodID = RodIDs[SelectedRod]
+
+    if not RodID then
+        Notify.Send("Error", "Rod ID tidak ditemukan!", 3)
+        return
+    end
+
+    -- Pemanggilan remote
+    RemoteBuyer.BuyRod(RodID)
+
+    Notify.Send("Buy Rod", "Membeli " .. SelectedRod .. "...", 3)
 end)
 
--- 168 = Angler Rod
-makeButton(catRod, "Buy Angler Rod", function()
-    RodBuyer.Buy(168)
-end)
-
--- 258 = Bamboo Rod
-makeButton(catRod, "Buy Bamboo Rod", function()
-    RodBuyer.Buy(258)
-end)
 
 -- Camera settings
 local catZoom = makeCategory(cameraViewPage, "Unlimited Zoom", "🔭")
