@@ -1,61 +1,29 @@
---// OpenShop Module
--- Dibuat untuk membuka & menutup GUI toko melalui loadstring
+-- Remote Merchant System (Standalone Version)
+-- Bisa dijalankan via raw link (loadstring + HttpGet)
 
-local Player = game.Players.LocalPlayer
-local PlayerGui = Player:WaitForChild("PlayerGui")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-local Shops = {
-    Merchant = "Merchant",
-    RodShop = "Rod Shop",
-    BaitShop = "Bait Shop"
-}
+-- Merchant UI di PlayerGui
+local MerchantUI = PlayerGui:WaitForChild("Merchant")
 
--- Fungsi umum membuka
-local function OpenGUI(name)
-    local gui = PlayerGui:FindFirstChild(name)
-    if gui then
-        gui.Enabled = true
-    else
-        warn("[OpenShop] GUI tidak ditemukan:", name)
+-- ==== FUNCTIONS ====
+
+local function OpenMerchant()
+    if MerchantUI then
+        MerchantUI.Enabled = true
     end
 end
 
--- Fungsi umum menutup
-local function CloseGUI(name)
-    local gui = PlayerGui:FindFirstChild(name)
-    if gui then
-        gui.Enabled = false
-    else
-        warn("[OpenShop] GUI tidak ditemukan:", name)
+local function CloseMerchant()
+    if MerchantUI then
+        MerchantUI.Enabled = false
     end
 end
 
 return {
-
-    -- MERCHANT
-    OpenMerchant = function()
-        OpenGUI(Shops.Merchant)
-    end,
-
-    CloseMerchant = function()
-        CloseGUI(Shops.Merchant)
-    end,
-
-    -- ROD SHOP
-    OpenRodShop = function()
-        OpenGUI(Shops.RodShop)
-    end,
-
-    CloseRodShop = function()
-        CloseGUI(Shops.RodShop)
-    end,
-
-    -- BAIT SHOP
-    OpenBaitShop = function()
-        OpenGUI(Shops.BaitShop)
-    end,
-
-    CloseBaitShop = function()
-        CloseGUI(Shops.BaitShop)
-    end
+    Open = OpenMerchant,
+    Close = CloseMerchant
 }
