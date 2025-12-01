@@ -30,7 +30,7 @@ local NoFishingAnimation = loadstring(game:HttpGet("https://raw.githubuserconten
 local LockPosition = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/LockPosition.lua"))()
 local AutoEquipRod = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/AutoEquipRod.lua"))()
 local DisableCutscenes = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/DisableCutscenes.lua"))()
-local DisableSmallNotification = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/DisableSmallNotification.lua"))()
+local DisableSmallNotification = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/DisableSmallNotification.lua"))()
 
 -- Teleport
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
