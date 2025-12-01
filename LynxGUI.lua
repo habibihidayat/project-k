@@ -1538,72 +1538,80 @@ end)
 -- ============================
 --  BUY RODS CATEGORY (REMOTE)
 -- ============================
-
 local catRod = makeCategory(shopPage, "Buy Rod", "🎣")
 
--- Rod ID hasil scan log (lengkap ID + PRICE)
-local RodIDs = {
-    ["Chrome Rod"]        = 7,      -- 437000
-    ["Lucky Rod"]         = 4,      -- 15000
-    ["Magma Rod"]         = 3,      -- ??
-    ["Starter Rod"]       = 1,      -- 50
-    ["Steampunk Rod"]     = 6,      -- 215000
-    ["Hyper Rod"]         = 9,      -- ??
-    ["Gold Rod"]          = 8,      -- ??
-    ["Lava Rod"]          = 2,      -- ??
-    ["Carbon Rod"]        = 76,     -- 750
-    ["Gingerbread Rod"]   = 103,    -- ??
-    ["Ice Rod"]           = 78,     -- 5000
-    ["Luck Rod"]          = 79,     -- 325
-    ["Midnight Rod"]      = 80,     -- 50000
-    ["Toy Rod"]           = 84,      -- ??
-    ["Grass Rod"]         = 85,     -- 1500
-    ["Candy Cane Rod"]    = 100,    -- ??
-    ["Christmas Tree Rod"]= 101,    -- ??
-    ["Demascus Rod"]      = 77,     -- 3000
-    ["Frozen Rod"]        = 102,    -- ??
-    ["Cute Rod"]          = 123,    -- ??
-    ["Angelic Rod"]       = 124,    -- ??
-    ["Astral Rod"]        = 5,      -- 1000000
-    ["Ares Rod"]          = 126,    -- 3000000
-    ["Ghoul Rod"]         = 129,    -- ??
-    ["Angler Rod"]        = 168,    -- 8000000
-    ["Ghostfinn Rod"]     = 169,    -- ??
-    ["Element Rod"]       = 257,    -- ??
-    ["Hazmat Rod"]        = 256,    -- ??
-    ["Fluorescent Rod"]   = 255,    -- 715000
-    ["Bamboo Rod"]        = 258,    -- 12000000
-    ["Studded Rod"]       = 400,    -- ??
+-- DATA ROD LENGKAP (HASIL SCAN)
+local RodData = {
+    ["Chrome Rod"] = {id = 7, price = 437000},
+    ["Lucky Rod"] = {id = 4, price = 15000},
+    ["Magma Rod"] = {id = 3, price = nil},
+    ["Starter Rod"] = {id = 1, price = 50},
+    ["Steampunk Rod"] = {id = 6, price = 215000},
+    ["Hyper Rod"] = {id = 9, price = nil},
+    ["Gold Rod"] = {id = 8, price = nil},
+    ["Lava Rod"] = {id = 2, price = nil},
+    ["Carbon Rod"] = {id = 76, price = 750},
+    ["Gingerbread Rod"] = {id = 103, price = nil},
+    ["Ice Rod"] = {id = 78, price = 5000},
+    ["Luck Rod"] = {id = 79, price = 325},
+    ["Midnight Rod"] = {id = 80, price = 50000},
+    ["Toy Rod"] = {id = 84, price = nil},
+    ["Grass Rod"] = {id = 85, price = 1500},
+    ["Candy Cane Rod"] = {id = 100, price = nil},
+    ["Christmas Tree Rod"] = {id = 101, price = nil},
+    ["Demascus Rod"] = {id = 77, price = 3000},
+    ["Frozen Rod"] = {id = 102, price = nil},
+    ["Cute Rod"] = {id = 123, price = nil},
+    ["Angelic Rod"] = {id = 124, price = nil},
+    ["Astral Rod"] = {id = 5, price = 1000000},
+    ["Ares Rod"] = {id = 126, price = 3000000},
+    ["Ghoul Rod"] = {id = 129, price = nil},
+    ["Angler Rod"] = {id = 168, price = 8000000},
+    ["Ghostfinn Rod"] = {id = 169, price = nil},
+    ["Element Rod"] = {id = 257, price = nil},
+    ["Hazmat Rod"] = {id = 256, price = nil},
+    ["Fluorescent Rod"] = {id = 255, price = 715000},
+    ["Bamboo Rod"] = {id = 258, price = 12000000},
+    ["Studded Rod"] = {id = 400, price = nil},
 }
 
--- Daftar dropdown (otomatis)
+-- ARRAY untuk dropdown
 local RodList = {}
-for rodName in pairs(RodIDs) do
-    table.insert(RodList, rodName)
+for name,_ in pairs(RodData) do
+    table.insert(RodList, name)
 end
-table.sort(RodList)
 
 local SelectedRod = nil
 
--- Dropdown
+-- LABEL untuk menampilkan harga
+local priceLabel = makeLabel(catRod, "Price: -")
+
+-- DROPDOWN PILIH ROD
 makeDropdown(catRod, "Select Rod", "🎣", RodList, function(chosenName)
     SelectedRod = chosenName
-    Notify.Send("Rod Selected", "Kamu memilih: " .. chosenName, 3)
+    local data = RodData[chosenName]
+
+    local priceText = data.price and tostring(data.price) or "Unknown Price"
+    priceLabel.Set("Price: " .. priceText)
+
+    Notify.Send("Rod Selected", "Rod: " .. chosenName .. "\nPrice: " .. priceText, 3)
 end, "RodDropdown")
 
--- Tombol BUY
+-- TOMBOL BUY
 makeButton(catRod, "BUY SELECTED ROD", function()
-
     if not SelectedRod then
-        Notify.Send("Buy Rod", "Pilih rod terlebih dahulu!", 3)
+        Notify.Send("Buy Rod", "Pilih rod dulu!", 3)
         return
     end
 
-    local RodID = RodIDs[SelectedRod]
-    RemoteBuyer.BuyRod(RodID)
+    local rod = RodData[SelectedRod]
+    if not rod then
+        Notify.Send("Error", "Rod tidak ditemukan!", 3)
+        return
+    end
 
+    RemoteBuyer.BuyRod(rod.id)
     Notify.Send("Buy Rod", "Membeli " .. SelectedRod .. "...", 3)
-
 end)
 
 -- Camera settings
