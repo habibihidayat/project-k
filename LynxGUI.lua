@@ -29,6 +29,8 @@ local blatantv2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/hab
 local NoFishingAnimation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/NoFishingAnimation.lua"))()
 local LockPosition = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/LockPosition.lua"))()
 local AutoEquipRod = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/AutoEquipRod.lua"))()
+local DisableCutscenes = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/DisableCutscenes.lua"))()
+
 -- Teleport
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
 local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/TeleportToPlayer.lua"))()
@@ -1250,6 +1252,17 @@ makeToggle(catSupport, "Auto Equip Rod", function(on)
         Notify.Send("Auto Equip Rod", "Auto equip dimatikan!", 4)
     end
 end)
+
+makeToggle(catSupport, "Disable Cutscenes", function(on)
+    if on then
+        DisableCutscenes.Start()
+        Notify.Send("Disable Cutscenes", "Semua cutscenes dimatikan!", 4)
+    else
+        DisableCutscenes.Stop()
+        Notify.Send("Disable Cutscenes", "Cutscenes kembali normal.", 4)
+    end
+end)
+
 
 -- ==== TELEPORT PAGE ====
 local locationItems = {}
