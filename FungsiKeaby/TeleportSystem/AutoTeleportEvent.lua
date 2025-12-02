@@ -1,4 +1,4 @@
--- AutoTeleportEvent.lua
+-- AutoTeleportEvent.lua (revisi)
 local module = {}
 
 local Players = game:GetService("Players")
@@ -6,7 +6,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local localPlayer = Players.LocalPlayer
-
 local active = false
 local selectedEvent = nil
 
@@ -20,21 +19,39 @@ function module.GetAvailableEvents()
         if eventModule:IsA("ModuleScript") then
             local success, eventData = pcall(require, eventModule)
             if success and eventData.Coordinates and #eventData.Coordinates > 0 then
-                table.insert(available, {Name = eventData.Name, Coordinates = eventData.Coordinates})
+                table.insert(available, {Name = eventData.Name, Coordinates = eventData.Coordinates, Module = eventModule})
             end
         end
     end
     return available
 end
 
--- Teleport ke koordinat pertama dari event
+-- Dapatkan koordinat aktif dari event (cek spawn object di server)
+local function getCurrentEventCoordinates(eventData)
+    -- Cek child di ReplicatedStorage/Events/EventName (misal spawn point atau marker)
+    local eventFolder = ReplicatedStorage.Events:FindFirstChild(eventData.Module.Name)
+    if eventFolder then
+        for _, obj in pairs(eventFolder:GetChildren()) do
+            if obj:IsA("BasePart") then
+                return obj.Position
+            end
+        end
+    end
+    -- fallback ke koordinat pertama
+    return eventData.Coordinates[1]
+end
+
+-- Teleport ke koordinat aktif
 local function teleportToEvent()
+    if not selectedEvent then return end
     local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
     local hrp = character:FindFirstChild("HumanoidRootPart")
-    if not hrp or not selectedEvent then return end
+    if not hrp then return end
 
-    local targetPos = selectedEvent.Coordinates[1]
-    hrp.CFrame = CFrame.new(targetPos)
+    local targetPos = getCurrentEventCoordinates(selectedEvent)
+    if targetPos then
+        hrp.CFrame = CFrame.new(targetPos)
+    end
 end
 
 -- Start auto teleport
@@ -53,6 +70,7 @@ function module.Start(eventName)
 
     if not selectedEvent then
         warn("Event "..eventName.." tidak ditemukan atau belum aktif!")
+        active = false
         return
     end
 
