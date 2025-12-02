@@ -1374,6 +1374,9 @@ makeButton(catSaved, "Reset Saved Location", function()
     Notify("Reset 🔄", "Lokasi tersimpan telah dihapus.", 3)
 end)
 
+--Events Teleport
+local selectedEventName = nil
+
 local ok, EventTeleport = pcall(function()
     return loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/EventTeleportDynamic.lua"))()
 end)
@@ -1382,21 +1385,27 @@ if not ok or not EventTeleport then
     EventTeleport = nil
 end
 
--- build dropdown
+-- Ambil list event
 local eventNames = EventTeleport and EventTeleport.GetEventNames() or {"- No events -"}
-local dropdown = makeDropdown(teleportPage, "Teleport Event", "🎯", eventNames, function(selected)
-    -- select only; don't auto start
+
+-- =================================================================
+-- 🟣 1 CATEGORY SAJA UNTUK SEMUA FITUR TELEPORT EVENT
+-- =================================================================
+local catTeleport = makeCategory(teleportPage, "Event Teleport", "🎯")
+
+-- Dropdown event di dalam category
+makeDropdown(catTeleport, "Pilih Event", "📌", eventNames, function(selected)
     selectedEventName = selected
     Notify.Send("Event", "Event dipilih: "..tostring(selected), 3)
 end, "EventTeleport")
 
--- toggle control
-local cat = makeCategory(teleportPage, "Auto Teleport Control", "⚡")
-makeToggle(cat, "Enable Auto Teleport", function(on)
+-- Toggle Auto Teleport di dalam category yang sama
+makeToggle(catTeleport, "Enable Auto Teleport", function(on)
     if not EventTeleport then
         Notify.Send("Error", "Module EventTeleport tidak dimuat!", 3)
         return
     end
+
     if on then
         if selectedEventName and EventTeleport.HasCoords(selectedEventName) then
             EventTeleport.Start(selectedEventName)
@@ -1410,11 +1419,17 @@ makeToggle(cat, "Enable Auto Teleport", function(on)
     end
 end)
 
--- optional single-teleport button
-makeButton(cat, "Teleport Now", function()
+-- Tombol Teleport Now (manual) juga dalam category ini
+makeButton(catTeleport, "Teleport Now", function()
     if EventTeleport and selectedEventName then
         local ok = EventTeleport.TeleportNow(selectedEventName)
-        if ok then Notify.Send("Teleport", "Teleported to "..selectedEventName, 3) end
+        if ok then
+            Notify.Send("Teleport", "Teleported ke "..selectedEventName, 3)
+        else
+            Notify.Send("Teleport", "Teleport gagal!", 3)
+        end
+    else
+        Notify.Send("Teleport", "Event belum dipilih!", 3)
     end
 end)
 
