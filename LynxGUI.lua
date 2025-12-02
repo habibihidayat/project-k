@@ -1376,15 +1376,61 @@ makeButton(catSaved, "Reset Saved Location", function()
     Notify("Reset 🔄", "Lokasi tersimpan telah dihapus.", 3)
 end)
 
--- Event teleport
+-- ==== TELEPORT PAGE - Event Teleport ====
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local eventsFolder = ReplicatedStorage:WaitForChild("Events") -- tunggu Events
+local teleportPageReady = teleportPage and teleportPage.Parent
 
--- Auto refresh dropdown jika ada event baru di server
+-- Pastikan teleportPage siap
+repeat task.wait() until teleportPageReady
+
+-- Ambil nama event aktif
+local function getActiveEventNames()
+    local events = AutoTeleportEvent.GetAvailableEvents()
+    local names = {}
+    for _, e in ipairs(events) do
+        table.insert(names, e.Name)
+    end
+    return names
+end
+
+-- Fungsi untuk buat dropdown hanya jika list tidak kosong
+local function createDropdown(title, emoji, callback, dropdownId)
+    local list = getActiveEventNames()
+    if #list == 0 then
+        list = {"- Tidak ada event aktif -"}
+    end
+    return makeDropdown(teleportPage, title, emoji, list, callback, dropdownId)
+end
+
+-- Buat dropdown Prioritas Event
+local priorityDropdown = createDropdown("Prioritas Event", "🎯", function(selectedEvent)
+    if selectedEvent ~= "- Tidak ada event aktif -" then
+        AutoTeleportEvent.Start(selectedEvent)
+        Notify.Send("Auto Teleport Event", "✓ Teleport ke event: "..selectedEvent, 4)
+    end
+end, "PriorityEventTeleport")
+
+-- Buat dropdown Opsi Event
+local optionDropdown = createDropdown("Opsi Event", "📌", function(selectedEvent)
+    if selectedEvent ~= "- Tidak ada event aktif -" then
+        local activeEvents = getActiveEventNames()
+        for _, name in ipairs(activeEvents) do
+            if name == selectedEvent then
+                AutoTeleportEvent.Start(selectedEvent)
+                Notify.Send("Auto Teleport Event", "✓ Teleport ke event: "..selectedEvent, 4)
+                return
+            end
+        end
+        Notify.Send("Auto Teleport Event", "⚠ Event "..selectedEvent.." belum aktif!", 3)
+    end
+end, "OptionEventTeleport")
+
+-- Auto refresh dropdown saat ada event baru di server
+local eventsFolder = ReplicatedStorage:WaitForChild("Events")
 eventsFolder.ChildAdded:Connect(function()
-    local updatedEvents = getActiveEventNames() -- fungsi ambil semua event aktif
+    task.wait(0.5) -- delay sebentar untuk stabilitas
+    local updatedEvents = getActiveEventNames()
 
-    -- update dropdown Prioritas Event
     if priorityDropdown and priorityDropdown.Parent then
         priorityDropdown:Destroy()
     end
@@ -1393,7 +1439,6 @@ eventsFolder.ChildAdded:Connect(function()
         Notify.Send("Auto Teleport Event", "✓ Teleport ke event: "..selectedEvent, 4)
     end, "PriorityEventTeleport")
 
-    -- update dropdown Opsi Event
     if optionDropdown and optionDropdown.Parent then
         optionDropdown:Destroy()
     end
@@ -1409,6 +1454,7 @@ eventsFolder.ChildAdded:Connect(function()
         Notify.Send("Auto Teleport Event", "⚠ Event "..selectedEvent.." belum aktif!", 3)
     end, "OptionEventTeleport")
 end)
+
 
 
 -- ==== QUEST PAGE ====
