@@ -49,6 +49,7 @@ local UnlimitedZoomModule = loadstring(game:HttpGet("https://raw.githubuserconte
 -- Misc
 local AntiAFK = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/AntiAFK.lua"))()
 local UnlockFPS = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/UnlockFPS.lua"))()
+local FPSBooster = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Misc/FPSBooster.lua"))()
 local AutoBuyWeather = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoBuyWeather.lua"))()
 local Notify = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/NotificationModule.lua"))()
 
@@ -1273,7 +1274,7 @@ makeToggle(catSupport, "Disable Cutscenes", function(on)
 end)
 
 -- Toggle Small Notification
-makeToggle(catSupport, "Disable Small Notification", function(on)
+makeToggle(catSupport, "Disable Obtained Fish Notification", function(on)
     if on then
         DisableExtras.StartSmallNotification()
         Notify.Send("Disable Small Notification", "✓ Small Notification dinonaktifkan!", 4)
@@ -1916,6 +1917,25 @@ makeToggle(catAFK, "Enable Anti-AFK", function(on)
         AntiAFK.Stop()
     end
 end)
+
+-- ==== FPS BOOSTER CATEGORY ====
+local catBoost = makeCategory(settingsPage, "FPS Booster", "⚡")
+
+makeToggle(catBoost, "Enable FPS Booster", function(on)
+    if not FPSBooster then
+        Notify.Send("FPS Booster", "Module FPSBooster gagal dimuat!", 3)
+        return
+    end
+
+    if on then
+        FPSBooster.Enable()
+        Notify.Send("FPS Booster", "FPS Booster diaktifkan!", 3)
+    else
+        FPSBooster.Disable()
+        Notify.Send("FPS Booster", "FPS Booster dimatikan.", 3)
+    end
+end)
+
 
 local catFPS = makeCategory(settingsPage, "FPS Unlocker", "🎞️")
 
