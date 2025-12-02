@@ -6,17 +6,16 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local localPlayer = Players.LocalPlayer
-local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
 local active = false
 local selectedEvent = nil
 
 -- Ambil semua event yang punya koordinat
 function module.GetAvailableEvents()
-    local eventsFolder = ReplicatedStorage:WaitForChild("Events")
-    local available = {}
+    local eventsFolder = ReplicatedStorage:FindFirstChild("Events")
+    if not eventsFolder then return {} end
 
+    local available = {}
     for _, eventModule in pairs(eventsFolder:GetChildren()) do
         if eventModule:IsA("ModuleScript") then
             local success, eventData = pcall(require, eventModule)
@@ -25,26 +24,26 @@ function module.GetAvailableEvents()
             end
         end
     end
-
     return available
 end
 
--- Fungsi teleport ke koordinat pertama dari event
+-- Teleport ke koordinat pertama dari event
 local function teleportToEvent()
-    if not selectedEvent or #selectedEvent.Coordinates == 0 then return end
-    local targetPos = selectedEvent.Coordinates[1]
+    local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp or not selectedEvent then return end
 
-    if humanoidRootPart then
-        humanoidRootPart.CFrame = CFrame.new(targetPos)
-    end
+    local targetPos = selectedEvent.Coordinates[1]
+    hrp.CFrame = CFrame.new(targetPos)
 end
 
--- Mulai auto teleport ke event tertentu
+-- Start auto teleport
 function module.Start(eventName)
     if active then return end
     active = true
 
     local events = module.GetAvailableEvents()
+    selectedEvent = nil
     for _, e in pairs(events) do
         if e.Name == eventName then
             selectedEvent = e
