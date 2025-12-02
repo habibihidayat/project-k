@@ -1376,39 +1376,15 @@ makeButton(catSaved, "Reset Saved Location", function()
     Notify("Reset 🔄", "Lokasi tersimpan telah dihapus.", 3)
 end)
 
--- Ambil list event aktif
-local function getActiveEventNames()
-    local events = AutoTeleportEvent.GetAvailableEvents()
-    local names = {}
-    for _, e in ipairs(events) do
-        table.insert(names, e.Name)
-    end
-    return names
-end
-
--- Dropdown Prioritas Event
-local priorityDropdown = makeDropdown(teleportPage, "Prioritas Event", "🎯", getActiveEventNames(), function(selectedEvent)
-    AutoTeleportEvent.Start(selectedEvent)
-    Notify.Send("Auto Teleport Event", "✓ Teleport ke event: "..selectedEvent, 4)
-end, "PriorityEventTeleport")
-
--- Dropdown Opsi Pilihan Event
-local optionDropdown = makeDropdown(teleportPage, "Opsi Event", "📌", getActiveEventNames(), function(selectedEvent)
-    local activeEvents = getActiveEventNames()
-    for _, name in ipairs(activeEvents) do
-        if name == selectedEvent then
-            AutoTeleportEvent.Start(selectedEvent)
-            Notify.Send("Auto Teleport Event", "✓ Teleport ke event: "..selectedEvent, 4)
-            return
-        end
-    end
-    Notify.Send("Auto Teleport Event", "⚠ Event "..selectedEvent.." belum aktif!", 3)
-end, "OptionEventTeleport")
+-- Event teleport
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local eventsFolder = ReplicatedStorage:WaitForChild("Events") -- tunggu Events
 
 -- Auto refresh dropdown jika ada event baru di server
-ReplicatedStorage.Events.ChildAdded:Connect(function()
-    local updatedEvents = getActiveEventNames()
+eventsFolder.ChildAdded:Connect(function()
+    local updatedEvents = getActiveEventNames() -- fungsi ambil semua event aktif
 
+    -- update dropdown Prioritas Event
     if priorityDropdown and priorityDropdown.Parent then
         priorityDropdown:Destroy()
     end
@@ -1417,6 +1393,7 @@ ReplicatedStorage.Events.ChildAdded:Connect(function()
         Notify.Send("Auto Teleport Event", "✓ Teleport ke event: "..selectedEvent, 4)
     end, "PriorityEventTeleport")
 
+    -- update dropdown Opsi Event
     if optionDropdown and optionDropdown.Parent then
         optionDropdown:Destroy()
     end
