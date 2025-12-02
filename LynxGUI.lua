@@ -1377,11 +1377,16 @@ makeButton(catSaved, "Reset Saved Location", function()
 end)
 
 -- ==== TELEPORT PAGE - Event Teleport ====
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local teleportPageReady = teleportPage and teleportPage.Parent
 
 -- Pastikan teleportPage siap
 repeat task.wait() until teleportPageReady
+
+-- Variabel untuk menyimpan event yang dipilih
+local selectedEventName = nil
+local autoTeleportEnabled = false
 
 -- Ambil nama event aktif
 local function getActiveEventNames()
@@ -1393,68 +1398,56 @@ local function getActiveEventNames()
     return names
 end
 
--- Fungsi untuk buat dropdown hanya jika list tidak kosong
-local function createDropdown(title, emoji, callback, dropdownId)
-    local list = getActiveEventNames()
-    if #list == 0 then
-        list = {"- Tidak ada event aktif -"}
+-- Fungsi buat dropdown event
+local function createEventDropdown()
+    local eventList = getActiveEventNames()
+    if #eventList == 0 then
+        eventList = {"- Tidak ada event aktif -"}
     end
-    return makeDropdown(teleportPage, title, emoji, list, callback, dropdownId)
+
+    return makeDropdown(teleportPage, "Pilih Event", "🎯", eventList, function(selected)
+        if selected ~= "- Tidak ada event aktif -" then
+            selectedEventName = selected
+            Notify.Send("Auto Teleport Event", "Event dipilih: "..selectedEventName, 3)
+        else
+            selectedEventName = nil
+        end
+    end, "SelectEventDropdown")
 end
 
--- Buat dropdown Prioritas Event
-local priorityDropdown = createDropdown("Prioritas Event", "🎯", function(selectedEvent)
-    if selectedEvent ~= "- Tidak ada event aktif -" then
-        AutoTeleportEvent.Start(selectedEvent)
-        Notify.Send("Auto Teleport Event", "✓ Teleport ke event: "..selectedEvent, 4)
-    end
-end, "PriorityEventTeleport")
+-- Buat dropdown awal
+local eventDropdown = createEventDropdown()
 
--- Buat dropdown Opsi Event
-local optionDropdown = createDropdown("Opsi Event", "📌", function(selectedEvent)
-    if selectedEvent ~= "- Tidak ada event aktif -" then
-        local activeEvents = getActiveEventNames()
-        for _, name in ipairs(activeEvents) do
-            if name == selectedEvent then
-                AutoTeleportEvent.Start(selectedEvent)
-                Notify.Send("Auto Teleport Event", "✓ Teleport ke event: "..selectedEvent, 4)
-                return
-            end
+-- Toggle On/Off untuk mulai/stop auto teleport
+local toggleCategory = makeCategory(teleportPage, "Auto Teleport Control", "⚡")
+makeToggle(toggleCategory, "Enable Auto Teleport", function(on)
+    autoTeleportEnabled = on
+
+    if on then
+        if selectedEventName then
+            AutoTeleportEvent.Start(selectedEventName)
+            Notify.Send("Auto Teleport Event", "✓ Auto teleport diaktifkan ke: "..selectedEventName, 4)
+        else
+            Notify.Send("Auto Teleport Event", "⚠ Pilih event terlebih dahulu!", 3)
+            -- Matikan toggle karena belum pilih event
+            autoTeleportEnabled = false
         end
-        Notify.Send("Auto Teleport Event", "⚠ Event "..selectedEvent.." belum aktif!", 3)
+    else
+        AutoTeleportEvent.Stop()
+        Notify.Send("Auto Teleport Event", "✖ Auto teleport dimatikan.", 3)
     end
-end, "OptionEventTeleport")
+end)
 
 -- Auto refresh dropdown saat ada event baru di server
 local eventsFolder = ReplicatedStorage:WaitForChild("Events")
 eventsFolder.ChildAdded:Connect(function()
     task.wait(0.5) -- delay sebentar untuk stabilitas
-    local updatedEvents = getActiveEventNames()
 
-    if priorityDropdown and priorityDropdown.Parent then
-        priorityDropdown:Destroy()
+    if eventDropdown and eventDropdown.Parent then
+        eventDropdown:Destroy()
     end
-    priorityDropdown = makeDropdown(teleportPage, "Prioritas Event", "🎯", updatedEvents, function(selectedEvent)
-        AutoTeleportEvent.Start(selectedEvent)
-        Notify.Send("Auto Teleport Event", "✓ Teleport ke event: "..selectedEvent, 4)
-    end, "PriorityEventTeleport")
-
-    if optionDropdown and optionDropdown.Parent then
-        optionDropdown:Destroy()
-    end
-    optionDropdown = makeDropdown(teleportPage, "Opsi Event", "📌", updatedEvents, function(selectedEvent)
-        local activeEvents = getActiveEventNames()
-        for _, name in ipairs(activeEvents) do
-            if name == selectedEvent then
-                AutoTeleportEvent.Start(selectedEvent)
-                Notify.Send("Auto Teleport Event", "✓ Teleport ke event: "..selectedEvent, 4)
-                return
-            end
-        end
-        Notify.Send("Auto Teleport Event", "⚠ Event "..selectedEvent.." belum aktif!", 3)
-    end, "OptionEventTeleport")
+    eventDropdown = createEventDropdown()
 end)
-
 
 
 -- ==== QUEST PAGE ====
