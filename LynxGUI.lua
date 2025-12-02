@@ -36,7 +36,7 @@ local DisableExtras = loadstring(game:HttpGet("https://raw.githubusercontent.com
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
 local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/TeleportToPlayer.lua"))()
 local SavedLocation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/SavedLocation.lua"))()
-local AutoTeleportEvent = loadstring(game:HttpGet("LINK_RAW_AUTO_TELEPORT_EVENT"))()
+local AutoTeleportEvent = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/AutoTeleportEvent.lua"))()
 
 -- Quest page
 local AutoQuestModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Quest/AutoQuestModule.lua"))()
