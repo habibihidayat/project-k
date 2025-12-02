@@ -36,7 +36,6 @@ local DisableExtras = loadstring(game:HttpGet("https://raw.githubusercontent.com
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
 local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/TeleportToPlayer.lua"))()
 local SavedLocation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/SavedLocation.lua"))()
-local AutoTeleportEvent = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/AutoTeleportEvent.lua"))()
 -- Quest page
 local AutoQuestModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Quest/AutoQuestModule.lua"))()
 -- Shop
@@ -1375,54 +1374,89 @@ makeButton(catSaved, "Reset Saved Location", function()
     Notify("Reset 🔄", "Lokasi tersimpan telah dihapus.", 3)
 end)
 
--- ==== TELEPORT PAGE - Event Teleport ====
+-- ==== SAFE LOAD MODULE ====
+local AutoTeleportEvent = nil
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local localPlayer = Players.LocalPlayer
+do
+    local ok, result = pcall(function()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/AutoTeleportEvent.lua"))()
+    end)
 
--- Pastikan teleportPage siap
-repeat task.wait() until teleportPage and teleportPage.Parent
+    if ok and result then
+        AutoTeleportEvent = result
+        print("[AutoTeleportEvent] Loaded Successfully!")
+    else
+        warn("[AutoTeleportEvent] Failed to load module:", result)
+        AutoTeleportEvent = {
+            GetAvailableEvents = function() return {} end,
+            Start = function() warn("[AutoTeleportEvent] Start ignored — module missing") end,
+            Stop = function() warn("[AutoTeleportEvent] Stop ignored — module missing") end
+        }
+    end
+end
 
--- Variabel untuk menyimpan event yang dipilih
+
+-- ==== EVENT TELEPORT PAGE ====
+
 local selectedEventId = nil
 local autoTeleportEnabled = false
 
--- Ambil event aktif
+-- Function aman untuk ambil list event
 local function getActiveEvents()
-    local events = AutoTeleportEvent.GetAvailableEvents()
+    local ok, events = pcall(function()
+        return AutoTeleportEvent.GetAvailableEvents()
+    end)
+
+    if not ok or not events then
+        return {}
+    end
+
     local names = {}
     for _, e in ipairs(events) do
         names[e.Name] = e.eventId
     end
+
     return names
 end
 
--- Buat dropdown event
+
+-- Build dropdown awal
 local eventList = getActiveEvents()
 local eventNames = {}
-for name, _ in pairs(eventList) do table.insert(eventNames, name) end
+
+for name,_ in pairs(eventList) do
+    table.insert(eventNames, name)
+end
+
 table.sort(eventNames)
 
-local eventDropdown = makeDropdown(teleportPage, "Pilih Event", "🎯", eventNames, function(selected)
-    if selected then
-        selectedEventId = eventList[selected]
-        Notify.Send("Auto Teleport Event", "Event dipilih: "..selected, 3)
-    end
-end, "SelectEventDropdown")
+local eventDropdown = makeDropdown(
+    teleportPage,
+    "Pilih Event",
+    "🎯",
+    eventNames,
+    function(selected)
+        if selected then
+            selectedEventId = eventList[selected]
+            Notify.Send("Auto Teleport Event", "Event dipilih: "..selected, 3)
+        end
+    end,
+    "SelectEventDropdown"
+)
 
--- Toggle On/Off
+
+-- ==== TOGGLE AUTO TELEPORT ====
 local toggleCategory = makeCategory(teleportPage, "Auto Teleport Control", "⚡")
+
 makeToggle(toggleCategory, "Enable Auto Teleport", function(on)
     autoTeleportEnabled = on
 
     if on then
         if selectedEventId then
             AutoTeleportEvent.Start(selectedEventId)
-            Notify.Send("Auto Teleport Event", "✓ Auto teleport diaktifkan ke: "..selectedEventId, 4)
+            Notify.Send("Auto Teleport Event", "✓ Auto teleport diaktifkan.", 4)
         else
             Notify.Send("Auto Teleport Event", "⚠ Pilih event terlebih dahulu!", 3)
-            autoTeleportEnabled = false
         end
     else
         AutoTeleportEvent.Stop()
@@ -1430,28 +1464,42 @@ makeToggle(toggleCategory, "Enable Auto Teleport", function(on)
     end
 end)
 
--- Auto refresh dropdown saat ada event baru di server
-local eventsFolder = ReplicatedStorage:WaitForChild("Events")
-eventsFolder.ChildAdded:Connect(function()
-    task.wait(0.5)
-    if eventDropdown and eventDropdown.Parent then
-        eventDropdown:Destroy()
-    end
 
-    -- Refresh list event
-    eventList = getActiveEvents()
-    eventNames = {}
-    for name, _ in pairs(eventList) do table.insert(eventNames, name) end
-    table.sort(eventNames)
+-- ==== SAFE EVENT REFRESH ====
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-    eventDropdown = makeDropdown(teleportPage, "Pilih Event", "🎯", eventNames, function(selected)
-        if selected then
-            selectedEventId = eventList[selected]
-            Notify.Send("Auto Teleport Event", "Event dipilih: "..selected, 3)
+local eventsFolder = ReplicatedStorage:FindFirstChild("Events")
+if eventsFolder then
+    eventsFolder.ChildAdded:Connect(function()
+        task.wait(0.4)
+
+        if eventDropdown and eventDropdown.Parent then
+            eventDropdown:Destroy()
         end
-    end, "SelectEventDropdown")
-end)
 
+        eventList = getActiveEvents()
+        eventNames = {}
+
+        for name,_ in pairs(eventList) do
+            table.insert(eventNames, name)
+        end
+        
+        table.sort(eventNames)
+
+        eventDropdown = makeDropdown(
+            teleportPage, "Pilih Event", "🎯", eventNames,
+            function(selected)
+                if selected then
+                    selectedEventId = eventList[selected]
+                    Notify.Send("Auto Teleport Event", "Event dipilih: "..selected, 3)
+                end
+            end,
+            "SelectEventDropdown"
+        )
+    end)
+else
+    warn("[AutoTeleportEvent] Folder 'Events' tidak ditemukan — refresh event dimatikan.")
+end
 
 -- ==== QUEST PAGE ====
 local catDeepSea = makeCategory(questPage, "Deep Sea Quest (Ghostfinn Rod)")
