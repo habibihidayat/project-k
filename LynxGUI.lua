@@ -36,7 +36,6 @@ local DisableExtras = loadstring(game:HttpGet("https://raw.githubusercontent.com
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
 local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/TeleportToPlayer.lua"))()
 local SavedLocation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/SavedLocation.lua"))()
-local EventTeleport = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/EventTeleport.lua"))()
 -- Quest page
 local AutoQuestModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Quest/AutoQuestModule.lua"))()
 -- Shop
@@ -1375,19 +1374,50 @@ makeButton(catSaved, "Reset Saved Location", function()
     Notify("Reset 🔄", "Lokasi tersimpan telah dihapus.", 3)
 end)
 
-local eventNames = {}
-for name, _ in pairs(EventTeleport.Events) do
-    table.insert(eventNames, name)
+local ok, EventTeleport = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/EventTeleportDynamic.lua"))()
+end)
+if not ok or not EventTeleport then
+    warn("Gagal load EventTeleport module")
+    EventTeleport = nil
 end
-table.sort(eventNames)
 
-makeDropdown(teleportPage, "Teleport Event", "🎯", eventNames, function(selected)
-    if EventTeleport.TeleportTo(selected) then
-        Notify("Teleport 🎯", "Berhasil teleport ke event " .. selected, 3)
-    else
-        Notify("Error ❌", "Event tidak punya koordinat!", 3)
-    end
+-- build dropdown
+local eventNames = EventTeleport and EventTeleport.GetEventNames() or {"- No events -"}
+local dropdown = makeDropdown(teleportPage, "Teleport Event", "🎯", eventNames, function(selected)
+    -- select only; don't auto start
+    selectedEventName = selected
+    Notify.Send("Event", "Event dipilih: "..tostring(selected), 3)
 end, "EventTeleport")
+
+-- toggle control
+local cat = makeCategory(teleportPage, "Auto Teleport Control", "⚡")
+makeToggle(cat, "Enable Auto Teleport", function(on)
+    if not EventTeleport then
+        Notify.Send("Error", "Module EventTeleport tidak dimuat!", 3)
+        return
+    end
+    if on then
+        if selectedEventName and EventTeleport.HasCoords(selectedEventName) then
+            EventTeleport.Start(selectedEventName)
+            Notify.Send("Auto Teleport", "Mulai auto teleport ke "..selectedEventName, 4)
+        else
+            Notify.Send("Auto Teleport", "Pilih event yang memiliki koordinat dulu!", 3)
+        end
+    else
+        EventTeleport.Stop()
+        Notify.Send("Auto Teleport", "Auto teleport dihentikan.", 3)
+    end
+end)
+
+-- optional single-teleport button
+makeButton(cat, "Teleport Now", function()
+    if EventTeleport and selectedEventName then
+        local ok = EventTeleport.TeleportNow(selectedEventName)
+        if ok then Notify.Send("Teleport", "Teleported to "..selectedEventName, 3) end
+    end
+end)
+
 
 -- ==== QUEST PAGE ====
 local catDeepSea = makeCategory(questPage, "Deep Sea Quest (Ghostfinn Rod)")
