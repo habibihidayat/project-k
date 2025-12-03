@@ -39,6 +39,8 @@ local SavedLocation = loadstring(game:HttpGet("https://raw.githubusercontent.com
 -- Quest page
 local AutoQuestModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Quest/AutoQuestModule.lua"))()
 local AutoTemple = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Quest/LeverQuest.lua"))()
+local TempleReader = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Quest/TempleDataReader.lua"))()
+
 -- Shop
 local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
 local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
@@ -1575,12 +1577,6 @@ task.spawn(function()
                 elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
             end
         end)
-
-        pcall(function()
-            if templeLabel and templeLabel.Parent and AutoTemple and type(AutoTemple.GetTempleInfoText) == "function" then
-                templeLabel.Text = AutoTemple.GetTempleInfoText()
-            end
-        end)
     end
 end)
 
@@ -1599,13 +1595,13 @@ local templeProgressFrame = new("Frame",{
 new("UICorner", {Parent = templeProgressFrame, CornerRadius = UDim.new(0, 8)})
 new("UIStroke", {Parent = templeProgressFrame, Color = colors.border, Thickness = 1, Transparency = 0.7})
 
--- Label Temple Progress
+-- Label Temple Progress (REAL-TIME)
 local templeLabel = new("TextLabel", {
     Parent = templeProgressFrame,
     Size = UDim2.new(1, -24, 1, -24),
     Position = UDim2.new(0, 12, 0, 12),
     BackgroundTransparency = 1,
-    Text = AutoTemple.GetTempleInfoText(),
+    Text = "Loading Temple Status...",
     Font = Enum.Font.Gotham,
     TextSize = 8,
     TextColor3 = colors.text,
@@ -1615,15 +1611,44 @@ local templeLabel = new("TextLabel", {
     ZIndex = 8
 })
 
+---------------------------------------------------------------------
+-- 🔥 Update Label Otomatis Ketika TempleDataReader Memperbarui Data
+---------------------------------------------------------------------
+TempleDataReader.OnTempleUpdate(function(status)
+    -- Convert ke teks cantik
+    local text =
+        "Sacred Temple Progress:\n\n" ..
+        "- Crescent Artifact: " .. (status["Crescent Artifact"] and "✔️" or "❌") .. "\n" ..
+        "- Arrow Artifact: " .. (status["Arrow Artifact"] and "✔️" or "❌") .. "\n" ..
+        "- Diamond Artifact: " .. (status["Diamond Artifact"] and "✔️" or "❌") .. "\n" ..
+        "- Hourglass Artifact: " .. (status["Hourglass Diamond Artifact"] and "✔️" or "❌")
+
+    templeLabel.Text = text
+end)
+
+---------------------------------------------------------------------
+-- 🔄 Refresh Progress Button
+---------------------------------------------------------------------
 makeButton(catTemple, "Refresh Progress", function()
-    if AutoTemple then
-        templeLabel.Text = AutoTemple.GetTempleInfoText()
-        if Notify and type(Notify.Send) == "function" then
-            Notify.Send("Refresh", "Temple progress updated!", 2)
-        end
+    local status = TempleDataReader.GetTempleStatus()
+
+    local text =
+        "Sacred Temple Progress:\n\n" ..
+        "- Crescent Artifact: " .. (status["Crescent Artifact"] and "✔️" or "❌") .. "\n" ..
+        "- Arrow Artifact: " .. (status["Arrow Artifact"] and "✔️" or "❌") .. "\n" ..
+        "- Diamond Artifact: " .. (status["Diamond Artifact"] and "✔️" or "❌") .. "\n" ..
+        "- Hourglass Artifact: " .. (status["Hourglass Diamond Artifact"] and "✔️" or "❌")
+
+    templeLabel.Text = text
+
+    if Notify then
+        Notify.Send("Refresh", "Temple progress updated!", 2)
     end
 end)
 
+---------------------------------------------------------------------
+-- 🎯 Toggle Auto Temple (Tetap gunakan AutoTemple punyamu)
+---------------------------------------------------------------------
 makeToggle(catTemple, "Auto Open Sacred Temple", function(on)
     if on then
         AutoTemple.Start()
@@ -1637,7 +1662,15 @@ makeToggle(catTemple, "Auto Open Sacred Temple", function(on)
         end
     end
 
-    templeLabel.Text = AutoTemple.GetTempleInfoText()
+    -- Update teks
+    local status = TempleDataReader.GetTempleStatus()
+
+    templeLabel.Text =
+        "Sacred Temple Progress:\n\n" ..
+        "- Crescent Artifact: " .. (status["Crescent Artifact"] and "✔️" or "❌") .. "\n" ..
+        "- Arrow Artifact: " .. (status["Arrow Artifact"] and "✔️" or "❌") .. "\n" ..
+        "- Diamond Artifact: " .. (status["Diamond Artifact"] and "✔️" or "❌") .. "\n" ..
+        "- Hourglass Artifact: " .. (status["Hourglass Diamond Artifact"] and "✔️" or "❌")
 end)
 
 
