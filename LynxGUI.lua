@@ -1195,6 +1195,13 @@ makeInput(catBlatantV1, "Cancel Delay", 0.1, function(v)
     print("✅ Cancel Delay set to: " .. v)
 end)
 
+makeInput(catBlatantV1, "After Cancel Delay", 0.027, function(v)
+    blatantv1.Settings.AfterCancelDelay = v
+    print("✅ Cancel Delay set to: " .. v)
+end)
+
+
+
 -- Blatant V2
 local catBlatantV2 = makeCategory(mainPage, "Blatant V2", "🔥")
 
