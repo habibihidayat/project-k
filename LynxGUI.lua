@@ -1359,20 +1359,20 @@ local catSaved = makeCategory(teleportPage, "Saved Location", "⭐")
 
 makeButton(catSaved, "Save Current Location", function()
     SavedLocation.Save()
-    Notify("Saved ⭐", "Lokasi berhasil disimpan.", 3)
+    Notify.Send("Saved ⭐", "Lokasi berhasil disimpan.", 3)
 end)
 
 makeButton(catSaved, "Teleport Saved Location", function()
     if SavedLocation.Teleport() then
         Notify("Teleported 🚀", "Berhasil teleport ke lokasi tersimpan.", 3)
     else
-        Notify("Error ❌", "Tidak ada lokasi yang disimpan!", 3)
+        Notify.Send("Error ❌", "Tidak ada lokasi yang disimpan!", 3)
     end
 end)
 
 makeButton(catSaved, "Reset Saved Location", function()
     SavedLocation.Reset()
-    Notify("Reset 🔄", "Lokasi tersimpan telah dihapus.", 3)
+    Notify.Send("Reset 🔄", "Lokasi tersimpan telah dihapus.", 3)
 end)
 
 --Events Teleport
