@@ -1,7 +1,6 @@
 -- ============================================
--- UNLIMITED ZOOM CAMERA MODULE
+-- UNLIMITED ZOOM CAMERA MODULE (CLEAN VERSION)
 -- ============================================
--- Character can walk normally, camera can zoom unlimited
 
 local UnlimitedZoomModule = {}
 
@@ -27,13 +26,8 @@ function UnlimitedZoomModule.Enable()
     
     unlimitedZoomActive = true
     
-    -- Remove zoom limits (character can still move)
     Player.CameraMinZoomDistance = 0.5
     Player.CameraMaxZoomDistance = 9999
-    
-    print("✅ Unlimited Zoom: ENABLED")
-    print("📷 Scroll to zoom in/out without limits")
-    print("🏃 Character can move normally")
     
     return true
 end
@@ -43,12 +37,8 @@ function UnlimitedZoomModule.Disable()
     
     unlimitedZoomActive = false
     
-    -- Restore original zoom limits
     Player.CameraMinZoomDistance = originalMinZoom
     Player.CameraMaxZoomDistance = originalMaxZoom
-    
-    print("🔴 Unlimited Zoom: DISABLED")
-    print("📷 Zoom limits restored")
     
     return true
 end
@@ -56,16 +46,5 @@ end
 function UnlimitedZoomModule.IsActive()
     return unlimitedZoomActive
 end
-
--- ============================================
--- INFO
--- ============================================
-print("╔════════════════════════════════════════╗")
-print("║   UNLIMITED ZOOM CAMERA MODULE READY   ║")
-print("╚════════════════════════════════════════╝")
-print("► Character: CAN MOVE NORMALLY 🏃")
-print("► Camera: UNLIMITED ZOOM 📷")
-print("► Control: SIMPLE ON/OFF TOGGLE")
-print("═════════════════════════════════════════")
 
 return UnlimitedZoomModule
