@@ -34,7 +34,6 @@ UltraBlatant.Settings = {
     AfterCancelDelay = 0.027 -- Delay setelah cancel sebelum cast lagi (untuk status OK)
 }
 
-print("💀 ULTRA BLATANT MODULE LOADED!")
 
 ----------------------------------------------------------------
 -- CORE FUNCTIONS
@@ -124,19 +123,17 @@ function UltraBlatant.Start()
     
     task.spawn(ultraSpamLoop)
     
-    print("💀 ULTRA BLATANT STARTED!")
+ 
 end
 
 -- Stop function
 function UltraBlatant.Stop()
     if not UltraBlatant.Active then 
-        print("⚠️ Ultra Blatant not running!")
         return
     end
     
     UltraBlatant.Active = false
     
-    print("⏸ ULTRA BLATANT STOPPED")
 end
 
 -- Get stats function (optional, untuk display di GUI)
@@ -155,11 +152,6 @@ function UltraBlatant.GetStats()
         isRunning = UltraBlatant.Active
     }
 end
-
-print("✅ ULTRA BLATANT MODULE READY!")
-print("📚 Usage: UltraBlatant.Start() / UltraBlatant.Stop()")
-print("⚙️ Settings: CompleteDelay / CancelDelay / AfterCancelDelay")
-print("💡 Use makeInput() for delay input in GUI")
 
 -- Return module
 return UltraBlatant
