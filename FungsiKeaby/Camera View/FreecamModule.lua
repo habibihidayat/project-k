@@ -472,5 +472,16 @@ if not isMobile then
     end)
 end
 
+-- ============================================
+-- INFO
+-- ============================================
+print("╔════════════════════════════════════════╗")
+print("║   FREECAM MODULE - PC & MOBILE READY   ║")
+print("╚════════════════════════════════════════╝")
+print("► Platform: " .. (isMobile and "📱 MOBILE" or "💻 PC"))
+print("► F3 Keybind: " .. (isMobile and "N/A (Mobile)" or "READY"))
+print("► Mobile Joystick: " .. (isMobile and "AUTO-DETECT" or "N/A"))
+print("► Ready to be controlled by GUI")
+print("═════════════════════════════════════════")
 
 return FreecamModule
