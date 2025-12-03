@@ -1,132 +1,120 @@
 --========================================================--
---       TempleDataReader (FULL DEBUG - FIND ROOT CAUSE)
+--        TempleDataReader V3 (AutoScan + UltraFast)
 --========================================================--
 
 local TempleDataReader = {}
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Packages = ReplicatedStorage:FindFirstChild("Packages")
-local Replion = Packages and require(Packages:WaitForChild("Replion"))
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
 
-local Data = nil
 local Ready = false
 local Listeners = {}
-local Started = false
+local Cached = {}
 
-local EXPECT_KEYS = {
-    "Crescent Artifact",
-    "Arrow Artifact",
-    "Diamond Artifact",
-    "Hourglass Diamond Artifact"
+local KEYS = {
+    ["Crescent Artifact"] = {"CrescentArtifact", "Crescent", "Artifact1"},
+    ["Arrow Artifact"] = {"ArrowArtifact", "Arrow", "Artifact2"},
+    ["Diamond Artifact"] = {"DiamondArtifact", "Diamond", "Artifact3"},
+    ["Hourglass Diamond Artifact"] = {"HourglassArtifact", "Hourglass", "Artifact4"},
 }
 
----------------------------------------------------------
--- INTERNAL: Print table safely
----------------------------------------------------------
-local function dump(tbl)
-    if type(tbl) ~= "table" then return tostring(tbl) end
-    local str = ""
-    for k,v in pairs(tbl) do
-        str = str .. tostring(k) .. " = " .. tostring(v) .. "\n"
+------------------------------------------------------------
+-- Safe Get Attribute in many possible locations
+------------------------------------------------------------
+local function ReadArtifact(mainName, aliases)
+    -- Player attribute
+    for _, k in ipairs(aliases) do
+        local v = Player:GetAttribute(k)
+        if v ~= nil then return v == true or v == 1 end
     end
-    return str
+
+    -- Character attributes
+    if Player.Character then
+        for _, k in ipairs(aliases) do
+            local v = Player.Character:GetAttribute(k)
+            if v ~= nil then return v == true or v == 1 end
+        end
+    end
+
+    -- Folder under Player
+    local folder = Player:FindFirstChild("TempleLevers")
+    if folder then
+        for _, k in ipairs(aliases) do
+            local obj = folder:FindFirstChild(k)
+            if obj and obj.Value ~= nil then return obj.Value == true end
+        end
+    end
+
+    -- ReplicatedStorage fallback
+    local rs = game:GetService("ReplicatedStorage")
+    local gameData = rs:FindFirstChild("GameData")
+    if gameData and gameData:FindFirstChild("Temple") then
+        local t = gameData.Temple
+        for _, k in ipairs(aliases) do
+            local obj = t:FindFirstChild(k)
+            if obj and obj.Value ~= nil then return obj.Value == true end
+        end
+    end
+
+    return false
 end
 
----------------------------------------------------------
--- Get Status (safe)
----------------------------------------------------------
+------------------------------------------------------------
+-- Build readable status table
+------------------------------------------------------------
+local function BuildStatus()
+    local data = {}
+    for displayName, aliases in pairs(KEYS) do
+        data[displayName] = ReadArtifact(displayName, aliases)
+    end
+    return data
+end
+
+------------------------------------------------------------
+-- Fire callbacks
+------------------------------------------------------------
+local function FireUpdate()
+    local status = BuildStatus()
+    Cached = status
+    for _, fn in ipairs(Listeners) do
+        task.spawn(fn, status)
+    end
+end
+
+------------------------------------------------------------
+-- API
+------------------------------------------------------------
 function TempleDataReader.GetTempleStatus()
-    if not Ready or not Data then
+    if not Ready then
         return {}
     end
-
-    local leverData = Data:Get("TempleLevers")
-    if type(leverData) ~= "table" then
-        print("[TDR] TempleLevers bukan table. Value =", leverData)
-        return {}
-    end
-
-    local result = {}
-    for _, key in ipairs(EXPECT_KEYS) do
-        result[key] = leverData[key] == true
-    end
-    return result
+    return Cached
 end
 
----------------------------------------------------------
--- Listener
----------------------------------------------------------
 function TempleDataReader.OnTempleUpdate(cb)
     table.insert(Listeners, cb)
     if Ready then
-        cb(TempleDataReader.GetTempleStatus())
+        cb(Cached)
     end
 end
 
----------------------------------------------------------
--- NOTIFY ALL LISTENERS
----------------------------------------------------------
-local function FireUpdate()
-    if not Ready then return end
-    local status = TempleDataReader.GetTempleStatus()
-    for _, cb in ipairs(Listeners) do
-        task.spawn(cb, status)
-    end
-end
+------------------------------------------------------------
+-- Start Scanner
+------------------------------------------------------------
+task.spawn(function()
+    -- Wait until character loaded
+    repeat task.wait() until Player.Character
 
----------------------------------------------------------
--- START
----------------------------------------------------------
-local function Start()
-    if Started then return end
-    Started = true
+    Ready = true
+    Cached = BuildStatus()
+    FireUpdate()
 
-    task.spawn(function()
-
-        print("\n==============================")
-        print("[TDR] STARTING DEBUG MODE")
-        print("==============================")
-
-        print("[TDR] Menunggu Replion Client...")
-
-        if not Replion then
-            warn("[TDR] ERROR: Replion tidak ada di ReplicatedStorage.Packages!")
-            return
-        end
-
-        Data = Replion.Client:WaitReplion("Data")
-
-        if not Data then
-            warn("[TDR] ERROR: Replion 'Data' tidak ditemukan!")
-            return
-        end
-
-        print("[TDR] Replion Data ditemukan!")
-        print("[TDR] Keys dalam Data:", dump(Data:GetAll()))
-
-        -- Tunggu TempleLevers
-        print("[TDR] Menunggu key TempleLevers...")
-        while not Data:Get("TempleLevers") do
-            task.wait(0.25)
-        end
-
-        local leverTable = Data:Get("TempleLevers")
-        print("[TDR] TempleLevers ditemukan:")
-        print(dump(leverTable))
-
-        Ready = true
-
-        -- Listener perubahan
-        Data:OnChange("TempleLevers", function(newValue)
-            print("[TDR] TempleLevers UPDATED:")
-            print(dump(newValue))
-            FireUpdate()
-        end)
-
+    -- Auto monitor attribute changes
+    Player.AttributeChanged:Connect(FireUpdate)
+    Player.CharacterAdded:Connect(function()
+        task.wait(0.5)
         FireUpdate()
     end)
-end
-
-Start()
+end)
 
 return TempleDataReader
