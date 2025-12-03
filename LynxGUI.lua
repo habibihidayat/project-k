@@ -1575,10 +1575,74 @@ task.spawn(function()
                 elementLabel.Text = AutoQuestModule.GetQuestInfo("ElementQuest")
             end
         end)
+
+        pcall(function()
+            if templeLabel and templeLabel.Parent and AutoTemple and type(AutoTemple.GetTempleInfoText) == "function" then
+                templeLabel.Text = AutoTemple.GetTempleInfoText()
+            end
+        end)
     end
 end)
 
+local catTemple = makeCategory(questPage, "Sacred Temple", "⛩️")
+
+-- TEMPLE PAGE
 local catTemple = makeCategory(settingsPage, "Sacred Temple", "⛩️")
+
+-- Frame progress seperti quest lain
+local templeProgressFrame = new("Frame",{
+    Parent = catTemple,
+    Size = UDim2.new(1, 0, 0, 120),
+    BackgroundColor3 = colors.bg3,
+    BackgroundTransparency = 0.6,
+    BorderSizePixel = 0,
+    ZIndex = 7
+})
+new("UICorner", {Parent = templeProgressFrame, CornerRadius = UDim.new(0, 8)})
+new("UIStroke", {Parent = templeProgressFrame, Color = colors.border, Thickness = 1, Transparency = 0.7})
+
+-- Label Temple Progress
+local templeLabel = new("TextLabel", {
+    Parent = templeProgressFrame,
+    Size = UDim2.new(1, -24, 1, -24),
+    Position = UDim2.new(0, 12, 0, 12),
+    BackgroundTransparency = 1,
+    Text = AutoTemple.GetTempleInfoText(),
+    Font = Enum.Font.Gotham,
+    TextSize = 8,
+    TextColor3 = colors.text,
+    TextWrapped = true,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    TextYAlignment = Enum.TextYAlignment.Top,
+    ZIndex = 8
+})
+
+makeButton(catTemple, "Refresh Progress", function()
+    if AutoTemple then
+        templeLabel.Text = AutoTemple.GetTempleInfoText()
+        if Notify and type(Notify.Send) == "function" then
+            Notify.Send("Refresh", "Temple progress updated!", 2)
+        end
+    end
+end)
+
+makeToggle(catTemple, "Auto Open Sacred Temple", function(on)
+    if on then
+        AutoTemple.Start()
+        if Notify then
+            Notify.Send("Temple", "Auto Sacred Temple AKTIF!", 2)
+        end
+    else
+        AutoTemple.Stop()
+        if Notify then
+            Notify.Send("Temple", "Auto Sacred Temple DIMATIKAN!", 2)
+        end
+    end
+
+    templeLabel.Text = AutoTemple.GetTempleInfoText()
+end)
+
+
 
 makeLabel(catTemple, "Temple Progress:\n" .. AutoTemple.GetTempleInfoText())
 
