@@ -16,22 +16,19 @@ local RF_RequestMinigame = netFolder:WaitForChild("RF/RequestFishingMinigameStar
 local RF_CancelFishingInputs = netFolder:WaitForChild("RF/CancelFishingInputs")
 local RE_FishingCompleted = netFolder:WaitForChild("RE/FishingCompleted")
 local RE_MinigameChanged = netFolder:WaitForChild("RE/FishingMinigameChanged")
-local RE_FishCaught = netFolder:WaitForChild("RE/FishCaught")
 
 -- Module table
 local UltraBlatant = {}
 UltraBlatant.Active = false
 UltraBlatant.Stats = {
     castCount = 0,
-    fishCaught = 0,
     startTime = 0
 }
 
 -- Settings (sesuai dengan pattern GUI kamu)
 UltraBlatant.Settings = {
     CompleteDelay = 0.001,    -- Delay sebelum complete
-    CancelDelay = 0.001,       -- Delay setelah complete sebelum cancel
-    AfterCancelDelay = 0.027 -- Delay setelah cancel sebelum cast lagi (untuk status OK)
+    CancelDelay = 0.001       -- Delay setelah complete sebelum cancel
 }
 
 
@@ -50,7 +47,7 @@ local function ultraSpamLoop()
     while UltraBlatant.Active do
         local currentTime = tick()
         
-        -- 1x CHARGE & REQUEST (CASTING) - DIPERBAIKI DARI 2x JADI 1x
+        -- 1x CHARGE & REQUEST (CASTING)
         safeFire(function()
             RF_ChargeFishingRod:InvokeServer({[1] = currentTime})
         end)
@@ -72,9 +69,6 @@ local function ultraSpamLoop()
         safeFire(function()
             RF_CancelFishingInputs:InvokeServer()
         end)
-        
-        -- Wait after cancel before next cast (untuk status OK)
-        task.wait(UltraBlatant.Settings.AfterCancelDelay)
     end
 end
 
@@ -93,14 +87,7 @@ RE_MinigameChanged.OnClientEvent:Connect(function(state)
         safeFire(function()
             RF_CancelFishingInputs:InvokeServer()
         end)
-        
-        task.wait(UltraBlatant.Settings.AfterCancelDelay)
     end)
-end)
-
--- FISH CAUGHT COUNTER
-RE_FishCaught.OnClientEvent:Connect(function()
-    UltraBlatant.Stats.fishCaught = UltraBlatant.Stats.fishCaught + 1
 end)
 
 ----------------------------------------------------------------
@@ -116,12 +103,9 @@ function UltraBlatant.Start()
     
     UltraBlatant.Active = true
     UltraBlatant.Stats.castCount = 0
-    UltraBlatant.Stats.fishCaught = 0
     UltraBlatant.Stats.startTime = tick()
     
     task.spawn(ultraSpamLoop)
-    
- 
 end
 
 -- Stop function
@@ -131,24 +115,6 @@ function UltraBlatant.Stop()
     end
     
     UltraBlatant.Active = false
-    
-end
-
--- Get stats function (optional, untuk display di GUI)
-function UltraBlatant.GetStats()
-    local elapsed = tick() - UltraBlatant.Stats.startTime
-    local cpm = 0
-    
-    if elapsed > 0 then
-        cpm = math.floor((UltraBlatant.Stats.castCount / elapsed) * 60)
-    end
-    
-    return {
-        casts = UltraBlatant.Stats.castCount,
-        fish = UltraBlatant.Stats.fishCaught,
-        cpm = cpm,
-        isRunning = UltraBlatant.Active
-    }
 end
 
 -- Return module
