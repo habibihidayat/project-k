@@ -1641,18 +1641,6 @@ makeToggle(catTemple, "Auto Open Sacred Temple", function(on)
 end)
 
 
-
-makeLabel(catTemple, "Temple Progress:\n" .. AutoTemple.GetTempleInfoText())
-
-makeToggle(catTemple, "Auto Open Sacred Temple", function(on)
-    if on then
-        AutoTemple.Start()
-    else
-        AutoTemple.Stop()
-    end
-end)
-
-
 -- ==== SHOP PAGE ====
 local catSell = makeCategory(shopPage, "Sell All", "💰")
 
