@@ -38,6 +38,7 @@ local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.
 local SavedLocation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/SavedLocation.lua"))()
 -- Quest page
 local AutoQuestModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Quest/AutoQuestModule.lua"))()
+local AutoTemple = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Quest/LeverQuest.lua"))()
 -- Shop
 local AutoSell = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSell.lua"))()
 local AutoSellTimer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/ShopFeatures/AutoSellTimer.lua"))()
@@ -1576,6 +1577,19 @@ task.spawn(function()
         end)
     end
 end)
+
+local catTemple = makeCategory(settingsPage, "Sacred Temple", "⛩️")
+
+makeLabel(catTemple, "Temple Progress:\n" .. AutoTemple.GetTempleInfoText())
+
+makeToggle(catTemple, "Auto Open Sacred Temple", function(on)
+    if on then
+        AutoTemple.Start()
+    else
+        AutoTemple.Stop()
+    end
+end)
+
 
 -- ==== SHOP PAGE ====
 local catSell = makeCategory(shopPage, "Sell All", "💰")
