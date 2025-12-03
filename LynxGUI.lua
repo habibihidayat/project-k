@@ -1182,12 +1182,12 @@ makeToggle(catBlatantV1, "Blatant Mode", function(on)
     end 
 end)
 
-makeInput(catBlatantV1, "Complete Delay", 0.05, function(v)
+makeInput(catBlatantV1, "Complete Delay", 1.5, function(v)
     blatantv1.Settings.CompleteDelay = v
     print("✅ Complete Delay set to: " .. v)
 end)
 
-makeInput(catBlatantV1, "Cancel Delay", 0.1, function(v)
+makeInput(catBlatantV1, "Cancel Delay", 0.5, function(v)
     blatantv1.Settings.CancelDelay = v
     print("✅ Cancel Delay set to: " .. v)
 end)
