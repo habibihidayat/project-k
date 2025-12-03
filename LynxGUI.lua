@@ -1983,59 +1983,11 @@ local infoText = new("TextLabel",{
     Position=UDim2.new(0, 12, 0, 12),
     BackgroundTransparency=1,
     Text=[[
-💜 LynX v2.3 GALAXY EDITION (REFINED)
+💜 LynX v2.3
 
 Free Not For Sale
 ━━━━━━━━━━━━━━━━━━━━━━
 
-🎣 AUTO FISHING
-• Instant Fishing (Fast/Perfect)
-• Perfect horizontal alignment
-• Blatant Mode V1 & V2
-• Advanced automation
-
-🛠️ SUPPORT FEATURES
-• No Fishing Animation
-• Performance optimizations
-
-🌍 TELEPORT SYSTEM
-• Location teleport
-• Player teleport
-• Smart dropdown selection
-
-💰 SHOP FEATURES
-• Auto Sell (instant & timer)
-• Auto Buy Weather
-• Organized categories
-
-⚙️ SETTINGS
-• Anti-AFK Protection
-• FPS Unlocker (60-240 FPS)
-• General preferences
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-💡 NEW IN v2.3 REFINED
-✓ Ultra transparent design
-✓ Perfect alignment system
-✓ Galaxy purple theme
-✓ Sidebar always visible
-✓ Fixed padding & spacing
-✓ Label-input horizontal layout
-✓ Smooth Quint animations
-✓ Better performance
-✓ Glass morphism effect
-
-🎮 CONTROLS
-• Click categories to expand
-• Drag from top bar to move
-• Drag corner to resize
-• (─) Minimize window
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-Created with 💜 by Lynx Team
-Refined Edition 2024
     ]],
     Font=Enum.Font.Gotham,
     TextSize=9,
@@ -2224,22 +2176,8 @@ task.spawn(function()
 end)
 
 print("━━━━━━━━━━━━━━━━━━━━━━")
-print("✨ Lynx GUI v2.3 Galaxy Edition (REFINED)")
-print("💜 FREE NOT FOR SALE")
+print("_______Lynx_______")
+print("FREE NOT FOR SALE")
 print("━━━━━━━━━━━━━━━━━━━━━━")
-print("🎉 PERFECTED & ALIGNED!")
-print("━━━━━━━━━━━━━━━━━━━━━━")
-print("📦 Features:")
-print("  • Ultra transparent design")
-print("  • Perfect alignment system")
-print("  • Galaxy purple theme")
-print("  • Smooth Quint animations")
-print("  • Always-visible sidebar")
-print("  • Horizontal input layout")
-print("  • Glass morphism effect")
-print("  • Polished UI components")
-print("━━━━━━━━━━━━━━━━━━━━━━")
-print("💎 All elements perfectly aligned!")
-print("━━━━━━━━━━━━━━━━━━━━━━")
-print("💎 Created by Lynx Team")
+print("--Created by Bee--")
 print("━━━━━━━━━━━━━━━━━━━━━━")
