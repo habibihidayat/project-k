@@ -1584,10 +1584,8 @@ task.spawn(function()
     end
 end)
 
-local catTemple = makeCategory(questPage, "Sacred Temple", "⛩️")
-
 -- TEMPLE PAGE
-local catTemple = makeCategory(settingsPage, "Sacred Temple", "⛩️")
+local catTemple = makeCategory(questPage, "Sacred Temple", "⛩️")
 
 -- Frame progress seperti quest lain
 local templeProgressFrame = new("Frame",{
