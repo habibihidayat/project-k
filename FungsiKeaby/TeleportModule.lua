@@ -1,3 +1,6 @@
+-- 🌍 TeleportModule.lua
+-- Modul fungsi teleport + daftar lokasi
+
 local TeleportModule = {}
 
 TeleportModule.Locations = {
@@ -27,9 +30,13 @@ function TeleportModule.TeleportTo(name)
     local root = char:WaitForChild("HumanoidRootPart")
 
     local target = TeleportModule.Locations[name]
-    if not target then return end
+    if not target then
+        warn("⚠️ Lokasi '" .. tostring(name) .. "' tidak ditemukan!")
+        return
+    end
 
     root.CFrame = CFrame.new(target)
+    print("✅ Teleported to:", name)
 end
 
 return TeleportModule
