@@ -1,6 +1,6 @@
---========================================================--
---            TempleDataReader.lua (LOADSTRING READY)
---========================================================--
+--==============================================================--
+--    TempleDataReader (FAST + SAFE VERSION, LOADSTRING READY)
+--==============================================================--
 
 local TempleDataReader = {}
 
@@ -9,26 +9,21 @@ local Replion = require(ReplicatedStorage.Packages.Replion)
 
 local Data = nil
 local Ready = false
-local Listeners = {}
+local Callbacks = {}
 local Started = false
 
------------------------------------------------------------
--- INTERNAL: Trigger callbacks on data update
------------------------------------------------------------
-local function FireUpdate()
-    if not Ready then return end
-
-    local status = TempleDataReader.GetTempleStatus()
-
-    for _, cb in ipairs(Listeners) do
-        task.spawn(cb, status)
-    end
+----------------------------------------------------------------
+-- 🔒 Utility: Safe Get Table
+----------------------------------------------------------------
+local function safeGet(tbl, key)
+    if type(tbl) ~= "table" then return nil end
+    return tbl[key]
 end
 
------------------------------------------------------------
--- PUBLIC: Read current temple lever status
------------------------------------------------------------
-function TempleDataReader.GetTempleStatus()
+----------------------------------------------------------------
+-- 🔥 Convert Raw Replion Data → Status Table
+----------------------------------------------------------------
+local function BuildStatus()
     if not Ready or not Data then
         return {
             ["Crescent Artifact"] = false,
@@ -38,62 +33,80 @@ function TempleDataReader.GetTempleStatus()
         }
     end
 
-    local leverData = Data:Get("TempleLevers")
+    local leverData = Data:Get("TempleLevers") or {}
 
     return {
-        ["Crescent Artifact"] = leverData["Crescent Artifact"] == true,
-        ["Arrow Artifact"] = leverData["Arrow Artifact"] == true,
-        ["Diamond Artifact"] = leverData["Diamond Artifact"] == true,
-        ["Hourglass Diamond Artifact"] = leverData["Hourglass Diamond Artifact"] == true
+        ["Crescent Artifact"] = safeGet(leverData, "Crescent Artifact") == true,
+        ["Arrow Artifact"] = safeGet(leverData, "Arrow Artifact") == true,
+        ["Diamond Artifact"] = safeGet(leverData, "Diamond Artifact") == true,
+        ["Hourglass Diamond Artifact"] = safeGet(leverData, "Hourglass Diamond Artifact") == true
     }
 end
 
------------------------------------------------------------
--- PUBLIC: Register callback for updates
------------------------------------------------------------
-function TempleDataReader.OnTempleUpdate(callback)
-    table.insert(Listeners, callback)
+----------------------------------------------------------------
+-- 📢 Fire Callbacks (Real-time)
+----------------------------------------------------------------
+local function Dispatch()
+    if not Ready then return end
+    local status = BuildStatus()
 
-    -- If ready, trigger immediately once
-    if Ready then
-        task.spawn(callback, TempleDataReader.GetTempleStatus())
+    for _, fn in ipairs(Callbacks) do
+        task.spawn(fn, status)
     end
 end
 
------------------------------------------------------------
--- INTERNAL: Auto-start listener once
------------------------------------------------------------
+----------------------------------------------------------------
+-- 🌐 Public: Get Temple Status
+----------------------------------------------------------------
+function TempleDataReader.GetTempleStatus()
+    return BuildStatus()
+end
+
+----------------------------------------------------------------
+-- 🧩 Public: Listen for Updates (Instant if Ready)
+----------------------------------------------------------------
+function TempleDataReader.OnTempleUpdate(callback)
+    table.insert(Callbacks, callback)
+
+    if Ready then
+        task.spawn(callback, BuildStatus())
+    end
+end
+
+----------------------------------------------------------------
+-- 🟢 Public: Check Ready Status (For GUI)
+----------------------------------------------------------------
+function TempleDataReader.IsReady()
+    return Ready
+end
+
+----------------------------------------------------------------
+-- 🚀 INTERNAL: Initialize Once
+----------------------------------------------------------------
 local function Start()
     if Started then return end
     Started = true
 
     task.spawn(function()
-        print("[TempleDataReader] Waiting for Replion Data...")
-
+        -- Wait Replion Data Object
         Data = Replion.Client:WaitReplion("Data")
 
-        -- Wait for TempleLevers to be initialized
-        while not Data:Get("TempleLevers") do
-            task.wait(0.25)
-        end
-
+        -- Mark ready as soon as object exists
         Ready = true
 
-        print("[TempleDataReader] TempleLevers ready:")
-        print(Data:Get("TempleLevers"))
+        -- Fire initial
+        Dispatch()
 
-        -- Listener for updates
+        ----------------------------------------------------------------
+        -- 📡 Listen to changes: ultra fast, no polling needed
+        ----------------------------------------------------------------
         Data:OnChange("TempleLevers", function()
-            print("[TempleDataReader] TempleLevers updated!")
-            FireUpdate()
+            Dispatch()
         end)
-
-        -- First update
-        FireUpdate()
     end)
 end
 
--- AUTO-START immediately when module is loaded
+-- AUTO INIT
 Start()
 
 return TempleDataReader
