@@ -50,15 +50,13 @@ local function ultraSpamLoop()
     while UltraBlatant.Active do
         local currentTime = tick()
         
-        -- 2x CHARGE & REQUEST (CASTING)
-        for i = 1, 2 do
-            safeFire(function()
-                RF_ChargeFishingRod:InvokeServer({[1] = currentTime})
-            end)
-            safeFire(function()
-                RF_RequestMinigame:InvokeServer(1, 0, currentTime)
-            end)
-        end
+        -- 1x CHARGE & REQUEST (CASTING) - DIPERBAIKI DARI 2x JADI 1x
+        safeFire(function()
+            RF_ChargeFishingRod:InvokeServer({[1] = currentTime})
+        end)
+        safeFire(function()
+            RF_RequestMinigame:InvokeServer(1, 0, currentTime)
+        end)
         
         UltraBlatant.Stats.castCount = UltraBlatant.Stats.castCount + 1
         
