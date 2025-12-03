@@ -55,8 +55,6 @@ function DisableCutscenes.Start()
             task.wait(1)
         end
     end)
-
-    print("[DisableCutscenes] ENABLED")
 end
 
 -----------------------------------------------------
@@ -78,8 +76,6 @@ function DisableCutscenes.Stop()
         task.cancel(_loopThread)
         _loopThread = nil
     end
-
-    print("[DisableCutscenes] DISABLED")
 end
 
 -----------------------------------------------------
