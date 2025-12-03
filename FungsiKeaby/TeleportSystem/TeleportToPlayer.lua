@@ -13,6 +13,9 @@ function TeleportToPlayer.TeleportTo(playerName)
 
     if targetHRP and myHRP then
         myHRP.CFrame = targetHRP.CFrame + Vector3.new(0, 3, 0)
+        print("[Teleport] 🚀 Teleported to player: " .. playerName)
+    else
+        warn("[Teleport] ❌ Gagal teleport, HRP tidak ditemukan.")
     end
 end
 
