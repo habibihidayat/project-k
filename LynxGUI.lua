@@ -1583,8 +1583,8 @@ end)
 -- TEMPLE PAGE
 local catTemple = makeCategory(questPage, "Sacred Temple", "⛩️")
 
--- Frame progress seperti quest lain
-local templeProgressFrame = new("Frame",{
+-- Container progress
+local templeProgressFrame = new("Frame", {
     Parent = catTemple,
     Size = UDim2.new(1, 0, 0, 120),
     BackgroundColor3 = colors.bg3,
@@ -1595,7 +1595,7 @@ local templeProgressFrame = new("Frame",{
 new("UICorner", {Parent = templeProgressFrame, CornerRadius = UDim.new(0, 8)})
 new("UIStroke", {Parent = templeProgressFrame, Color = colors.border, Thickness = 1, Transparency = 0.7})
 
--- Label Temple Progress (REAL-TIME)
+-- Label
 local templeLabel = new("TextLabel", {
     Parent = templeProgressFrame,
     Size = UDim2.new(1, -24, 1, -24),
@@ -1611,35 +1611,31 @@ local templeLabel = new("TextLabel", {
     ZIndex = 8
 })
 
----------------------------------------------------------------------
--- 🔥 Update Label Otomatis Ketika TempleDataReader Memperbarui Data
----------------------------------------------------------------------
-TempleDataReader.OnTempleUpdate(function(status)
-    -- Convert ke teks cantik
-    local text =
+-------------------------------------------------------------
+-- 🧩 Function untuk membuat teks status (1 sumber data)
+-------------------------------------------------------------
+local function BuildTempleText(status)
+    return
         "Sacred Temple Progress:\n\n" ..
         "- Crescent Artifact: " .. (status["Crescent Artifact"] and "✔️" or "❌") .. "\n" ..
         "- Arrow Artifact: " .. (status["Arrow Artifact"] and "✔️" or "❌") .. "\n" ..
         "- Diamond Artifact: " .. (status["Diamond Artifact"] and "✔️" or "❌") .. "\n" ..
         "- Hourglass Artifact: " .. (status["Hourglass Diamond Artifact"] and "✔️" or "❌")
+end
 
-    templeLabel.Text = text
+---------------------------------------------------------------------
+-- 🔥 Auto Update Label Saat Data Berubah (REALTIME)
+---------------------------------------------------------------------
+TempleDataReader.OnTempleUpdate(function(status)
+    templeLabel.Text = BuildTempleText(status)
 end)
 
 ---------------------------------------------------------------------
--- 🔄 Refresh Progress Button
+-- 🔄 Refresh Progress
 ---------------------------------------------------------------------
 makeButton(catTemple, "Refresh Progress", function()
     local status = TempleDataReader.GetTempleStatus()
-
-    local text =
-        "Sacred Temple Progress:\n\n" ..
-        "- Crescent Artifact: " .. (status["Crescent Artifact"] and "✔️" or "❌") .. "\n" ..
-        "- Arrow Artifact: " .. (status["Arrow Artifact"] and "✔️" or "❌") .. "\n" ..
-        "- Diamond Artifact: " .. (status["Diamond Artifact"] and "✔️" or "❌") .. "\n" ..
-        "- Hourglass Artifact: " .. (status["Hourglass Diamond Artifact"] and "✔️" or "❌")
-
-    templeLabel.Text = text
+    templeLabel.Text = BuildTempleText(status)
 
     if Notify then
         Notify.Send("Refresh", "Temple progress updated!", 2)
@@ -1647,7 +1643,7 @@ makeButton(catTemple, "Refresh Progress", function()
 end)
 
 ---------------------------------------------------------------------
--- 🎯 Toggle Auto Temple (Tetap gunakan AutoTemple punyamu)
+-- 🎯 Auto Open Sacred Temple Toggle
 ---------------------------------------------------------------------
 makeToggle(catTemple, "Auto Open Sacred Temple", function(on)
     if on then
@@ -1662,17 +1658,9 @@ makeToggle(catTemple, "Auto Open Sacred Temple", function(on)
         end
     end
 
-    -- Update teks
-    local status = TempleDataReader.GetTempleStatus()
-
-    templeLabel.Text =
-        "Sacred Temple Progress:\n\n" ..
-        "- Crescent Artifact: " .. (status["Crescent Artifact"] and "✔️" or "❌") .. "\n" ..
-        "- Arrow Artifact: " .. (status["Arrow Artifact"] and "✔️" or "❌") .. "\n" ..
-        "- Diamond Artifact: " .. (status["Diamond Artifact"] and "✔️" or "❌") .. "\n" ..
-        "- Hourglass Artifact: " .. (status["Hourglass Diamond Artifact"] and "✔️" or "❌")
+    -- Tetap update label untuk konsistensi
+    templeLabel.Text = BuildTempleText(TempleDataReader.GetTempleStatus())
 end)
-
 
 -- ==== SHOP PAGE ====
 local catSell = makeCategory(shopPage, "Sell All", "💰")
