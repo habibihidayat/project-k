@@ -57,15 +57,5 @@ function UnlimitedZoomModule.IsActive()
     return unlimitedZoomActive
 end
 
--- ============================================
--- INFO
--- ============================================
-print("╔════════════════════════════════════════╗")
-print("║   UNLIMITED ZOOM CAMERA MODULE READY   ║")
-print("╚════════════════════════════════════════╝")
-print("► Character: CAN MOVE NORMALLY 🏃")
-print("► Camera: UNLIMITED ZOOM 📷")
-print("► Control: SIMPLE ON/OFF TOGGLE")
-print("═════════════════════════════════════════")
 
 return UnlimitedZoomModule
