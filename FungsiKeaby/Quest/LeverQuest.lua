@@ -1,5 +1,5 @@
 --========================================================--
---               AutoTempleModule.lua (FINAL)
+--       AutoTempleModule (NO REPLION, FINAL FIXED)
 --========================================================--
 
 local AutoTemple = {}
@@ -8,11 +8,17 @@ local Run = false
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Replion (Temple Progress)
-local Replion = require(game.ReplicatedStorage:WaitForChild("Replion"))
-local data = Replion.Client:Get("Data")
+-- Temple data asli dari game (bukan Replion)
+local TempleStateFolder = game.ReplicatedStorage
+    :WaitForChild("Shared")
+    :WaitForChild("Types")
+    :WaitForChild("TempleState")
 
--- Temple lever types (exact names)
+local TempleLeverFolder = TempleStateFolder:WaitForChild("TempleLevers")
+
+-- Folder lever fisik di map
+local JungleFolder = workspace:WaitForChild("JUNGLE INTERACTIONS")
+
 local LeverTypes = {
     "Crescent Artifact",
     "Arrow Artifact",
@@ -20,18 +26,36 @@ local LeverTypes = {
     "Hourglass Diamond Artifact"
 }
 
--- Folder lever di workspace
-local JungleFolder = workspace:WaitForChild("JUNGLE INTERACTIONS")
+---------------------------------------------------------------------
+-- AMBIL STATUS LEVER DARI ATTRIBUTE ASLI GAME
+---------------------------------------------------------------------
+local function GetTempleProgress()
+    local result = {}
+
+    for _, typeName in ipairs(LeverTypes) do
+        local lever = TempleLeverFolder:FindFirstChild(typeName)
+        if lever then
+            result[typeName] = lever:GetAttribute("Completed") == true
+        else
+            result[typeName] = false
+        end
+    end
+
+    return result
+end
 
 ---------------------------------------------------------------------
--- CARI LEVER DI WORKSPACE BERDASARKAN TYPE
+-- CARI LEVER FISIK DI MAP
 ---------------------------------------------------------------------
 local function FindLeverByType(typeName)
     for _, obj in ipairs(JungleFolder:GetChildren()) do
         if obj.Name == "TempleLever" then
-            local leverType = obj:GetAttribute("Type")
-            if leverType == typeName then
-                local part = obj:FindFirstChild("MovePiece") or obj:FindFirstChildWhichIsA("BasePart")
+            local Type = obj:GetAttribute("Type")
+            if Type == typeName then
+                local part =
+                    obj:FindFirstChild("MovePiece") or
+                    obj:FindFirstChildWhichIsA("BasePart")
+
                 if part then
                     return obj, part.Position
                 end
@@ -42,58 +66,42 @@ local function FindLeverByType(typeName)
 end
 
 ---------------------------------------------------------------------
--- AMBIL PROGRESS TEMPLE
----------------------------------------------------------------------
-local function GetProgress()
-    local tab = data:GetExpect("TempleLevers")
-    if typeof(tab) ~= "table" then
-        return {
-            ["Crescent Artifact"] = false,
-            ["Arrow Artifact"] = false,
-            ["Diamond Artifact"] = false,
-            ["Hourglass Diamond Artifact"] = false
-        }
-    end
-    return tab
-end
-
----------------------------------------------------------------------
--- TEXT UNTUK GUI (PROGRESS)
+-- PROGRESS TEXT UNTUK GUI
 ---------------------------------------------------------------------
 function AutoTemple.GetTempleInfoText()
-    local prog = GetProgress()
-    local t = {}
+    local prog = GetTempleProgress()
+    local lines = {}
 
     for _, typeName in ipairs(LeverTypes) do
-        local done = prog[typeName]
-        table.insert(t, typeName .. " : " .. (done and "✅" or "❌"))
+        table.insert(lines, typeName .. " : " .. (prog[typeName] and "✅" or "❌"))
     end
 
-    return table.concat(t, "\n")
+    return table.concat(lines, "\n")
 end
 
 ---------------------------------------------------------------------
--- TELEPORT INSTAN CFRAME
+-- TELEPORT DIRECT CFRAME
 ---------------------------------------------------------------------
 local function TeleportTo(pos)
-    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        return
-    end
-    LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
+    local char = LocalPlayer.Character
+    if not char then return end
+
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    hrp.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
 end
 
 ---------------------------------------------------------------------
--- MENCARI LEVER YANG BELUM DONE
+-- AMBIL LEVER YANG BELUM SELESAI
 ---------------------------------------------------------------------
 local function GetNextLever()
-    local prog = GetProgress()
+    local prog = GetTempleProgress()
 
     for _, typeName in ipairs(LeverTypes) do
         if not prog[typeName] then
             local model, pos = FindLeverByType(typeName)
-            if pos then
-                return typeName, pos
-            end
+            if pos then return typeName, pos end
         end
     end
 
@@ -111,22 +119,19 @@ function AutoTemple.Start()
         while Run do
             local typeName, pos = GetNextLever()
 
-            if typeName and pos then
-                -- Teleport ke lever yang belum selesai
-                TeleportTo(pos)
-            else
-                -- Semua lever selesai
+            if not typeName then
                 Run = false
                 break
             end
 
+            TeleportTo(pos)
             task.wait(1.2)
         end
     end)
 end
 
 ---------------------------------------------------------------------
--- STOP
+-- STOP AUTO TEMPLE
 ---------------------------------------------------------------------
 function AutoTemple.Stop()
     Run = false
