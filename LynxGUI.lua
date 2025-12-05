@@ -1356,7 +1356,7 @@ local catSkinSwap = makeCategory(mainPage, "Animation Skin Swap", "🎭")
 local currentSelectedSkin = "Eclipse"
 
 -- Eclipse Katana Button
-makeButton(catSkinSwap, "⚔️ Eclipse Katana", function()
+makeButton(catSkinSwap, "Eclipse Katana", function()
     if not loadSkinSwap() then return end
     
     currentSelectedSkin = "Eclipse"
@@ -1370,7 +1370,7 @@ makeButton(catSkinSwap, "⚔️ Eclipse Katana", function()
 end)
 
 -- Holy Trident Button
-makeButton(catSkinSwap, "🔱 Holy Trident", function()
+makeButton(catSkinSwap, "Holy Trident", function()
     if not loadSkinSwap() then return end
     
     currentSelectedSkin = "HolyTrident"
