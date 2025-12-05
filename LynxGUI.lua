@@ -1299,7 +1299,7 @@ makeToggle(catSupport, "Disable Skin Effect", function(on)
     end
 end)
 
-makeButton(catSupport, "Auto Totem 3X", function()
+makeButton(catAutoTotem, "Auto Totem 3X", function()
     if AutoTotem3X.IsRunning() then
         local success, message = AutoTotem3X.Stop()
         if success then
