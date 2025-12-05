@@ -1317,6 +1317,94 @@ makeButton(catAutoTotem, "Auto Totem 3X", function()
     end
 end)
 
+-- ========================================
+-- SKIN SWAP INTEGRATION
+-- Add this to your GUI script
+-- ========================================
+
+-- Load SkinSwap module from raw link
+local SkinSwap
+local skinSwapLoaded = false
+
+local function loadSkinSwap()
+    if skinSwapLoaded then return true end
+    
+    local success = pcall(function()
+        SkinSwap = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/SkinSwapAnimation.lua"))()
+        skinSwapLoaded = true
+    end)
+    
+    if not success then
+        Notify.Send("Error", "⚠ Gagal load Skin Swap module!", 3)
+        return false
+    end
+    
+    return true
+end
+
+-- Try to load on script start
+task.spawn(loadSkinSwap)
+
+-- ========================================
+-- ADD THIS AFTER YOUR "Auto Spawn 3X Totem" CATEGORY
+-- ========================================
+
+-- Animation Skin Swap
+local catSkinSwap = makeCategory(mainPage, "Animation Skin Swap", "🎭")
+
+-- Skin Selection (Eclipse or Holy Trident)
+local currentSelectedSkin = "Eclipse"
+
+-- Eclipse Katana Button
+makeButton(catSkinSwap, "⚔️ Eclipse Katana", function()
+    if not loadSkinSwap() then return end
+    
+    currentSelectedSkin = "Eclipse"
+    local success, message = SkinSwap.SetSkin("Eclipse")
+    
+    if success then
+        Notify.Send("Skin Changed", "⚔️ " .. message, 3)
+    else
+        Notify.Send("Error", "⚠ " .. message, 3)
+    end
+end)
+
+-- Holy Trident Button
+makeButton(catSkinSwap, "🔱 Holy Trident", function()
+    if not loadSkinSwap() then return end
+    
+    currentSelectedSkin = "HolyTrident"
+    local success, message = SkinSwap.SetSkin("HolyTrident")
+    
+    if success then
+        Notify.Send("Skin Changed", "🔱 " .. message, 3)
+    else
+        Notify.Send("Error", "⚠ " .. message, 3)
+    end
+end)
+
+-- Toggle to enable/disable
+makeToggle(catSkinSwap, "Enable Skin Swap", function(on)
+    if not loadSkinSwap() then return end
+    
+    if on then
+        local success, message = SkinSwap.Start()
+        if success then
+            local icon = currentSelectedSkin == "Eclipse" and "⚔️" or "🔱"
+            Notify.Send("Skin Swap", icon .. " " .. message, 4)
+        else
+            Notify.Send("Skin Swap", "⚠ " .. message, 3)
+        end
+    else
+        local success, message = SkinSwap.Stop()
+        if success then
+            Notify.Send("Skin Swap", "✓ " .. message, 4)
+        else
+            Notify.Send("Skin Swap", "⚠ " .. message, 3)
+        end
+    end
+end)
+
 -- ==== TELEPORT PAGE ====
 local locationItems = {}
 for name, _ in pairs(TeleportModule.Locations) do
