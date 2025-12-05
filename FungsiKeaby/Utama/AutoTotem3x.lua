@@ -4,7 +4,6 @@ local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
 local VirtualUser = game:GetService("VirtualUser")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local LP = Players.LocalPlayer
 local Net = RS.Packages["_Index"]["sleitnick_net@0.2.0"].net
 local RE_EquipToolFromHotbar = Net["RE/EquipToolFromHotbar"]
@@ -147,54 +146,26 @@ local function equipTotem()
     task.wait(1.5)
 end
 
--- Auto Click (Improved - Direct Tool Activation)
+-- Auto Click
 local function autoClick()
-    local char = LP.Character
-    if not char then return end
-    
-    local tool = char:FindFirstChildOfClass("Tool")
-    
     for i = 1, CLICK_COUNT do
-        if not isRunning then break end
-        
-        -- Method 1: Direct Tool Activation
-        if tool and tool:IsA("Tool") then
-            pcall(function()
-                tool:Activate()
-            end)
-        end
-        
-        task.wait(CLICK_DELAY)
-        
-        -- Method 2: Mouse Click Simulation (Backup)
         pcall(function()
-            local mouse = LP:GetMouse()
-            if mouse then
-                -- Simulate mouse click at center of screen
-                local screenSize = workspace.CurrentCamera.ViewportSize
-                local centerPos = Vector2.new(screenSize.X / 2, screenSize.Y / 2)
-                
-                -- Use VirtualInputManager instead of VirtualUser for better accuracy
-                local vim = game:GetService("VirtualInputManager")
-                vim:SendMouseButtonEvent(centerPos.X, centerPos.Y, 0, true, game, 0)
-                task.wait(0.05)
-                vim:SendMouseButtonEvent(centerPos.X, centerPos.Y, 0, false, game, 0)
-            end
+            VirtualUser:Button1Down(Vector2.new(0, 0))
+            task.wait(0.05)
+            VirtualUser:Button1Up(Vector2.new(0, 0))
         end)
-        
         task.wait(CLICK_DELAY)
         
-        -- Method 3: Fire Remote Events (if tool uses RemoteEvent)
-        if tool then
-            for _, obj in pairs(tool:GetDescendants()) do
-                if obj:IsA("RemoteEvent") and obj.Name:match("Click") or obj.Name:match("Use") or obj.Name:match("Activate") then
+        local char = LP.Character
+        if char then
+            for _, tool in pairs(char:GetChildren()) do
+                if tool:IsA("Tool") then
                     pcall(function()
-                        obj:FireServer()
+                        tool:Activate()
                     end)
                 end
             end
         end
-        
         task.wait(CLICK_DELAY)
     end
 end
