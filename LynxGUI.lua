@@ -31,6 +31,7 @@ local LockPosition = loadstring(game:HttpGet("https://raw.githubusercontent.com/
 local AutoEquipRod = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/AutoEquipRod.lua"))()
 local DisableCutscenes = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/DisableCutscenes.lua"))()
 local DisableExtras = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/DisableExtras.lua"))()
+local AutoTotem3X = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/AutoTotem3x.lua"))()
 
 -- Teleport
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
@@ -1295,6 +1296,22 @@ makeToggle(catSupport, "Disable Skin Effect", function(on)
     else
         DisableExtras.StopSkinEffect()
         Notify.Send("Disable Skin Effect", "Skin effect bisa muncul kembali.", 3)
+    end
+end)
+
+makeButton(catSupport, "Auto Totem 3X", function()
+    if AutoTotem3X.IsRunning() then
+        local success, message = AutoTotem3X.Stop()
+        if success then
+            Notify.Send("Auto Totem 3X", "⏹ " .. message, 4)
+        end
+    else
+        local success, message = AutoTotem3X.Start()
+        if success then
+            Notify.Send("Auto Totem 3X", "▶ " .. message, 4)
+        else
+            Notify.Send("Auto Totem 3X", "⚠ " .. message, 3)
+        end
     end
 end)
 
