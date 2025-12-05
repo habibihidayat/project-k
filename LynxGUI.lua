@@ -32,6 +32,7 @@ local AutoEquipRod = loadstring(game:HttpGet("https://raw.githubusercontent.com/
 local DisableCutscenes = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/DisableCutscenes.lua"))()
 local DisableExtras = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/DisableExtras.lua"))()
 local AutoTotem3X = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/AutoTotem3x.lua"))()
+local SkinAnimation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/SkinSwapAnimation.lua"))()
 
 -- Teleport
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
@@ -1317,90 +1318,70 @@ makeButton(catAutoTotem, "Auto Totem 3X", function()
     end
 end)
 
--- ========================================
--- SKIN SWAP INTEGRATION
--- Add this to your GUI script
--- ========================================
+local catSkin = makeCategory(mainPage, "Skin Animation", "✨")
 
--- Load SkinSwap module from raw link
-local SkinSwap
-local skinSwapLoaded = false
-
-local function loadSkinSwap()
-    if skinSwapLoaded then return true end
-    
-    local success = pcall(function()
-        SkinSwap = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/SkinSwapAnimation.lua"))()
-        skinSwapLoaded = true
-    end)
-    
-    if not success then
-        Notify.Send("Error", "⚠ Gagal load Skin Swap module!", 3)
-        return false
-    end
-    
-    return true
-end
-
--- Try to load on script start
-task.spawn(loadSkinSwap)
-
--- ========================================
--- ADD THIS AFTER YOUR "Auto Spawn 3X Totem" CATEGORY
--- ========================================
-
--- Animation Skin Swap
-local catSkinSwap = makeCategory(mainPage, "Animation Skin Swap", "🎭")
-
--- Skin Selection (Eclipse or Holy Trident)
-local currentSelectedSkin = "Eclipse"
-
--- Eclipse Katana Button
-makeButton(catSkinSwap, "Eclipse Katana", function()
-    if not loadSkinSwap() then return end
-    
-    currentSelectedSkin = "Eclipse"
-    local success, message = SkinSwap.SetSkin("Eclipse")
-    
+-- Button: Eclipse Katana
+makeButton(catSkin, "⚔️ Eclipse Katana", function()
+    local success = SkinAnimation.SwitchSkin("Eclipse")
     if success then
-        Notify.Send("Skin Changed", "⚔️ " .. message, 3)
-    else
-        Notify.Send("Error", "⚠ " .. message, 3)
-    end
-end)
-
--- Holy Trident Button
-makeButton(catSkinSwap, "Holy Trident", function()
-    if not loadSkinSwap() then return end
-    
-    currentSelectedSkin = "HolyTrident"
-    local success, message = SkinSwap.SetSkin("HolyTrident")
-    
-    if success then
-        Notify.Send("Skin Changed", "🔱 " .. message, 3)
-    else
-        Notify.Send("Error", "⚠ " .. message, 3)
-    end
-end)
-
--- Toggle to enable/disable
-makeToggle(catSkinSwap, "Enable Skin Swap", function(on)
-    if not loadSkinSwap() then return end
-    
-    if on then
-        local success, message = SkinSwap.Start()
-        if success then
-            local icon = currentSelectedSkin == "Eclipse" and "⚔️" or "🔱"
-            Notify.Send("Skin Swap", icon .. " " .. message, 4)
-        else
-            Notify.Send("Skin Swap", "⚠ " .. message, 3)
+        Notify.Send("Skin Animation", "⚔️ Eclipse Katana diaktifkan!\n• RodThrow: 1.4x (FASTEST CAST!)", 4)
+        
+        -- Auto enable jika belum aktif
+        if not SkinAnimation.IsEnabled() then
+            SkinAnimation.Enable()
         end
     else
-        local success, message = SkinSwap.Stop()
+        Notify.Send("Skin Animation", "⚠ Gagal mengganti skin!", 3)
+    end
+end)
+
+-- Button: Holy Trident
+makeButton(catSkin, "🔱 Holy Trident", function()
+    local success = SkinAnimation.SwitchSkin("HolyTrident")
+    if success then
+        Notify.Send("Skin Animation", "🔱 Holy Trident diaktifkan!\n• RodThrow: 1.3x\n• FishCaught: 1.2x", 4)
+        
+        -- Auto enable jika belum aktif
+        if not SkinAnimation.IsEnabled() then
+            SkinAnimation.Enable()
+        end
+    else
+        Notify.Send("Skin Animation", "⚠ Gagal mengganti skin!", 3)
+    end
+end)
+
+-- Button: Soul Scythe
+makeButton(catSkin, "💀 Soul Scythe", function()
+    local success = SkinAnimation.SwitchSkin("SoulScythe")
+    if success then
+        Notify.Send("Skin Animation", "💀 Soul Scythe diaktifkan!\n• StartRodCharge: 1.4x (FASTEST CHARGE!)\n• FishCaught: 1.2x", 4)
+        
+        -- Auto enable jika belum aktif
+        if not SkinAnimation.IsEnabled() then
+            SkinAnimation.Enable()
+        end
+    else
+        Notify.Send("Skin Animation", "⚠ Gagal mengganti skin!", 3)
+    end
+end)
+
+-- Toggle: Enable/Disable Skin Animation
+makeToggle(catSkin, "Enable Skin Animation", function(on)
+    if on then
+        local success = SkinAnimation.Enable()
         if success then
-            Notify.Send("Skin Swap", "✓ " .. message, 4)
+            local currentSkin = SkinAnimation.GetCurrentSkin()
+            local icon = currentSkin == "Eclipse" and "⚔️" or (currentSkin == "HolyTrident" and "🔱" or "💀")
+            Notify.Send("Skin Animation", "✓ " .. icon .. " " .. currentSkin .. " aktif!", 4)
         else
-            Notify.Send("Skin Swap", "⚠ " .. message, 3)
+            Notify.Send("Skin Animation", "⚠ Sudah aktif!", 3)
+        end
+    else
+        local success = SkinAnimation.Disable()
+        if success then
+            Notify.Send("Skin Animation", "✓ Skin Animation dimatikan!", 4)
+        else
+            Notify.Send("Skin Animation", "⚠ Sudah nonaktif!", 3)
         end
     end
 end)
