@@ -1299,7 +1299,7 @@ makeToggle(catSupport, "Disable Skin Effect", function(on)
     end
 end)
 
-local catAutoTotem = makeCategory(mainPage, "Auto Spawn 3X Totem", "🛠️")
+local catAutoTotem = makeCategory(mainPage, "Auto Spawn 3X Totem oii", "🛠️")
 
 makeButton(catAutoTotem, "Auto Totem 3X", function()
     if AutoTotem3X.IsRunning() then
