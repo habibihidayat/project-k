@@ -21,8 +21,8 @@ local fishing = {
     Settings = {
         FishingDelay = 0.05,      -- Dikurangi dari 0.3 ke 0.05
         CancelDelay = 0.01,       -- Dikurangi dari 0.05 ke 0.01
-        HookWaitTime = 0.15,      -- Dikurangi dari 0.30 ke 0.15
-        CastDelay = 0.03,         -- Dikurangi dari 0.07 ke 0.03
+        HookWaitTime = 0.01,      -- Dikurangi dari 0.30 ke 0.15
+        CastDelay = 0.25,         -- Dikurangi dari 0.07 ke 0.03
         TimeoutDelay = 0.8,       -- Dikurangi dari 1.1 ke 0.8
     },
 }
