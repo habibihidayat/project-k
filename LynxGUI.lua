@@ -25,6 +25,7 @@ end
 local instant = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant.lua"))()
 local instant2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Instant2.lua"))()
 local blatantv1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/BlatantV1.lua"))()
+local UltraBlatant = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/BlatantV2.lua"))()
 local blatantv2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/BlatantV2.lua"))()
 local NoFishingAnimation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/NoFishingAnimation.lua"))()
 local LockPosition = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/LockPosition.lua"))()
@@ -33,6 +34,7 @@ local DisableCutscenes = loadstring(game:HttpGet("https://raw.githubusercontent.
 local DisableExtras = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/DisableExtras.lua"))()
 local AutoTotem3X = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/AutoTotem3x.lua"))()
 local SkinAnimation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/SkinSwapAnimation.lua"))()
+
 
 -- Teleport
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
@@ -1197,8 +1199,29 @@ makeInput(catBlatantV1, "Cancel Delay", 0.1, function(v)
     print("✅ Cancel Delay set to: " .. v)
 end)
 
+-- ===== ULTRA BLATANT V3 (NEW!) =====
+local catUltraBlatant = makeCategory(mainPage, "Blatant V2", "⚡")
+
+makeToggle(catUltraBlatant, "Ultra Blatant Mode", function(on) 
+    if on then 
+        UltraBlatant.Start() 
+    else 
+        UltraBlatant.Stop() 
+    end 
+end)
+
+makeInput(catUltraBlatant, "Complete Delay", 0.05, function(v)
+    UltraBlatant.UpdateSettings(v, nil, nil)
+    print("⚡ Complete Delay set to: " .. v)
+end)
+
+makeInput(catUltraBlatant, "Cancel Delay", 0.1, function(v)
+    UltraBlatant.UpdateSettings(nil, v, nil)
+    print("⚡ Cancel Delay set to: " .. v)
+end)
+
 -- Blatant V2
-local catBlatantV2 = makeCategory(mainPage, "Blatant V2", "🔥")
+local catBlatantV2 = makeCategory(mainPage, "Fast auto fishing perfect", "🔥")
 
 makeToggle(catBlatantV2, "Blatant Features", function(on) 
     if on then 
@@ -1214,14 +1237,6 @@ end)
 
 makeInput(catBlatantV2, "Cancel Delay", 0.01, function(v) 
     blatantv2.Settings.CancelDelay = v 
-end)
-
-makeInput(catBlatantV2, "Hook Wait Time", 0.15, function(v) 
-    blatantv2.Settings.HookWaitTime = v 
-end)
-
-makeInput(catBlatantV2, "Cast Delay", 0.03, function(v) 
-    blatantv2.Settings.CastDelay = v 
 end)
 
 makeInput(catBlatantV2, "Timeout Delay", 0.8, function(v) 
