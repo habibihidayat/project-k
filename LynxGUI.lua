@@ -102,27 +102,9 @@ local gui = new("ScreenGui",{
 })
 
 local function bringToFront()
-    local maxDisplayOrder = 0
-    
-    -- Cek GUI di PlayerGui
-    for _, screenGui in ipairs(localPlayer.PlayerGui:GetChildren()) do
-        if screenGui:IsA("ScreenGui") and screenGui ~= gui then
-            maxDisplayOrder = math.max(maxDisplayOrder, screenGui.DisplayOrder)
-        end
-    end
-    
-    -- Cek juga CoreGui (GUI Roblox bawaan)
-    local CoreGui = game:GetService("CoreGui")
-    for _, screenGui in ipairs(CoreGui:GetChildren()) do
-        if screenGui:IsA("ScreenGui") then
-            maxDisplayOrder = math.max(maxDisplayOrder, screenGui.DisplayOrder)
-        end
-    end
-    
-    -- Set lebih tinggi dari semua
-    gui.DisplayOrder = maxDisplayOrder + 1000  -- ⬅️ Tambah margin lebih besar
-    
-    print("🔥 GUI DisplayOrder set to:", gui.DisplayOrder) -- Debug
+    -- Langsung set ke nilai maksimal DisplayOrder
+    gui.DisplayOrder = 2147483647  -- Nilai Int32 maksimal
+    print("🔥 GUI forced to max DisplayOrder:", gui.DisplayOrder)
 end
 
 -- Main Window Container - ULTRA TRANSPARENT
