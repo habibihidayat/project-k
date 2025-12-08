@@ -2145,20 +2145,6 @@ makeDropdown(catFPS, "Select FPS Limit", "⚙️", {"60 FPS", "90 FPS", "120 FPS
     end
 end, "FPSDropdown")
 
-local catGeneral = makeCategory(settingsPage, "General Settings", "⚙️")
-
-makeToggle(catGeneral, "Auto Save Settings", function(on) 
-    print("Auto Save:", on) 
-end)
-
-makeToggle(catGeneral, "Show Notifications", function(on) 
-    print("Notifications:", on) 
-end)
-
-makeToggle(catGeneral, "Performance Mode", function(on) 
-    print("Performance:", on) 
-end)
-
 -- ==== INFO PAGE ====
 local infoContainer = new("Frame",{
     Parent=infoPage,
@@ -2178,61 +2164,14 @@ new("UIStroke",{
 
 local infoText = new("TextLabel",{
     Parent=infoContainer,
-    Size=UDim2.new(1, -24, 1, -24),
+    Size=UDim2.new(1, -24, 0, 80),
     Position=UDim2.new(0, 12, 0, 12),
     BackgroundTransparency=1,
     Text=[[
-💜 LynX v2.3 GALAXY EDITION (REFINED)
-
+💜 LynX v2.3 
 Free Not For Sale
 ━━━━━━━━━━━━━━━━━━━━━━
-
-🎣 AUTO FISHING
-• Instant Fishing (Fast/Perfect)
-• Perfect horizontal alignment
-• Blatant Mode V1 & V2
-• Advanced automation
-
-🛠️ SUPPORT FEATURES
-• No Fishing Animation
-• Performance optimizations
-
-🌍 TELEPORT SYSTEM
-• Location teleport
-• Player teleport
-• Smart dropdown selection
-
-💰 SHOP FEATURES
-• Auto Sell (instant & timer)
-• Auto Buy Weather
-• Organized categories
-
-⚙️ SETTINGS
-• Anti-AFK Protection
-• FPS Unlocker (60-240 FPS)
-• General preferences
-
 ━━━━━━━━━━━━━━━━━━━━━━
-
-💡 NEW IN v2.3 REFINED
-✓ Ultra transparent design
-✓ Perfect alignment system
-✓ Galaxy purple theme
-✓ Sidebar always visible
-✓ Fixed padding & spacing
-✓ Label-input horizontal layout
-✓ Smooth Quint animations
-✓ Better performance
-✓ Glass morphism effect
-
-🎮 CONTROLS
-• Click categories to expand
-• Drag from top bar to move
-• Drag corner to resize
-• (─) Minimize window
-
-━━━━━━━━━━━━━━━━━━━━━━
-
 Created with 💜 by Lynx Team
 Refined Edition 2024
     ]],
@@ -2244,6 +2183,27 @@ Refined Edition 2024
     TextYAlignment=Enum.TextYAlignment.Top,
     ZIndex=7
 })
+
+-- Tambahkan TextButton untuk link
+local linkButton = new("TextButton",{
+    Parent=infoContainer,
+    Size=UDim2.new(1, -24, 0, 20),
+    Position=UDim2.new(0, 12, 0, 90),
+    BackgroundTransparency=1,
+    Text="🔗 Discord: discord.gg/lynxteam",
+    Font=Enum.Font.GothamBold,
+    TextSize=9,
+    TextColor3=Color3.fromRGB(88, 101, 242), -- Warna Discord
+    TextXAlignment=Enum.TextXAlignment.Left,
+    ZIndex=7
+})
+
+linkButton.MouseButton1Click:Connect(function()
+    setclipboard("https://discord.gg/lynxteam") -- Copy link ke clipboard
+    linkButton.Text = "✅ Link copied to clipboard!"
+    wait(2)
+    linkButton.Text = "🔗 Discord: discord.gg/lynxteam"
+end)
 
 -- ==== MINIMIZE SYSTEM ====
 local minimized = false
