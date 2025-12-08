@@ -84,22 +84,6 @@ local colors = {
     glow = Color3.fromRGB(138, 43, 226),
 }
 
--- ==== BRING TO FRONT FUNCTION ====
--- LETAKKAN DI BAGIAN PALING ATAS SETELAH GUI DIBUAT (setelah baris 82)
-local function bringToFront()
-    local maxDisplayOrder = 0
-    for _, screenGui in ipairs(localPlayer.PlayerGui:GetChildren()) do
-        if screenGui:IsA("ScreenGui") and screenGui ~= gui then
-            maxDisplayOrder = math.max(maxDisplayOrder, screenGui.DisplayOrder)
-        end
-    end
-    gui.DisplayOrder = maxDisplayOrder + 100
-end
-
--- Panggil pertama kali saat GUI dibuat
-bringToFront()
-
-
 -- Compact Window Size
 local windowSize = UDim2.new(0, 420, 0, 280)
 local minWindowSize = Vector2.new(380, 250)
@@ -116,6 +100,20 @@ local gui = new("ScreenGui",{
     ZIndexBehavior=Enum.ZIndexBehavior.Sibling,
     DisplayOrder=999999
 })
+
+-- ⬇️ BARU DEFINISIKAN FUNGSI bringToFront (SETELAH 'gui' ADA)
+local function bringToFront()
+    local maxDisplayOrder = 0
+    for _, screenGui in ipairs(localPlayer.PlayerGui:GetChildren()) do
+        if screenGui:IsA("ScreenGui") and screenGui ~= gui then
+            maxDisplayOrder = math.max(maxDisplayOrder, screenGui.DisplayOrder)
+        end
+    end
+    gui.DisplayOrder = maxDisplayOrder + 100
+end
+
+-- ⬇️ PANGGIL FUNGSI (SEKARANG AMAN)
+bringToFront()
 
 -- Main Window Container - ULTRA TRANSPARENT
 local win = new("Frame",{
@@ -1141,20 +1139,6 @@ local function makeButton(parent, label, callback)
     end)
     
     return btnFrame
-end
-
--- Tambahkan di fungsi minimize/restore
-local function bringToFront()
-    -- Cari DisplayOrder tertinggi
-    local maxDisplayOrder = 0
-    for _, screenGui in ipairs(localPlayer.PlayerGui:GetChildren()) do
-        if screenGui:IsA("ScreenGui") and screenGui ~= gui then
-            maxDisplayOrder = math.max(maxDisplayOrder, screenGui.DisplayOrder)
-        end
-    end
-    
-    -- Set lebih tinggi
-    gui.DisplayOrder = maxDisplayOrder + 100
 end
 
 -- LynxGUI_v2.3.lua - Galaxy Edition (REFINED)
