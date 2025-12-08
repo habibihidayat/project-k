@@ -98,22 +98,32 @@ local gui = new("ScreenGui",{
     IgnoreGuiInset=true,
     ResetOnSpawn=false,
     ZIndexBehavior=Enum.ZIndexBehavior.Sibling,
-    DisplayOrder=999999
+    DisplayOrder=999999999
 })
 
--- ⬇️ BARU DEFINISIKAN FUNGSI bringToFront (SETELAH 'gui' ADA)
 local function bringToFront()
     local maxDisplayOrder = 0
+    
+    -- Cek GUI di PlayerGui
     for _, screenGui in ipairs(localPlayer.PlayerGui:GetChildren()) do
         if screenGui:IsA("ScreenGui") and screenGui ~= gui then
             maxDisplayOrder = math.max(maxDisplayOrder, screenGui.DisplayOrder)
         end
     end
-    gui.DisplayOrder = maxDisplayOrder + 100
+    
+    -- Cek juga CoreGui (GUI Roblox bawaan)
+    local CoreGui = game:GetService("CoreGui")
+    for _, screenGui in ipairs(CoreGui:GetChildren()) do
+        if screenGui:IsA("ScreenGui") then
+            maxDisplayOrder = math.max(maxDisplayOrder, screenGui.DisplayOrder)
+        end
+    end
+    
+    -- Set lebih tinggi dari semua
+    gui.DisplayOrder = maxDisplayOrder + 1000  -- ⬅️ Tambah margin lebih besar
+    
+    print("🔥 GUI DisplayOrder set to:", gui.DisplayOrder) -- Debug
 end
-
--- ⬇️ PANGGIL FUNGSI (SEKARANG AMAN)
-bringToFront()
 
 -- Main Window Container - ULTRA TRANSPARENT
 local win = new("Frame",{
