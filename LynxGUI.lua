@@ -1132,28 +1132,39 @@ end
 
 -- ==== MAIN PAGE ====
 local catAutoFishing = makeCategory(mainPage, "Auto Fishing", "🎣")
-
 local currentInstantMode = "None"
 local fishingDelayValue = 1.30
 local cancelDelayValue = 0.19
+local isInstantFishingEnabled = false -- Tambahkan variabel untuk melacak status toggle
 
 makeDropdown(catAutoFishing, "Instant Fishing Mode", "⚡", {"Fast", "Perfect"}, function(mode)
     currentInstantMode = mode
     instant.Stop()
     instant2.Stop()
     
-    if mode == "Fast" then
+    -- Hanya start jika toggle sudah diaktifkan
+    if isInstantFishingEnabled then
+        if mode == "Fast" then
+            instant.Settings.MaxWaitTime = fishingDelayValue
+            instant.Settings.CancelDelay = cancelDelayValue
+            instant.Start()
+        elseif mode == "Perfect" then
+            instant2.Settings.MaxWaitTime = fishingDelayValue
+            instant2.Settings.CancelDelay = cancelDelayValue
+            instant2.Start()
+        end
+    else
+        -- Jika toggle belum aktif, hanya update settings tanpa start
         instant.Settings.MaxWaitTime = fishingDelayValue
         instant.Settings.CancelDelay = cancelDelayValue
-        instant.Start()
-    elseif mode == "Perfect" then
         instant2.Settings.MaxWaitTime = fishingDelayValue
         instant2.Settings.CancelDelay = cancelDelayValue
-        instant2.Start()
     end
 end, "InstantFishingMode")
 
 makeToggle(catAutoFishing, "Enable Instant Fishing", function(on)
+    isInstantFishingEnabled = on -- Update status toggle
+    
     if on then
         if currentInstantMode == "Fast" then
             instant.Start()
