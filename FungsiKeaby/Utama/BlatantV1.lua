@@ -1,6 +1,5 @@
 -- ⚠️ ULTRA BLATANT AUTO FISHING - GUI COMPATIBLE MODULE
 -- DESIGNED TO WORK WITH EXTERNAL GUI SYSTEM
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
@@ -14,6 +13,7 @@ local netFolder = ReplicatedStorage
 local RF_ChargeFishingRod = netFolder:WaitForChild("RF/ChargeFishingRod")
 local RF_RequestMinigame = netFolder:WaitForChild("RF/RequestFishingMinigameStarted")
 local RF_CancelFishingInputs = netFolder:WaitForChild("RF/CancelFishingInputs")
+local RF_UpdateAutoFishingState = netFolder:WaitForChild("RF/UpdateAutoFishingState")  -- ⭐ ADDED untuk stop function
 local RE_FishingCompleted = netFolder:WaitForChild("RE/FishingCompleted")
 local RE_MinigameChanged = netFolder:WaitForChild("RE/FishingMinigameChanged")
 
@@ -30,7 +30,6 @@ UltraBlatant.Settings = {
     CompleteDelay = 0.001,    -- Delay sebelum complete
     CancelDelay = 0.001       -- Delay setelah complete sebelum cancel
 }
-
 
 ----------------------------------------------------------------
 -- CORE FUNCTIONS
@@ -108,13 +107,28 @@ function UltraBlatant.Start()
     task.spawn(ultraSpamLoop)
 end
 
--- Stop function
+-- ⭐ ENHANCED Stop function - Nyalakan auto fishing game
 function UltraBlatant.Stop()
     if not UltraBlatant.Active then 
         return
     end
     
     UltraBlatant.Active = false
+    
+    -- ⭐ Nyalakan auto fishing game (biarkan tetap nyala)
+    safeFire(function()
+        RF_UpdateAutoFishingState:InvokeServer(true)
+    end)
+    
+    -- Wait sebentar untuk game process
+    task.wait(0.2)
+    
+    -- Cancel fishing inputs untuk memastikan karakter berhenti
+    safeFire(function()
+        RF_CancelFishingInputs:InvokeServer()
+    end)
+    
+    print("✅ Ultra Blatant stopped - Game auto fishing enabled, can change rod/skin")
 end
 
 -- Return module
