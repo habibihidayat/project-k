@@ -1,4 +1,4 @@
--- ⚡ ULTRA SPEED AUTO FISHING v29.1 (No Auto-Start / Controlled by GUI)
+-- ⚡ ULTRA SPEED AUTO FISHING v29.2 (No Auto-Start / Controlled by GUI)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
@@ -21,6 +21,7 @@ local netFolder = ReplicatedStorage
 local RF_ChargeFishingRod = netFolder:WaitForChild("RF/ChargeFishingRod")
 local RF_RequestMinigame = netFolder:WaitForChild("RF/RequestFishingMinigameStarted")
 local RF_CancelFishingInputs = netFolder:WaitForChild("RF/CancelFishingInputs")
+local RF_UpdateAutoFishingState = netFolder:WaitForChild("RF/UpdateAutoFishingState")  -- ⭐ ADDED
 local RE_FishingCompleted = netFolder:WaitForChild("RE/FishingCompleted")
 local RE_MinigameChanged = netFolder:WaitForChild("RE/FishingMinigameChanged")
 local RE_FishCaught = netFolder:WaitForChild("RE/FishCaught")
@@ -176,7 +177,7 @@ function fishing.Start()
     fishing.Cast()
 end
 
--- Stop
+-- ⭐ ENHANCED Stop - Nyalakan auto fishing game
 function fishing.Stop()
     if not fishing.Running then return end
     fishing.Running = false
@@ -190,6 +191,21 @@ function fishing.Stop()
         end
     end
     fishing.Connections = {}
+    
+    -- ⭐ Nyalakan auto fishing game (biarkan tetap nyala)
+    pcall(function()
+        RF_UpdateAutoFishingState:InvokeServer(true)
+    end)
+    
+    -- Wait sebentar untuk game process
+    task.wait(0.2)
+    
+    -- Cancel fishing inputs untuk memastikan karakter berhenti
+    pcall(function()
+        RF_CancelFishingInputs:InvokeServer()
+    end)
+    
+    print("✅ Ultra Speed stopped - Game auto fishing enabled, can change rod/skin")
 end
 
 return fishing
