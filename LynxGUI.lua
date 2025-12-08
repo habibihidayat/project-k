@@ -2172,7 +2172,7 @@ local infoText = new("TextLabel",{
 Free Not For Sale
 ━━━━━━━━━━━━━━━━━━━━━━
 ━━━━━━━━━━━━━━━━━━━━━━
-Created with 💜 by Lynx Team
+Created with 💜 by Beee
 Refined Edition 2024
     ]],
     Font=Enum.Font.Gotham,
@@ -2190,7 +2190,7 @@ local linkButton = new("TextButton",{
     Size=UDim2.new(1, -24, 0, 20),
     Position=UDim2.new(0, 12, 0, 90),
     BackgroundTransparency=1,
-    Text="🔗 Discord: discord.gg/lynxteam",
+    Text="🔗 Discord: https://discord.gg/6Rpvm2gQ",
     Font=Enum.Font.GothamBold,
     TextSize=9,
     TextColor3=Color3.fromRGB(88, 101, 242), -- Warna Discord
@@ -2199,10 +2199,10 @@ local linkButton = new("TextButton",{
 })
 
 linkButton.MouseButton1Click:Connect(function()
-    setclipboard("https://discord.gg/lynxteam") -- Copy link ke clipboard
+    setclipboard("https://discord.gg/6Rpvm2gQ") -- Copy link ke clipboard
     linkButton.Text = "✅ Link copied to clipboard!"
     wait(2)
-    linkButton.Text = "🔗 Discord: discord.gg/lynxteam"
+    linkButton.Text = "🔗 Discord: https://discord.gg/6Rpvm2gQ"
 end)
 
 -- ==== MINIMIZE SYSTEM ====
