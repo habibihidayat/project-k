@@ -2168,11 +2168,11 @@ local infoText = new("TextLabel",{
     Position=UDim2.new(0, 12, 0, 12),
     BackgroundTransparency=1,
     Text=[[
-💜 LynX v2.3 
+# LynX v2.3 
 Free Not For Sale
 ━━━━━━━━━━━━━━━━━━━━━━
 ━━━━━━━━━━━━━━━━━━━━━━
-Created with 💜 by Beee
+Created with by Beee
 Refined Edition 2024
     ]],
     Font=Enum.Font.Gotham,
@@ -2383,22 +2383,8 @@ task.spawn(function()
 end)
 
 print("━━━━━━━━━━━━━━━━━━━━━━")
-print("✨ Lynx GUI v2.3 Galaxy Edition (REFINED)")
-print("💜 FREE NOT FOR SALE")
-print("━━━━━━━━━━━━━━━━━━━━━━")
-print("🎉 PERFECTED & ALIGNED!")
-print("━━━━━━━━━━━━━━━━━━━━━━")
-print("📦 Features:")
-print("  • Ultra transparent design")
-print("  • Perfect alignment system")
-print("  • Galaxy purple theme")
-print("  • Smooth Quint animations")
-print("  • Always-visible sidebar")
-print("  • Horizontal input layout")
-print("  • Glass morphism effect")
-print("  • Polished UI components")
-print("━━━━━━━━━━━━━━━━━━━━━━")
-print("💎 All elements perfectly aligned!")
+print("✨ Lynx GUI v2.3 ")
+print("FREE NOT FOR SALE")
 print("━━━━━━━━━━━━━━━━━━━━━━")
 print("💎 Created by Lynx Team")
 print("━━━━━━━━━━━━━━━━━━━━━━")
