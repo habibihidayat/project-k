@@ -1,22 +1,21 @@
 -- NoFishingAnimation.lua
--- Auto play ReelingIdle animation dan freeze di pose itu
+-- Auto freeze karakter di pose fishing dengan ZERO animasi
+-- Ready untuk diintegrasikan ke GUI
 
 local NoFishingAnimation = {}
 NoFishingAnimation.Enabled = false
 NoFishingAnimation.Connection = nil
 NoFishingAnimation.SavedPose = {}
 NoFishingAnimation.ReelingTrack = nil
+NoFishingAnimation.AnimationBlocker = nil
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local localPlayer = Players.LocalPlayer
 
--- ID Animasi ReelingIdle (ambil dari game)
-local REELING_ANIMATION_ID = "rbxassetid://YOUR_REELING_ID" -- Akan di-detect otomatis
-
--- Fungsi untuk find atau create ReelingIdle animation
+-- Fungsi untuk find ReelingIdle animation
 local function getOrCreateReelingAnimation()
-    pcall(function()
+    local success, result = pcall(function()
         local character = localPlayer.Character
         if not character then return nil end
         
@@ -30,7 +29,6 @@ local function getOrCreateReelingAnimation()
         for _, track in pairs(animator:GetPlayingAnimationTracks()) do
             local name = track.Name
             if name:find("Reel") and name:find("Idle") then
-                print("✅ Found existing ReelingIdle:", name)
                 return track
             end
         end
@@ -38,9 +36,6 @@ local function getOrCreateReelingAnimation()
         -- Cari di semua loaded animations
         for _, track in pairs(humanoid.Animator:GetPlayingAnimationTracks()) do
             if track.Animation then
-                local animId = track.Animation.AnimationId
-                print("🔍 Checking animation:", track.Name, animId)
-                
                 if track.Name:find("Reel") then
                     return track
                 end
@@ -54,7 +49,6 @@ local function getOrCreateReelingAnimation()
                     if anim:IsA("Animation") then
                         local name = anim.Name
                         if name:find("Reel") and name:find("Idle") then
-                            print("✅ Found ReelingIdle animation in tool:", name)
                             local track = animator:LoadAnimation(anim)
                             return track
                         end
@@ -62,8 +56,13 @@ local function getOrCreateReelingAnimation()
                 end
             end
         end
+        
+        return nil
     end)
     
+    if success then
+        return result
+    end
     return nil
 end
 
@@ -90,8 +89,59 @@ local function capturePose()
         end
     end)
     
-    print("📸 Pose captured! Total joints:", count)
     return count > 0
+end
+
+-- Fungsi untuk STOP SEMUA animasi secara permanent
+local function killAllAnimations()
+    pcall(function()
+        local character = localPlayer.Character
+        if not character then return end
+        
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if not humanoid then return end
+        
+        local animator = humanoid:FindFirstChildOfClass("Animator")
+        if not animator then return end
+        
+        -- STOP semua playing animations
+        for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+            track:Stop(0)
+            track:Destroy()
+        end
+        
+        -- STOP semua humanoid animations
+        for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+            track:Stop(0)
+            track:Destroy()
+        end
+    end)
+end
+
+-- Fungsi untuk BLOCK animasi baru agar tidak play
+local function blockNewAnimations()
+    if NoFishingAnimation.AnimationBlocker then
+        NoFishingAnimation.AnimationBlocker:Disconnect()
+    end
+    
+    pcall(function()
+        local character = localPlayer.Character
+        if not character then return end
+        
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if not humanoid then return end
+        
+        local animator = humanoid:FindFirstChildOfClass("Animator")
+        if not animator then return end
+        
+        -- Hook semua animasi baru yang mau play
+        NoFishingAnimation.AnimationBlocker = animator.AnimationPlayed:Connect(function(animTrack)
+            if NoFishingAnimation.Enabled then
+                animTrack:Stop(0)
+                animTrack:Destroy()
+            end
+        end)
+    end)
 end
 
 -- Fungsi untuk freeze pose
@@ -110,12 +160,12 @@ local function freezePose()
             local humanoid = character:FindFirstChildOfClass("Humanoid")
             if not humanoid then return end
             
-            -- STOP SEMUA ANIMASI
+            -- FORCE STOP semua animasi setiap frame
             for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
                 track:Stop(0)
             end
             
-            -- APPLY SAVED POSE
+            -- APPLY SAVED POSE setiap frame
             for jointName, poseData in pairs(NoFishingAnimation.SavedPose) do
                 local motor = character:FindFirstChild(jointName, true)
                 if motor and motor:IsA("Motor6D") then
@@ -134,6 +184,11 @@ local function stopFreeze()
         NoFishingAnimation.Connection = nil
     end
     
+    if NoFishingAnimation.AnimationBlocker then
+        NoFishingAnimation.AnimationBlocker:Disconnect()
+        NoFishingAnimation.AnimationBlocker = nil
+    end
+    
     if NoFishingAnimation.ReelingTrack then
         NoFishingAnimation.ReelingTrack:Stop()
         NoFishingAnimation.ReelingTrack = nil
@@ -142,27 +197,25 @@ local function stopFreeze()
     NoFishingAnimation.SavedPose = {}
 end
 
+-- ============================================
+-- PUBLIC FUNCTIONS (untuk GUI)
+-- ============================================
+
 -- Fungsi Start (AUTO - tanpa perlu memancing dulu)
 function NoFishingAnimation.Start()
     if NoFishingAnimation.Enabled then
-        warn("⚠️ NoFishingAnimation sudah aktif!")
-        return
+        return false, "Already enabled"
     end
-    
-    print("🎣 Mencari animasi ReelingIdle...")
     
     local character = localPlayer.Character
     if not character then 
-        warn("❌ Character tidak ditemukan!")
-        return 
+        return false, "Character not found"
     end
     
     -- 1. Cari atau buat ReelingIdle animation
     local reelingTrack = getOrCreateReelingAnimation()
     
     if reelingTrack then
-        print("✅ ReelingIdle animation ditemukan!")
-        
         -- 2. Play animasi (pause setelah beberapa frame)
         reelingTrack:Play()
         reelingTrack:AdjustSpeed(0) -- Pause animasi di frame pertama
@@ -176,61 +229,90 @@ function NoFishingAnimation.Start()
         local success = capturePose()
         
         if success then
-            -- 5. Enable freeze
+            -- 5. KILL semua animasi
+            killAllAnimations()
+            
+            -- 6. Block animasi baru
+            blockNewAnimations()
+            
+            -- 7. Enable freeze
             NoFishingAnimation.Enabled = true
             freezePose()
             
-            print("✅ POSE FROZEN! Karakter stuck di pose reeling")
+            return true, "Pose frozen successfully"
         else
-            warn("❌ Gagal capture pose - tidak ada joints tersimpan")
             reelingTrack:Stop()
+            return false, "Failed to capture pose"
         end
     else
-        warn("❌ ReelingIdle animation tidak ditemukan!")
-        warn("💡 Coba method delay: memancing dulu, baru aktifkan")
+        return false, "Reeling animation not found"
     end
 end
 
--- Fungsi Start dengan delay (backup method)
-function NoFishingAnimation.StartWithDelay()
+-- Fungsi Start dengan delay (RECOMMENDED)
+function NoFishingAnimation.StartWithDelay(delay, callback)
     if NoFishingAnimation.Enabled then
-        warn("⚠️ NoFishingAnimation sudah aktif!")
-        return
+        return false, "Already enabled"
     end
     
-    print("⏳ Tunggu 2 detik...")
-    print("🎣 TARIK IKAN SEKARANG!")
+    delay = delay or 2
     
-    task.wait(2)
+    -- Jalankan di coroutine agar tidak blocking
+    task.spawn(function()
+        task.wait(delay)
+        
+        local success = capturePose()
+        
+        if success then
+            -- KILL semua animasi
+            killAllAnimations()
+            
+            -- Block animasi baru
+            blockNewAnimations()
+            
+            -- Enable freeze
+            NoFishingAnimation.Enabled = true
+            freezePose()
+            
+            -- Callback jika ada
+            if callback then
+                callback(true, "Pose frozen successfully")
+            end
+        else
+            -- Callback error
+            if callback then
+                callback(false, "Failed to capture pose")
+            end
+        end
+    end)
     
-    local success = capturePose()
-    
-    if success then
-        NoFishingAnimation.Enabled = true
-        freezePose()
-        print("✅ POSE FROZEN!")
-    else
-        warn("❌ Gagal capture pose")
-    end
+    return true, "Starting with delay..."
 end
 
 -- Fungsi Stop
 function NoFishingAnimation.Stop()
     if not NoFishingAnimation.Enabled then
-        warn("⚠️ NoFishingAnimation sudah tidak aktif!")
-        return
+        return false, "Already disabled"
     end
     
     NoFishingAnimation.Enabled = false
     stopFreeze()
     
-    print("🔴 Pose unfrozen - Animasi normal kembali")
+    return true, "Pose unfrozen"
 end
+
+-- Fungsi untuk cek status
+function NoFishingAnimation.IsEnabled()
+    return NoFishingAnimation.Enabled
+end
+
+-- ============================================
+-- EVENT HANDLERS
+-- ============================================
 
 -- Handle respawn
 localPlayer.CharacterAdded:Connect(function(character)
     if NoFishingAnimation.Enabled then
-        print("🔄 Character respawned - NoFishingAnimation direset")
         NoFishingAnimation.Enabled = false
         stopFreeze()
     end
