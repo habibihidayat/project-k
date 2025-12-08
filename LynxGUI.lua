@@ -84,6 +84,22 @@ local colors = {
     glow = Color3.fromRGB(138, 43, 226),
 }
 
+-- ==== BRING TO FRONT FUNCTION ====
+-- LETAKKAN DI BAGIAN PALING ATAS SETELAH GUI DIBUAT (setelah baris 82)
+local function bringToFront()
+    local maxDisplayOrder = 0
+    for _, screenGui in ipairs(localPlayer.PlayerGui:GetChildren()) do
+        if screenGui:IsA("ScreenGui") and screenGui ~= gui then
+            maxDisplayOrder = math.max(maxDisplayOrder, screenGui.DisplayOrder)
+        end
+    end
+    gui.DisplayOrder = maxDisplayOrder + 100
+end
+
+-- Panggil pertama kali saat GUI dibuat
+bringToFront()
+
+
 -- Compact Window Size
 local windowSize = UDim2.new(0, 420, 0, 280)
 local minWindowSize = Vector2.new(380, 250)
@@ -1125,6 +1141,20 @@ local function makeButton(parent, label, callback)
     end)
     
     return btnFrame
+end
+
+-- Tambahkan di fungsi minimize/restore
+local function bringToFront()
+    -- Cari DisplayOrder tertinggi
+    local maxDisplayOrder = 0
+    for _, screenGui in ipairs(localPlayer.PlayerGui:GetChildren()) do
+        if screenGui:IsA("ScreenGui") and screenGui ~= gui then
+            maxDisplayOrder = math.max(maxDisplayOrder, screenGui.DisplayOrder)
+        end
+    end
+    
+    -- Set lebih tinggi
+    gui.DisplayOrder = maxDisplayOrder + 100
 end
 
 -- LynxGUI_v2.3.lua - Galaxy Edition (REFINED)
@@ -2263,12 +2293,13 @@ local function createMinimizedIcon()
         end
     end)
     
-    icon.InputEnded:Connect(function(input)
+   icon.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             if dragging then
                 dragging = false
                 savedIconPos = icon.Position
                 if not dragMoved then
+                    bringToFront()  -- ⬅️ TAMBAHKAN INI
                     win.Visible = true
                     TweenService:Create(win, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
                         Size=windowSize,
@@ -2304,6 +2335,7 @@ local dragging, dragStart, startPos = false, nil, nil
 
 scriptHeader.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        bringToFront()  -- ⬅️ TAMBAHKAN INI
         dragging, dragStart, startPos = true, input.Position, win.Position
     end
 end)
