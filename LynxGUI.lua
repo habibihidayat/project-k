@@ -98,7 +98,7 @@ local gui = new("ScreenGui",{
     IgnoreGuiInset=true,
     ResetOnSpawn=false,
     ZIndexBehavior=Enum.ZIndexBehavior.Sibling,
-    DisplayOrder=999
+    DisplayOrder=999999
 })
 
 -- Main Window Container - ULTRA TRANSPARENT
