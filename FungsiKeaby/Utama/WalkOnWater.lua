@@ -21,7 +21,7 @@ WalkOnWater.DetectedWaterLevel = nil
 
 -- Settings
 local PLATFORM_SIZE = 14
-local PLAYER_HEIGHT_OFFSET = 1.6 -- Offset from platform to player feet
+local PLAYER_HEIGHT_OFFSET = 1.2-- Offset from platform to player feet
 
 -- =====================================================
 -- WATER DETECTION
