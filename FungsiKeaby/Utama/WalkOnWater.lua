@@ -21,7 +21,7 @@ WalkOnWater.LockedHeight = nil
 
 -- Settings
 local PLATFORM_SIZE = 14
-local PLAYER_HEIGHT_OFFSET = 1.4 -- Perfect height!
+local PLAYER_HEIGHT_OFFSET = 0.9 -- Perfect height!
 local HEIGHT_LOCK_TOLERANCE = 0.05 -- Very strict height lock
 
 -- =====================================================
