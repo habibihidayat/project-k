@@ -34,8 +34,7 @@ local DisableCutscenes = loadstring(game:HttpGet("https://raw.githubusercontent.
 local DisableExtras = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/DisableExtras.lua"))()
 local AutoTotem3X = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/AutoTotem3x.lua"))()
 local SkinAnimation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/SkinSwapAnimation.lua"))()
-
-
+local WalkOnWater = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/WalkOnWater.lua"))()
 -- Teleport
 local TeleportModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportModule.lua"))()
 local TeleportToPlayer = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/TeleportSystem/TeleportToPlayer.lua"))()
@@ -1329,6 +1328,16 @@ makeToggle(catSupport, "Disable Skin Effect", function(on)
     else
         DisableExtras.StopSkinEffect()
         Notify.Send("Disable Skin Effect", "Skin effect bisa muncul kembali.", 3)
+    end
+end)
+
+makeToggle(catSupport, "Walk on Water", function(on)
+    if on then
+        WalkOnWater.Start()
+        Notify.Send("Walk on Water", "Kamu bisa berjalan di atas air! 🌊", 4)
+    else
+        WalkOnWater.Stop()
+        Notify.Send("Walk on Water", "Walk on water dimatikan!", 4)
     end
 end)
 
