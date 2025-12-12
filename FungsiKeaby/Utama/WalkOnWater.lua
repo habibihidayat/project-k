@@ -1,6 +1,5 @@
--- FISH IT - WALK ON WATER MODULE (STABLE & LOCKED)
--- Walk on water with NO bouncing - perfectly stable like on ground
-
+-- ULTRA STABLE WALK ON WATER (ALIGNPOSITION V2 – NO ERROR)
+-- Module Version - No Chat Commands
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -8,331 +7,137 @@ local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local HRP = Character:WaitForChild("HumanoidRootPart")
 
--- =====================================================
--- MODULE
--- =====================================================
 local WalkOnWater = {}
 WalkOnWater.Enabled = false
-WalkOnWater.Connection = nil
 WalkOnWater.Platform = nil
-WalkOnWater.LockedHeight = nil
+WalkOnWater.AlignPos = nil
+WalkOnWater.Connection = nil
 
--- Settings
 local PLATFORM_SIZE = 14
-local PLAYER_HEIGHT_OFFSET = 0.9 -- Perfect height!
-local HEIGHT_LOCK_TOLERANCE = 0.05 -- Very strict height lock
+local OFFSET = 3 -- tinggi aman & anti jitter
 
--- =====================================================
--- WATER DETECTION
--- =====================================================
+----------------------------------------------------------
+-- WATER HEIGHT DETECTION
+----------------------------------------------------------
 
-local function IsOverWater()
-    if not HumanoidRootPart then return false end
-    
-    local pos = HumanoidRootPart.Position
-    
-    -- Check if swimming
-    if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
-        return true
+local function GetWaterHeight()
+    local origin = HRP.Position
+    local direction = Vector3.new(0, -200, 0)
+
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Blacklist
+    params.FilterDescendantsInstances = {Character}
+
+    local result = Workspace:Raycast(origin, direction, params)
+    if not result then return nil end
+
+    local mat = result.Material
+    if mat == Enum.Material.Water or tostring(mat):lower():find("water") then
+        return result.Position.Y
     end
-    
-    -- Raycast down to check for ground
-    local rayOrigin = pos
-    local rayDirection = Vector3.new(0, -50, 0)
-    
-    local raycastParams = RaycastParams.new()
-    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-    raycastParams.FilterDescendantsInstances = {Character, WalkOnWater.Platform}
-    
-    local rayResult = Workspace:Raycast(rayOrigin, rayDirection, raycastParams)
-    
-    -- No ground nearby = over water
-    if not rayResult then
-        return true
-    end
-    
-    -- Ground is far = over water
-    if rayResult.Distance > 10 then
-        return true
-    end
-    
-    return false
+
+    return nil
 end
 
--- =====================================================
--- PLATFORM MANAGEMENT
--- =====================================================
+----------------------------------------------------------
+-- PLATFORM CREATION
+----------------------------------------------------------
 
 local function CreatePlatform()
-    if WalkOnWater.Platform then
-        pcall(function()
-            WalkOnWater.Platform:Destroy()
-        end)
-    end
-    
-    local platform = Instance.new("Part")
-    platform.Name = "WaterWalkPlatform"
-    platform.Size = Vector3.new(PLATFORM_SIZE, 1, PLATFORM_SIZE)
-    platform.Anchored = true
-    platform.CanCollide = true
-    platform.Transparency = 1
-    platform.Material = Enum.Material.SmoothPlastic
-    platform.CastShadow = false
-    platform.TopSurface = Enum.SurfaceType.Smooth
-    platform.BottomSurface = Enum.SurfaceType.Smooth
-    platform.Locked = true
-    platform.Massless = true
-    platform.CanTouch = false
-    platform.CanQuery = false
-    
-    platform.Parent = Workspace
-    WalkOnWater.Platform = platform
-    
-    return platform
+    local p = Instance.new("Part")
+    p.Size = Vector3.new(PLATFORM_SIZE, 1, PLATFORM_SIZE)
+    p.Anchored = true
+    p.CanCollide = true
+    p.Transparency = 1
+    p.CanQuery = false
+    p.CanTouch = false
+    p.Parent = Workspace
+    WalkOnWater.Platform = p
 end
 
-local function UpdatePlatform()
-    if not WalkOnWater.Enabled then return end
-    if not HumanoidRootPart or not HumanoidRootPart.Parent then return end
-    if not Character or not Character.Parent then return end
-    if not Humanoid or not Humanoid.Parent then return end
-    
-    -- Recreate platform if missing
-    if not WalkOnWater.Platform or not WalkOnWater.Platform.Parent then 
-        pcall(CreatePlatform)
-        return 
+----------------------------------------------------------
+-- ALIGN POSITION SETUP (NO FORCE LIMIT)
+----------------------------------------------------------
+
+local function SetupAlign()
+    if WalkOnWater.AlignPos then
+        WalkOnWater.AlignPos:Destroy()
     end
-    
-    local hrpPos = HumanoidRootPart.Position
-    local isOverWater = IsOverWater()
-    
-    if isOverWater then
-        -- Lock height on first detection
-        if not WalkOnWater.LockedHeight then
-            WalkOnWater.LockedHeight = hrpPos.Y
-        end
-        
-        -- Calculate platform position based on locked height
-        local platformY = WalkOnWater.LockedHeight - PLAYER_HEIGHT_OFFSET
-        
-        pcall(function()
-            -- Update platform position (X and Z follow player, Y is locked)
-            WalkOnWater.Platform.CFrame = CFrame.new(
-                hrpPos.X,
-                platformY,
-                hrpPos.Z
-            )
-            WalkOnWater.Platform.CanCollide = true
-        end)
-        
-        -- STRICT HEIGHT LOCKING - Keep player at exact locked height
-        local heightDiff = math.abs(hrpPos.Y - WalkOnWater.LockedHeight)
-        if heightDiff > HEIGHT_LOCK_TOLERANCE then
-            pcall(function()
-                -- Lock player to exact height (no bouncing!)
-                HumanoidRootPart.CFrame = CFrame.new(
-                    hrpPos.X,
-                    WalkOnWater.LockedHeight,
-                    hrpPos.Z
-                )
-                
-                -- Cancel all vertical velocity (no jumping/falling)
-                HumanoidRootPart.Velocity = Vector3.new(
-                    HumanoidRootPart.Velocity.X,
-                    0,
-                    HumanoidRootPart.Velocity.Z
-                )
-                
-                HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(
-                    HumanoidRootPart.AssemblyLinearVelocity.X,
-                    0,
-                    HumanoidRootPart.AssemblyLinearVelocity.Z
-                )
-            end)
-        end
-        
-        -- Prevent swimming animation
-        if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
-            pcall(function()
-                Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-            end)
-        end
-        
-        -- Prevent freefall
-        if Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
-            pcall(function()
-                Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-            end)
-        end
-        
-        -- Prevent jumping
-        if Humanoid:GetState() == Enum.HumanoidStateType.Jumping then
-            pcall(function()
-                Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-            end)
-        end
-        
-        -- Maintain walkspeed
-        if Humanoid.WalkSpeed < 16 then
-            pcall(function()
-                Humanoid.WalkSpeed = 16
-            end)
-        end
-    else
-        -- Hide platform when not over water
-        pcall(function()
-            WalkOnWater.Platform.CanCollide = false
-            WalkOnWater.Platform.CFrame = CFrame.new(0, -10000, 0)
-        end)
-        
-        -- Reset locked height
-        WalkOnWater.LockedHeight = nil
+
+    -- Buat attachment kalau belum ada
+    local att = HRP:FindFirstChild("RootAttachment")
+    if not att then
+        att = Instance.new("Attachment")
+        att.Name = "RootAttachment"
+        att.Parent = HRP
     end
+
+    local ap = Instance.new("AlignPosition")
+    ap.Attachment0 = att
+    ap.MaxForce = 500000 -- cukup kuat menahan HRP
+    ap.MaxVelocity = 500
+    ap.Responsiveness = 200  -- smooth + cepat
+    ap.RigidityEnabled = true
+    ap.Parent = HRP
+
+    WalkOnWater.AlignPos = ap
 end
 
--- =====================================================
--- MODULE FUNCTIONS
--- =====================================================
+----------------------------------------------------------
+-- START WALK ON WATER
+----------------------------------------------------------
 
 function WalkOnWater.Start()
     if WalkOnWater.Enabled then return end
-    
     WalkOnWater.Enabled = true
-    WalkOnWater.LockedHeight = nil
-    
-    -- Create platform
-    pcall(CreatePlatform)
-    
-    -- Fix swimming state
-    if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
-        pcall(function()
-            Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-        end)
-    end
-    
-    -- Disable jump temporarily to prevent bouncing
-    local originalJumpPower = Humanoid.JumpPower
-    local originalJumpHeight = Humanoid.JumpHeight
-    
-    pcall(function()
-        Humanoid.JumpPower = 0
-        Humanoid.JumpHeight = 0
-    end)
-    
-    -- Start update loop
+
+    if not WalkOnWater.Platform then CreatePlatform() end
+    SetupAlign()
+
     WalkOnWater.Connection = RunService.Heartbeat:Connect(function()
-        pcall(UpdatePlatform)
+        if not WalkOnWater.Enabled then return end
+
+        local waterY = GetWaterHeight()
+        if not waterY then
+            WalkOnWater.Platform.CanCollide = false
+            return
+        end
+
+        WalkOnWater.Platform.CanCollide = true
+
+        -- Platform mengikuti player
+        WalkOnWater.Platform.CFrame = CFrame.new(
+            HRP.Position.X,
+            waterY,
+            HRP.Position.Z
+        )
+
+        -- Target posisi HRP (super smooth)
+        WalkOnWater.AlignPos.Position = Vector3.new(
+            HRP.Position.X,
+            waterY + OFFSET,
+            HRP.Position.Z
+        )
     end)
-    
-    print("[Walk on Water] Started - Height locked at 1.4, perfectly stable!")
 end
+
+----------------------------------------------------------
+-- STOP WALK ON WATER
+----------------------------------------------------------
 
 function WalkOnWater.Stop()
     WalkOnWater.Enabled = false
-    WalkOnWater.LockedHeight = nil
-    
-    -- Restore jump
-    pcall(function()
-        Humanoid.JumpPower = 50
-        Humanoid.JumpHeight = 7.2
-    end)
-    
-    -- Stop update loop
-    if WalkOnWater.Connection then
-        pcall(function()
-            WalkOnWater.Connection:Disconnect()
-        end)
-        WalkOnWater.Connection = nil
-    end
-    
-    -- Remove platform
+
+    if WalkOnWater.Connection then WalkOnWater.Connection:Disconnect() end
+    if WalkOnWater.AlignPos then WalkOnWater.AlignPos:Destroy() end
+
     if WalkOnWater.Platform then
-        pcall(function()
-            WalkOnWater.Platform:Destroy()
-        end)
+        WalkOnWater.Platform:Destroy()
         WalkOnWater.Platform = nil
     end
-    
-    print("[Walk on Water] Stopped")
 end
 
--- =====================================================
--- AUTO HANDLERS
--- =====================================================
-
--- Handle character respawn
-LocalPlayer.CharacterAdded:Connect(function(newCharacter)
-    Character = newCharacter
-    
-    task.wait(0.5)
-    
-    Humanoid = newCharacter:WaitForChild("Humanoid")
-    HumanoidRootPart = newCharacter:WaitForChild("HumanoidRootPart")
-    
-    -- Restart if was enabled
-    if WalkOnWater.Enabled then
-        local wasEnabled = WalkOnWater.Enabled
-        pcall(function() WalkOnWater.Stop() end)
-        task.wait(1)
-        if wasEnabled then
-            pcall(function() WalkOnWater.Start() end)
-        end
-    end
-end)
-
--- Platform health monitor
-task.spawn(function()
-    while task.wait(2) do
-        if WalkOnWater.Enabled then
-            if not WalkOnWater.Platform or not WalkOnWater.Platform.Parent then
-                pcall(CreatePlatform)
-            end
-        end
-    end
-end)
-
--- ULTRA STRICT height lock failsafe (prevents ALL bouncing)
-task.spawn(function()
-    while task.wait() do -- Every frame
-        if WalkOnWater.Enabled and IsOverWater() and WalkOnWater.LockedHeight then
-            if HumanoidRootPart then
-                local currentY = HumanoidRootPart.Position.Y
-                
-                -- Force exact height if drifting
-                if math.abs(currentY - WalkOnWater.LockedHeight) > HEIGHT_LOCK_TOLERANCE then
-                    pcall(function()
-                        local pos = HumanoidRootPart.Position
-                        HumanoidRootPart.CFrame = CFrame.new(
-                            pos.X,
-                            WalkOnWater.LockedHeight,
-                            pos.Z
-                        )
-                        
-                        -- Zero out vertical velocity
-                        HumanoidRootPart.Velocity = Vector3.new(
-                            HumanoidRootPart.Velocity.X,
-                            0,
-                            HumanoidRootPart.Velocity.Z
-                        )
-                    end)
-                end
-            end
-            
-            -- Force running state (no swimming/jumping/freefall)
-            if Humanoid then
-                local state = Humanoid:GetState()
-                if state == Enum.HumanoidStateType.Swimming or 
-                   state == Enum.HumanoidStateType.Freefall or
-                   state == Enum.HumanoidStateType.Jumping then
-                    pcall(function()
-                        Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-                    end)
-                end
-            end
-        end
-    end
-end)
-
+----------------------------------------------------------
 return WalkOnWater
