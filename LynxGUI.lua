@@ -1331,13 +1331,14 @@ makeToggle(catSupport, "Disable Skin Effect", function(on)
     end
 end)
 
-makeToggle(catSupport, "Walk on Water", function(on)
+-- ✨ NEW: Walk On Water
+makeToggle(catSupport, "Walk On Water", function(on)
     if on then
         WalkOnWater.Start()
-        Notify.Send("Walk on Water", "Kamu bisa berjalan di atas air! 🌊", 4)
+        Notify.Send("Walk On Water", "✓ Kamu bisa berjalan di atas air!", 4)
     else
         WalkOnWater.Stop()
-        Notify.Send("Walk on Water", "Walk on water dimatikan!", 4)
+        Notify.Send("Walk On Water", "Walk on water dimatikan.", 3)
     end
 end)
 
