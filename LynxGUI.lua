@@ -1334,12 +1334,18 @@ end)
 makeToggle(catSupport, "Walk on Water", function(on)
     if on then
         WalkOnWater.Start()
-        WalkOnWater.SetTransparency(0.5) -- Make visible for debugging
         Notify.Send("Walk on Water", "Kamu bisa berjalan di atas air! 🌊", 4)
     else
         WalkOnWater.Stop()
         Notify.Send("Walk on Water", "Walk on water dimatikan!", 4)
     end
+end)
+
+-- Slider untuk adjust height
+makeSlider(catSupport, "Water Height", 3, 6, 4.5, function(value)
+    -- Update the offset value in real-time
+    -- You can add this function to the module:
+    WalkOnWater.SetPlatformOffset(value)
 end)
 
 local catAutoTotem = makeCategory(mainPage, "Auto Spawn 3X Totem", "🛠️")
