@@ -1331,21 +1331,32 @@ makeToggle(catSupport, "Disable Skin Effect", function(on)
     end
 end)
 
+-- GUI Code dengan error handling
 makeToggle(catSupport, "Walk on Water", function(on)
-    if on then
-        WalkOnWater.Start()
-        Notify.Send("Walk on Water", "Kamu bisa berjalan di atas air! 🌊", 4)
-    else
-        WalkOnWater.Stop()
-        Notify.Send("Walk on Water", "Walk on water dimatikan!", 4)
-    end
+    pcall(function()
+        if on then
+            if WalkOnWater and WalkOnWater.Start then
+                WalkOnWater:Start()
+                Notify.Send("Walk on Water", "Kamu bisa berjalan di atas air! 🌊", 4)
+            else
+                Notify.Send("Error", "Module WalkOnWater tidak ditemukan!", 4)
+            end
+        else
+            if WalkOnWater and WalkOnWater.Stop then
+                WalkOnWater:Stop()
+                Notify.Send("Walk on Water", "Walk on water dimatikan!", 4)
+            end
+        end
+    end)
 end)
 
--- Slider untuk adjust height
+-- Slider untuk adjust height dengan error handling
 makeSlider(catSupport, "Water Height", 3, 6, 4.5, function(value)
-    -- Update the offset value in real-time
-    -- You can add this function to the module:
-    WalkOnWater.SetPlatformOffset(value)
+    pcall(function()
+        if WalkOnWater and WalkOnWater.SetPlatformOffset then
+            WalkOnWater:SetPlatformOffset(value)
+        end
+    end)
 end)
 
 local catAutoTotem = makeCategory(mainPage, "Auto Spawn 3X Totem", "🛠️")
