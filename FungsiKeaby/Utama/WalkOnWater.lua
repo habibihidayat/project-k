@@ -22,6 +22,7 @@ WalkOnWater.Platform = nil
 local Config = {
     PlatformSize = Vector3.new(12, 1, 12),
     HeightAboveWater = 2, -- How high above water surface
+    PlatformOffset = 4.5, -- Offset below player (NEW)
     CheckDistance = 50, -- Ray distance to check for water
     UpdateRate = RunService.Heartbeat, -- Update every frame
 }
@@ -110,12 +111,12 @@ local function UpdatePlatform()
     local isInOrNearWater = IsInWater()
     
     if isInOrNearWater then
-        -- Calculate platform position
-        local targetY = hrpPos.Y - 4.5 -- Platform below feet (adjusted lower)
+        -- Calculate platform position using configurable offset
+        local targetY = hrpPos.Y - Config.PlatformOffset
         
         -- Adjust based on humanoid state
         if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
-            targetY = hrpPos.Y - 4.2
+            targetY = hrpPos.Y - (Config.PlatformOffset - 0.3)
         end
         
         -- Update platform position
@@ -184,6 +185,11 @@ end
 
 function WalkOnWater.SetHeightAboveWater(height)
     Config.HeightAboveWater = height
+end
+
+function WalkOnWater.SetPlatformOffset(offset)
+    -- NEW FUNCTION: Set the offset of platform below player
+    Config.PlatformOffset = offset
 end
 
 function WalkOnWater.SetTransparency(transparency)
