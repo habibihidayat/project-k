@@ -1,4 +1,4 @@
--- FISH IT - WALK ON WATER MODULE
+-- FISH IT - WALK ON WATER MODULE (FIXED)
 -- Module for walking on water surface
 
 local Players = game:GetService("Players")
@@ -7,6 +7,7 @@ local Workspace = game:GetService("Workspace")
 
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
 -- =====================================================
@@ -16,70 +17,52 @@ local WalkOnWater = {}
 WalkOnWater.Enabled = false
 WalkOnWater.Connection = nil
 WalkOnWater.Platform = nil
-WalkOnWater.WaterLevel = nil
 
 -- Configuration
 local Config = {
-    PlatformSize = Vector3.new(15, 0.5, 15),
-    PlatformOffset = -3.5, -- Platform offset from character Y position
-    Transparency = 1, -- Fully invisible
-    UpdateRate = 0.03, -- Update every frame for smooth movement
+    PlatformSize = Vector3.new(12, 1, 12),
+    HeightAboveWater = 2, -- How high above water surface
+    CheckDistance = 50, -- Ray distance to check for water
+    UpdateRate = RunService.Heartbeat, -- Update every frame
 }
 
 -- =====================================================
 -- HELPER FUNCTIONS
 -- =====================================================
 
-local function FindWaterLevel()
-    -- Try to find Terrain water or specific water parts
-    local terrain = Workspace:FindFirstChildOfClass("Terrain")
+local function IsInWater()
+    if not Humanoid then return false end
     
-    if terrain then
-        -- Check common water levels in Roblox games
-        -- Fish It typically has water at around Y = 0 to -10
-        local possibleLevels = {-1, 0, -5, -10, -2, -3}
-        
-        for _, level in ipairs(possibleLevels) do
-            local region = Region3.new(
-                Vector3.new(-100, level - 5, -100),
-                Vector3.new(100, level + 5, 100)
-            )
-            region = region:ExpandToGrid(4)
+    -- Method 1: Check Humanoid state
+    if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
+        return true
+    end
+    
+    -- Method 2: Check if character Y position is low (near water)
+    if HumanoidRootPart then
+        local pos = HumanoidRootPart.Position
+        -- Fish It water is typically at Y = 0 to -10
+        if pos.Y < 20 then
+            -- Raycast down to check for water
+            local rayOrigin = pos
+            local rayDirection = Vector3.new(0, -Config.CheckDistance, 0)
             
-            local materials, sizes = terrain:ReadVoxels(region, 4)
-            local size = materials.Size
+            local raycastParams = RaycastParams.new()
+            raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+            raycastParams.FilterDescendantsInstances = {Character}
             
-            for x = 1, size.X do
-                for y = 1, size.Y do
-                    for z = 1, size.Z do
-                        if materials[x][y][z] == Enum.Material.Water then
-                            return level
-                        end
-                    end
-                end
+            local rayResult = Workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+            
+            -- If no ground detected or ground is far, assume water
+            if not rayResult or (rayResult.Distance > 10) then
+                return true
+            end
+            
+            -- Check if hit material is water
+            if rayResult and rayResult.Material == Enum.Material.Water then
+                return true
             end
         end
-    end
-    
-    -- Fallback: Check for water parts
-    for _, obj in pairs(Workspace:GetDescendants()) do
-        if obj:IsA("Part") and obj.Name:lower():find("water") then
-            return obj.Position.Y + (obj.Size.Y / 2)
-        end
-    end
-    
-    -- Default water level for Fish It
-    return 0
-end
-
-local function IsOverWater()
-    if not HumanoidRootPart then return false end
-    
-    local pos = HumanoidRootPart.Position
-    
-    -- Check if player is above water level
-    if WalkOnWater.WaterLevel then
-        return pos.Y <= (WalkOnWater.WaterLevel + 10) and pos.Y >= (WalkOnWater.WaterLevel - 5)
     end
     
     return false
@@ -91,17 +74,22 @@ local function CreatePlatform()
     end
     
     local platform = Instance.new("Part")
-    platform.Name = "WaterPlatform"
+    platform.Name = "WaterWalkPlatform_" .. LocalPlayer.Name
     platform.Size = Config.PlatformSize
     platform.Anchored = true
     platform.CanCollide = true
-    platform.Transparency = Config.Transparency
-    platform.Material = Enum.Material.SmoothPlastic
-    platform.TopSurface = Enum.SurfaceType.Smooth
-    platform.BottomSurface = Enum.SurfaceType.Smooth
+    platform.Transparency = 1
+    platform.Material = Enum.Material.ForceField
     platform.CastShadow = false
     
-    -- Make it invisible and non-interactive for others
+    -- Additional properties for stability
+    platform.TopSurface = Enum.SurfaceType.Smooth
+    platform.BottomSurface = Enum.SurfaceType.Smooth
+    platform.Locked = true
+    
+    -- Prevent platform from being affected by physics
+    platform.Massless = true
+    
     platform.Parent = Workspace
     
     WalkOnWater.Platform = platform
@@ -112,22 +100,41 @@ end
 local function UpdatePlatform()
     if not WalkOnWater.Enabled then return end
     if not HumanoidRootPart or not HumanoidRootPart.Parent then return end
-    if not WalkOnWater.Platform then return end
+    if not Character or not Character.Parent then return end
+    if not WalkOnWater.Platform or not WalkOnWater.Platform.Parent then 
+        CreatePlatform()
+        return 
+    end
     
-    local pos = HumanoidRootPart.Position
+    local hrpPos = HumanoidRootPart.Position
+    local isInOrNearWater = IsInWater()
     
-    if IsOverWater() then
-        -- Position platform below character
-        WalkOnWater.Platform.Position = Vector3.new(
-            pos.X,
-            pos.Y + Config.PlatformOffset,
-            pos.Z
+    if isInOrNearWater then
+        -- Calculate platform position
+        local targetY = hrpPos.Y - 3 -- Platform below feet
+        
+        -- Adjust based on humanoid state
+        if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
+            targetY = hrpPos.Y - 2.5
+        end
+        
+        -- Update platform position
+        WalkOnWater.Platform.CFrame = CFrame.new(
+            hrpPos.X,
+            targetY,
+            hrpPos.Z
         )
+        
         WalkOnWater.Platform.CanCollide = true
+        
+        -- Force humanoid to not swim
+        if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
+            Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+        end
     else
-        -- Move platform far away when not over water
+        -- Disable collision when not in water
         WalkOnWater.Platform.CanCollide = false
-        WalkOnWater.Platform.Position = Vector3.new(0, -1000, 0)
+        WalkOnWater.Platform.CFrame = CFrame.new(0, -1000, 0)
     end
 end
 
@@ -140,14 +147,16 @@ function WalkOnWater.Start()
     
     WalkOnWater.Enabled = true
     
-    -- Find water level
-    WalkOnWater.WaterLevel = FindWaterLevel()
-    
     -- Create platform
     CreatePlatform()
     
-    -- Start update loop
-    WalkOnWater.Connection = RunService.Heartbeat:Connect(UpdatePlatform)
+    -- Disable swimming state immediately if in water
+    if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
+        Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+    end
+    
+    -- Start update loop with highest priority
+    WalkOnWater.Connection = Config.UpdateRate:Connect(UpdatePlatform)
 end
 
 function WalkOnWater.Stop()
@@ -167,18 +176,17 @@ function WalkOnWater.Stop()
 end
 
 function WalkOnWater.SetPlatformSize(size)
-    Config.PlatformSize = Vector3.new(size, 0.5, size)
+    Config.PlatformSize = Vector3.new(size, 1, size)
     if WalkOnWater.Platform then
         WalkOnWater.Platform.Size = Config.PlatformSize
     end
 end
 
-function WalkOnWater.SetPlatformOffset(offset)
-    Config.PlatformOffset = offset
+function WalkOnWater.SetHeightAboveWater(height)
+    Config.HeightAboveWater = height
 end
 
 function WalkOnWater.SetTransparency(transparency)
-    Config.Transparency = transparency
     if WalkOnWater.Platform then
         WalkOnWater.Platform.Transparency = transparency
     end
@@ -189,15 +197,24 @@ end
 -- =====================================================
 LocalPlayer.CharacterAdded:Connect(function(newCharacter)
     Character = newCharacter
+    Humanoid = newCharacter:WaitForChild("Humanoid")
     HumanoidRootPart = newCharacter:WaitForChild("HumanoidRootPart")
     
     if WalkOnWater.Enabled then
+        -- Stop and restart
+        WalkOnWater.Stop()
         task.wait(1)
-        -- Recreate platform
-        if WalkOnWater.Platform then
-            WalkOnWater.Platform:Destroy()
+        WalkOnWater.Start()
+    end
+end)
+
+-- Failsafe: Recreate platform if destroyed
+task.spawn(function()
+    while true do
+        task.wait(1)
+        if WalkOnWater.Enabled and (not WalkOnWater.Platform or not WalkOnWater.Platform.Parent) then
+            CreatePlatform()
         end
-        CreatePlatform()
     end
 end)
 
