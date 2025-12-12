@@ -1,4 +1,4 @@
--- FISH IT - WALK ON WATER MODULE (FIXED)
+-- FISH IT - WALK ON WATER MODULE (FIXED v2)
 -- Module for walking on water surface
 
 local Players = game:GetService("Players")
@@ -21,10 +21,10 @@ WalkOnWater.Platform = nil
 -- Configuration
 local Config = {
     PlatformSize = Vector3.new(12, 1, 12),
-    HeightAboveWater = 2, -- How high above water surface
-    PlatformOffset = 4.5, -- Offset below player (NEW)
-    CheckDistance = 50, -- Ray distance to check for water
-    UpdateRate = RunService.Heartbeat, -- Update every frame
+    HeightAboveWater = 2,
+    PlatformOffset = 4.5,
+    CheckDistance = 50,
+    UpdateRate = RunService.Heartbeat,
 }
 
 -- =====================================================
@@ -71,7 +71,9 @@ end
 
 local function CreatePlatform()
     if WalkOnWater.Platform then
-        WalkOnWater.Platform:Destroy()
+        pcall(function()
+            WalkOnWater.Platform:Destroy()
+        end)
     end
     
     local platform = Instance.new("Part")
@@ -103,7 +105,7 @@ local function UpdatePlatform()
     if not HumanoidRootPart or not HumanoidRootPart.Parent then return end
     if not Character or not Character.Parent then return end
     if not WalkOnWater.Platform or not WalkOnWater.Platform.Parent then 
-        CreatePlatform()
+        pcall(CreatePlatform)
         return 
     end
     
@@ -120,22 +122,28 @@ local function UpdatePlatform()
         end
         
         -- Update platform position
-        WalkOnWater.Platform.CFrame = CFrame.new(
-            hrpPos.X,
-            targetY,
-            hrpPos.Z
-        )
-        
-        WalkOnWater.Platform.CanCollide = true
+        pcall(function()
+            WalkOnWater.Platform.CFrame = CFrame.new(
+                hrpPos.X,
+                targetY,
+                hrpPos.Z
+            )
+            
+            WalkOnWater.Platform.CanCollide = true
+        end)
         
         -- Force humanoid to not swim
         if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
-            Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+            pcall(function()
+                Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+            end)
         end
     else
         -- Disable collision when not in water
-        WalkOnWater.Platform.CanCollide = false
-        WalkOnWater.Platform.CFrame = CFrame.new(0, -1000, 0)
+        pcall(function()
+            WalkOnWater.Platform.CanCollide = false
+            WalkOnWater.Platform.CFrame = CFrame.new(0, -1000, 0)
+        end)
     end
 end
 
@@ -143,59 +151,72 @@ end
 -- MODULE FUNCTIONS
 -- =====================================================
 
-function WalkOnWater.Start()
-    if WalkOnWater.Enabled then return end
+function WalkOnWater:Start()
+    if self.Enabled then return end
     
-    WalkOnWater.Enabled = true
+    self.Enabled = true
     
     -- Create platform
-    CreatePlatform()
+    pcall(CreatePlatform)
     
     -- Disable swimming state immediately if in water
     if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
-        Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+        pcall(function()
+            Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+        end)
     end
     
     -- Start update loop with highest priority
-    WalkOnWater.Connection = Config.UpdateRate:Connect(UpdatePlatform)
+    self.Connection = Config.UpdateRate:Connect(UpdatePlatform)
 end
 
-function WalkOnWater.Stop()
-    WalkOnWater.Enabled = false
+function WalkOnWater:Stop()
+    self.Enabled = false
     
     -- Disconnect update loop
-    if WalkOnWater.Connection then
-        WalkOnWater.Connection:Disconnect()
-        WalkOnWater.Connection = nil
+    if self.Connection then
+        pcall(function()
+            self.Connection:Disconnect()
+        end)
+        self.Connection = nil
     end
     
     -- Remove platform
-    if WalkOnWater.Platform then
-        WalkOnWater.Platform:Destroy()
-        WalkOnWater.Platform = nil
+    if self.Platform then
+        pcall(function()
+            self.Platform:Destroy()
+        end)
+        self.Platform = nil
     end
 end
 
-function WalkOnWater.SetPlatformSize(size)
+function WalkOnWater:SetPlatformSize(size)
     Config.PlatformSize = Vector3.new(size, 1, size)
-    if WalkOnWater.Platform then
-        WalkOnWater.Platform.Size = Config.PlatformSize
+    if self.Platform then
+        pcall(function()
+            self.Platform.Size = Config.PlatformSize
+        end)
     end
 end
 
-function WalkOnWater.SetHeightAboveWater(height)
+function WalkOnWater:SetHeightAboveWater(height)
     Config.HeightAboveWater = height
 end
 
-function WalkOnWater.SetPlatformOffset(offset)
-    -- NEW FUNCTION: Set the offset of platform below player
-    Config.PlatformOffset = offset
+function WalkOnWater:SetPlatformOffset(offset)
+    Config.PlatformOffset = offset or 4.5
 end
 
-function WalkOnWater.SetTransparency(transparency)
-    if WalkOnWater.Platform then
-        WalkOnWater.Platform.Transparency = transparency
+function WalkOnWater:SetTransparency(transparency)
+    if self.Platform then
+        pcall(function()
+            self.Platform.Transparency = transparency
+        end)
     end
+end
+
+function WalkOnWater:IsEnabled()
+    return self.Enabled
 end
 
 -- =====================================================
@@ -208,9 +229,13 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
     
     if WalkOnWater.Enabled then
         -- Stop and restart
-        WalkOnWater.Stop()
+        pcall(function()
+            WalkOnWater:Stop()
+        end)
         task.wait(1)
-        WalkOnWater.Start()
+        pcall(function()
+            WalkOnWater:Start()
+        end)
     end
 end)
 
@@ -219,7 +244,7 @@ task.spawn(function()
     while true do
         task.wait(1)
         if WalkOnWater.Enabled and (not WalkOnWater.Platform or not WalkOnWater.Platform.Parent) then
-            CreatePlatform()
+            pcall(CreatePlatform)
         end
     end
 end)
