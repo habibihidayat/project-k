@@ -1334,6 +1334,7 @@ end)
 makeToggle(catSupport, "Walk on Water", function(on)
     if on then
         WalkOnWater.Start()
+        WalkOnWater.SetTransparency(0.5) -- Make visible for debugging
         Notify.Send("Walk on Water", "Kamu bisa berjalan di atas air! 🌊", 4)
     else
         WalkOnWater.Stop()
