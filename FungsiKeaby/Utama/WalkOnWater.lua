@@ -1,5 +1,5 @@
--- FISH IT - WALK ON WATER MODULE (STABLE & SMOOTH)
--- Walk perfectly on water surface - no sinking!
+-- FISH IT - WALK ON WATER MODULE (AUTO WATER LEVEL DETECTION)
+-- Automatically finds correct water level and walks on it
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -17,64 +17,77 @@ local WalkOnWater = {}
 WalkOnWater.Enabled = false
 WalkOnWater.Connection = nil
 WalkOnWater.Platform = nil
-WalkOnWater.WaterLevel = 51.5 -- Fish It water surface level
+WalkOnWater.DetectedWaterLevel = nil
 
--- Optimized settings
-local PLATFORM_SIZE = 16
-local PLATFORM_HEIGHT = 1
-local HEIGHT_ABOVE_WATER = 0.5 -- Player height above water (RIGHT ON SURFACE!)
+-- Settings
+local PLATFORM_SIZE = 14
+local PLAYER_HEIGHT_OFFSET = 2.5 -- Offset from platform to player feet
 
 -- =====================================================
--- HELPER FUNCTIONS
+-- WATER DETECTION
 -- =====================================================
 
-local function GetWaterLevel()
-    -- Fish It water is at Y = 51.5
-    -- You can adjust this if needed
-    return WalkOnWater.WaterLevel
+local function DetectWaterLevel()
+    if not HumanoidRootPart then return nil end
+    
+    local pos = HumanoidRootPart.Position
+    
+    -- Raycast straight down to find water or ground
+    local rayOrigin = pos + Vector3.new(0, 10, 0) -- Start above player
+    local rayDirection = Vector3.new(0, -200, 0) -- Go far down
+    
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    raycastParams.FilterDescendantsInstances = {Character, WalkOnWater.Platform}
+    raycastParams.IgnoreWater = false
+    
+    local rayResult = Workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+    
+    if rayResult then
+        -- If we hit something, use that Y position
+        return rayResult.Position.Y
+    end
+    
+    -- Fallback: use player's current Y position minus offset
+    return pos.Y - 5
 end
 
 local function IsOverWater()
     if not HumanoidRootPart then return false end
     
     local pos = HumanoidRootPart.Position
-    local waterLevel = GetWaterLevel()
     
-    -- Check if player is near water level (within 20 studs above/below)
-    if pos.Y > (waterLevel - 5) and pos.Y < (waterLevel + 20) then
-        -- Raycast down to check for solid ground
-        local rayOrigin = pos
-        local rayDirection = Vector3.new(0, -100, 0)
-        
-        local raycastParams = RaycastParams.new()
-        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-        raycastParams.FilterDescendantsInstances = {Character, WalkOnWater.Platform}
-        
-        local rayResult = Workspace:Raycast(rayOrigin, rayDirection, raycastParams)
-        
-        -- No solid ground = over water
-        if not rayResult then
-            return true
-        end
-        
-        -- Check if ground is below water level
-        if rayResult.Position.Y < waterLevel then
-            return true
-        end
-        
-        -- Check distance to ground
-        if rayResult.Distance > 10 then
-            return true
-        end
+    -- Check if swimming
+    if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
+        return true
     end
     
-    -- Always check swimming state
-    if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
+    -- Raycast down to check for ground
+    local rayOrigin = pos
+    local rayDirection = Vector3.new(0, -50, 0)
+    
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    raycastParams.FilterDescendantsInstances = {Character, WalkOnWater.Platform}
+    
+    local rayResult = Workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+    
+    -- No ground nearby = over water
+    if not rayResult then
+        return true
+    end
+    
+    -- Ground is far = over water
+    if rayResult.Distance > 10 then
         return true
     end
     
     return false
 end
+
+-- =====================================================
+-- PLATFORM MANAGEMENT
+-- =====================================================
 
 local function CreatePlatform()
     if WalkOnWater.Platform then
@@ -85,7 +98,7 @@ local function CreatePlatform()
     
     local platform = Instance.new("Part")
     platform.Name = "WaterWalkPlatform"
-    platform.Size = Vector3.new(PLATFORM_SIZE, PLATFORM_HEIGHT, PLATFORM_SIZE)
+    platform.Size = Vector3.new(PLATFORM_SIZE, 0.5, PLATFORM_SIZE)
     platform.Anchored = true
     platform.CanCollide = true
     platform.Transparency = 1
@@ -120,13 +133,16 @@ local function UpdatePlatform()
     local isOverWater = IsOverWater()
     
     if isOverWater then
-        local waterLevel = GetWaterLevel()
+        -- Detect water level if not already detected
+        if not WalkOnWater.DetectedWaterLevel then
+            WalkOnWater.DetectedWaterLevel = DetectWaterLevel()
+        end
         
-        -- Lock platform at exact water level
-        local platformY = waterLevel + (PLATFORM_HEIGHT / 2)
+        -- Place platform directly under player's feet
+        local platformY = hrpPos.Y - PLAYER_HEIGHT_OFFSET
         
         pcall(function()
-            -- Update platform position (locked to water surface)
+            -- Update platform position to follow player
             WalkOnWater.Platform.CFrame = CFrame.new(
                 hrpPos.X,
                 platformY,
@@ -135,60 +151,35 @@ local function UpdatePlatform()
             WalkOnWater.Platform.CanCollide = true
         end)
         
-        -- Lock player height above water surface
-        local targetPlayerY = waterLevel + HEIGHT_ABOVE_WATER
-        
-        -- Smoothly adjust player position if sinking
-        if hrpPos.Y < targetPlayerY then
-            pcall(function()
-                HumanoidRootPart.CFrame = CFrame.new(
-                    hrpPos.X,
-                    targetPlayerY,
-                    hrpPos.Z
-                )
-                HumanoidRootPart.Velocity = Vector3.new(
-                    HumanoidRootPart.Velocity.X,
-                    0, -- No vertical movement
-                    HumanoidRootPart.Velocity.Z
-                )
-            end)
-        end
-        
-        -- Force running state (prevent swimming animation)
+        -- Prevent swimming animation
         if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
             pcall(function()
                 Humanoid:ChangeState(Enum.HumanoidStateType.Running)
             end)
         end
         
-        -- Prevent freefall state
+        -- Prevent freefall
         if Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
             pcall(function()
                 Humanoid:ChangeState(Enum.HumanoidStateType.Running)
             end)
         end
         
-        -- Maintain normal walkspeed
+        -- Maintain walkspeed
         if Humanoid.WalkSpeed < 16 then
             pcall(function()
                 Humanoid.WalkSpeed = 16
             end)
         end
-        
-        -- Disable gravity effect when on water
-        pcall(function()
-            HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(
-                HumanoidRootPart.AssemblyLinearVelocity.X,
-                0,
-                HumanoidRootPart.AssemblyLinearVelocity.Z
-            )
-        end)
     else
         -- Hide platform when not over water
         pcall(function()
             WalkOnWater.Platform.CanCollide = false
             WalkOnWater.Platform.CFrame = CFrame.new(0, -10000, 0)
         end)
+        
+        -- Reset water level detection
+        WalkOnWater.DetectedWaterLevel = nil
     end
 end
 
@@ -200,25 +191,29 @@ function WalkOnWater.Start()
     if WalkOnWater.Enabled then return end
     
     WalkOnWater.Enabled = true
+    WalkOnWater.DetectedWaterLevel = nil
     
     -- Create platform
     pcall(CreatePlatform)
     
-    -- Fix swimming state immediately
+    -- Fix swimming state
     if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
         pcall(function()
             Humanoid:ChangeState(Enum.HumanoidStateType.Running)
         end)
     end
     
-    -- Start ultra-fast update loop for smooth, stable walking
+    -- Start update loop
     WalkOnWater.Connection = RunService.Heartbeat:Connect(function()
         pcall(UpdatePlatform)
     end)
+    
+    print("[Walk on Water] Started - Platform follows your feet!")
 end
 
 function WalkOnWater.Stop()
     WalkOnWater.Enabled = false
+    WalkOnWater.DetectedWaterLevel = nil
     
     -- Stop update loop
     if WalkOnWater.Connection then
@@ -235,6 +230,8 @@ function WalkOnWater.Stop()
         end)
         WalkOnWater.Platform = nil
     end
+    
+    print("[Walk on Water] Stopped")
 end
 
 -- =====================================================
@@ -272,9 +269,9 @@ task.spawn(function()
     end
 end)
 
--- Anti-swim & anti-sink failsafe (HIGH PRIORITY)
+-- Anti-swim failsafe
 task.spawn(function()
-    while task.wait() do -- Runs every frame for maximum stability
+    while task.wait() do
         if WalkOnWater.Enabled and IsOverWater() then
             -- Prevent swimming
             if Humanoid and Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
@@ -288,23 +285,6 @@ task.spawn(function()
                 pcall(function()
                     Humanoid:ChangeState(Enum.HumanoidStateType.Running)
                 end)
-            end
-            
-            -- Lock height above water (prevent sinking)
-            if HumanoidRootPart then
-                local waterLevel = GetWaterLevel()
-                local targetY = waterLevel + HEIGHT_ABOVE_WATER
-                
-                if HumanoidRootPart.Position.Y < targetY then
-                    pcall(function()
-                        local currentPos = HumanoidRootPart.Position
-                        HumanoidRootPart.CFrame = CFrame.new(
-                            currentPos.X,
-                            targetY,
-                            currentPos.Z
-                        )
-                    end)
-                end
             end
         end
     end
