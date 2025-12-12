@@ -22,7 +22,7 @@ WalkOnWater.WaterLevel = 51.5 -- Fish It water surface level
 -- Optimized settings
 local PLATFORM_SIZE = 16
 local PLATFORM_HEIGHT = 1
-local HEIGHT_ABOVE_WATER = 1.5 -- Player height above water (PERFECT HEIGHT!)
+local HEIGHT_ABOVE_WATER = 0.5 -- Player height above water (RIGHT ON SURFACE!)
 
 -- =====================================================
 -- HELPER FUNCTIONS
