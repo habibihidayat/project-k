@@ -1331,32 +1331,28 @@ makeToggle(catSupport, "Disable Skin Effect", function(on)
     end
 end)
 
--- GUI Code dengan error handling
+-- Toggle untuk Walk on Water
 makeToggle(catSupport, "Walk on Water", function(on)
-    pcall(function()
-        if on then
-            if WalkOnWater and WalkOnWater.Start then
-                WalkOnWater:Start()
-                Notify.Send("Walk on Water", "Kamu bisa berjalan di atas air! 🌊", 4)
-            else
-                Notify.Send("Error", "Module WalkOnWater tidak ditemukan!", 4)
-            end
-        else
-            if WalkOnWater and WalkOnWater.Stop then
-                WalkOnWater:Stop()
-                Notify.Send("Walk on Water", "Walk on water dimatikan!", 4)
-            end
-        end
-    end)
+    if on then
+        WalkOnWater.Start()
+        Notify.Send("Walk on Water", "Kamu bisa berjalan di atas air! 🌊", 4)
+    else
+        WalkOnWater.Stop()
+        Notify.Send("Walk on Water", "Walk on water dimatikan!", 4)
+    end
 end)
 
--- Slider untuk adjust height dengan error handling
-makeSlider(catSupport, "Water Height", 3, 6, 4.5, function(value)
-    pcall(function()
-        if WalkOnWater and WalkOnWater.SetPlatformOffset then
-            WalkOnWater:SetPlatformOffset(value)
-        end
-    end)
+-- Input box untuk Platform Offset (ketinggian platform)
+makeInput(catSupport, "Platform Offset", 4.5, function(v) 
+    WalkOnWater.Settings.PlatformOffset = tonumber(v) or 4.5
+end)
+
+-- Input box untuk Platform Size (ukuran platform)
+makeInput(catSupport, "Platform Size", 12, function(v) 
+    WalkOnWater.Settings.PlatformSize = tonumber(v) or 12
+    if WalkOnWater.Platform then
+        WalkOnWater.Platform.Size = Vector3.new(tonumber(v) or 12, 1, tonumber(v) or 12)
+    end
 end)
 
 local catAutoTotem = makeCategory(mainPage, "Auto Spawn 3X Totem", "🛠️")
