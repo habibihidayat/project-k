@@ -111,11 +111,11 @@ local function UpdatePlatform()
     
     if isInOrNearWater then
         -- Calculate platform position
-        local targetY = hrpPos.Y - 3 -- Platform below feet
+        local targetY = hrpPos.Y - 4.5 -- Platform below feet (adjusted lower)
         
         -- Adjust based on humanoid state
         if Humanoid:GetState() == Enum.HumanoidStateType.Swimming then
-            targetY = hrpPos.Y - 2.5
+            targetY = hrpPos.Y - 4.2
         end
         
         -- Update platform position
