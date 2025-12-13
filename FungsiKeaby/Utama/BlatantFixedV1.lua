@@ -28,7 +28,7 @@ BlatantV2.Stats = {
 
 -- Settings (accessible from external GUI)
 BlatantV2.Settings = {
-    ChargeDelay = 0.950,      -- Charge delay untuk perfect cast (timing)
+    ChargeDelay = 0.007,      -- Charge delay untuk perfect cast (timing)
     CompleteDelay = 0.001,    -- Delay sebelum complete
     CancelDelay = 0.001       -- Delay setelah complete
 }
