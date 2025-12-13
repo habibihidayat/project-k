@@ -27,6 +27,8 @@ local instant2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habi
 local blatantv1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/BlatantV1.lua"))()
 local UltraBlatant = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/BlatantV2.lua"))()
 local blatantv2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/BlatantV2.lua"))()
+local blatantv2fix = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/BlatantFixedV1.lua"))()
+
 local NoFishingAnimation = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/NoFishingAnimation.lua"))()
 local LockPosition = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/LockPosition.lua"))()
 local AutoEquipRod = loadstring(game:HttpGet("https://raw.githubusercontent.com/habibihidayat/project-k/refs/heads/main/FungsiKeaby/Utama/AutoEquipRod.lua"))()
@@ -1192,6 +1194,29 @@ makeInput(catAutoFishing, "Cancel Delay", 0.19, function(v)
     cancelDelayValue = v
     instant.Settings.CancelDelay = v
     instant2.Settings.CancelDelay = v
+end)
+
+local catBlatantV2 = makeCategory(mainPage, "Blatant Tester", "🎯")
+
+-- Toggle
+makeToggle(catBlatantV2, "Blatant Tester", function(on) 
+    if on then 
+        blatantv2fix.Start() 
+    else 
+        blatantv2fix.Stop() 
+    end 
+end)
+
+-- Complete Delay Input
+makeInput(catBlatantV2, "Complete Delay", 0.001, function(v)
+    blatantv2fix.Settings.CompleteDelay = v
+    print("✅ Complete Delay set to: " .. v)
+end)
+
+-- Cancel Delay Input
+makeInput(catBlatantV2, "Cancel Delay", 0.001, function(v)
+    blatantv2fix.Settings.CancelDelay = v
+    print("✅ Cancel Delay set to: " .. v)
 end)
 
 -- Blatant V1
